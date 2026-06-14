@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500">
+  <style>
+    .node { fill:#fff; stroke:#0f172a; stroke-width:1.2px; rx:6; }
+    .title { font: 600 13px 'Helvetica Neue', Arial; fill:#0f172a; }
+    .small { font: 400 11px 'Helvetica Neue', Arial; fill:#475569; }
+    .arrow { stroke:#0f172a; stroke-width:1.6; fill:none; marker-end:url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a" />
+    </marker>
+  </defs>
+  <title>AI Routing Layer - Request Flow</title>
+  <desc>Sequence diagram showing a client request flowing through the API Gateway, Routing Service, Provider Adapter, and Billing. Grouped for design import.</desc>
+
+  <g id="layer-flow" data-layer="Request Flow">
+
+  <rect x="40" y="40" width="200" height="80" class="node"/>
+  <text x="60" y="70" class="title">Client (SDK / CURL)</text>
+  <text x="60" y="90" class="small">Build request, include API key</text>
+
+  <rect x="320" y="40" width="220" height="80" class="node"/>
+  <text x="340" y="70" class="title">API Gateway</text>
+  <text x="340" y="90" class="small">Auth, rate limit</text>
+
+  <rect x="640" y="40" width="260" height="120" class="node"/>
+  <text x="660" y="70" class="title">Routing Service</text>
+  <text x="660" y="90" class="small">Select provider, enforce quotas</text>
+
+  <rect x="640" y="200" width="260" height="120" class="node"/>
+  <text x="660" y="230" class="title">Provider Adapter</text>
+  <text x="660" y="250" class="small">OpenAI/Anthropic</text>
+
+  <rect x="320" y="200" width="220" height="80" class="node"/>
+  <text x="340" y="230" class="title">Billing</text>
+  <text x="340" y="250" class="small">Record usage</text>
+
+  <path d="M 240 80 L 320 80" class="arrow"/>
+  <path d="M 540 80 L 640 80" class="arrow"/>
+  <path d="M 770 160 L 770 200" class="arrow"/>
+  <path d="M 770 320 L 540 240" class="arrow"/>
+
+  <text x="40" y="420" class="small">Editable SVGs are in `docs/images/` — open in a vector editor or text editor to modify.</text>
+</svg>

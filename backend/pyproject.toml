@@ -1,0 +1,47 @@
+[project]
+name = "ai-routing-layer"
+version = "2.0.0"
+description = "Professional microservice-based LLM routing platform"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.115.0,<1.0.0",
+    "uvicorn[standard]>=0.34.0,<1.0.0",
+    "httpx>=0.28.0,<1.0.0",
+    "pydantic>=2.11.0,<3.0.0",
+    "pydantic-settings>=2.8.0,<3.0.0",
+    "pyyaml>=6.0.2,<7.0.0",
+    "sqlalchemy>=2.0.38,<3.0.0",
+    "aiosqlite>=0.21.0,<1.0.0",
+    "prometheus-client>=0.21.1,<1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.5,<9.0.0",
+    "pytest-asyncio>=0.26.0,<1.0.0",
+    "respx>=0.22.0,<1.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.9"

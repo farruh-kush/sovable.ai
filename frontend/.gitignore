@@ -1,0 +1,19 @@
+# Node
+node_modules/
+dist/
+build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+
+# Cache
+.cache/

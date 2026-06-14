@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="950" viewBox="0 0 1400 950">
+  <defs>
+    <style>
+      .background { fill: #ffffff; }
+      .env-section { fill: #f3f4f6; stroke: #d1d5db; stroke-width: 2; rx: 12; }
+      .pod { fill: #dbeafe; stroke: #0284c7; stroke-width: 2; rx: 6; }
+      .service { fill: #fce7f3; stroke: #be185d; stroke-width: 2; rx: 6; }
+      .storage { fill: #d1fae5; stroke: #059669; stroke-width: 2; rx: 6; }
+      .external { fill: #fef3c7; stroke: #d97706; stroke-width: 2; rx: 6; }
+      .title { font: bold 18px 'Segoe UI', Arial; fill: #0f172a; }
+      .subtitle { font: 600 14px 'Segoe UI', Arial; fill: #1f2937; }
+      .small { font: 400 12px 'Segoe UI', Arial; fill: #4b5563; }
+      .tiny { font: 400 10px 'Segoe UI', Arial; fill: #6b7280; }
+      .arrow { stroke: #1f2937; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke: #6b7280; stroke-width: 1.5; stroke-dasharray: 3,3; fill: none; }
+    </style>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 3 L 0 6 Z" fill="#1f2937" />
+    </marker>
+  </defs>
+
+  <rect width="1400" height="950" class="background"/>
+
+  <!-- Title -->
+  <text x="700" y="35" class="title" text-anchor="middle">Deployment Architecture - Multi-Environment Strategy</text>
+  <text x="700" y="55" class="small" text-anchor="middle">Development, Staging, and Production topologies with scaling and disaster recovery</text>
+
+  <!-- DEVELOPMENT ENVIRONMENT -->
+  <rect x="30" y="80" width="420" height="380" class="env-section"/>
+  <text x="240" y="105" class="subtitle" text-anchor="middle">DEVELOPMENT</text>
+  <text x="240" y="125" class="tiny" text-anchor="middle">Local machine or dev server</text>
+
+  <!-- Dev Docker Compose -->
+  <rect x="50" y="150" width="380" height="300" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="8"/>
+  <text x="240" y="175" class="small" text-anchor="middle">Docker Compose Stack</text>
+
+  <!-- Dev Services -->
+  <rect x="70" y="195" width="85" height="60" class="pod"/>
+  <text x="112" y="215" class="tiny" text-anchor="middle">API</text>
+  <text x="112" y="230" class="tiny" text-anchor="middle">Port 8000</text>
+
+  <rect x="175" y="195" width="85" height="60" class="storage"/>
+  <text x="217" y="215" class="tiny" text-anchor="middle">SQLite</text>
+  <text x="217" y="230" class="tiny" text-anchor="middle">Dev DB</text>
+
+  <rect x="280" y="195" width="85" height="60" class="storage"/>
+  <text x="322" y="215" class="tiny" text-anchor="middle">Redis</text>
+  <text x="322" y="230" class="tiny" text-anchor="middle">Cache</text>
+
+  <!-- Dev Volumes -->
+  <rect x="70" y="275" width="295" height="35" fill="#f9fafb" stroke="#d1d5db" stroke-width="1" rx="4"/>
+  <text x="217" y="295" class="tiny" text-anchor="middle">Volumes: ./data, ./logs</text>
+
+  <!-- Dev Networking -->
+  <rect x="70" y="325" width="295" height="35" fill="#f9fafb" stroke="#d1d5db" stroke-width="1" rx="4"/>
+  <text x="217" y="345" class="tiny" text-anchor="middle">Network: dev-network (bridge)</text>
+
+  <!-- Dev Features -->
+  <text x="50" y="385" class="tiny">✓ Hot reload enabled</text>
+  <text x="50" y="405" class="tiny">✓ Debug logging (DEBUG=True)</text>
+  <text x="280" y="385" class="tiny">✓ All tests pass</text>
+  <text x="280" y="405" class="tiny">✓ Mock providers</text>
+
+  <!-- STAGING ENVIRONMENT -->
+  <rect x="490" y="80" width="420" height="380" class="env-section"/>
+  <text x="700" y="105" class="subtitle" text-anchor="middle">STAGING</text>
+  <text x="700" y="125" class="tiny" text-anchor="middle">Pre-production testing cluster</text>
+
+  <!-- Staging K8s -->
+  <rect x="510" y="150" width="380" height="300" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="8"/>
+  <text x="700" y="175" class="small" text-anchor="middle">Kubernetes Cluster (Single Node)</text>
+
+  <!-- Staging Replicas -->
+  <rect x="530" y="195" width="60" height="60" class="pod"/>
+  <text x="560" y="225" class="tiny" text-anchor="middle">API ×2</text>
+
+  <rect x="610" y="195" width="60" height="60" class="service"/>
+  <text x="640" y="225" class="tiny" text-anchor="middle">Route ×2</text>
+
+  <rect x="690" y="195" width="60" height="60" class="service"/>
+  <text x="720" y="225" class="tiny" text-anchor="middle">Auth ×2</text>
+
+  <rect x="770" y="195" width="60" height="60" class="service"/>
+  <text x="800" y="225" class="tiny" text-anchor="middle">Bill ×2</text>
+
+  <!-- Staging Storage -->
+  <rect x="530" y="280" width="130" height="55" class="storage"/>
+  <text x="595" y="300" class="tiny" text-anchor="middle">PostgreSQL</text>
+  <text x="595" y="315" class="tiny" text-anchor="middle">Primary</text>
+
+  <rect x="680" y="280" width="130" height="55" class="storage"/>
+  <text x="745" y="300" class="tiny" text-anchor="middle">Redis</text>
+  <text x="745" y="315" class="tiny" text-anchor="middle">Cluster</text>
+
+  <!-- Staging Ingress -->
+  <rect x="530" y="355" width="300" height="30" fill="#f9fafb" stroke="#d1d5db" stroke-width="1" rx="4"/>
+  <text x="680" y="372" class="tiny" text-anchor="middle">Ingress: staging.example.com (TLS)</text>
+
+  <!-- Staging Features -->
+  <text x="510" y="405" class="tiny">✓ 2 replicas per service</text>
+  <text x="510" y="420" class="tiny">✓ Load balancer enabled</text>
+  <text x="740" y="405" class="tiny">✓ Full monitoring active</text>
+  <text x="740" y="420" class="tiny">✓ Real provider APIs</text>
+
+  <!-- PRODUCTION ENVIRONMENT -->
+  <rect x="950" y="80" width="420" height="380" class="env-section"/>
+  <text x="1160" y="105" class="subtitle" text-anchor="middle">PRODUCTION</text>
+  <text x="1160" y="125" class="tiny" text-anchor="middle">Multi-zone HA cluster with DR</text>
+
+  <!-- Production K8s -->
+  <rect x="970" y="150" width="380" height="300" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="8"/>
+  <text x="1160" y="175" class="small" text-anchor="middle">Kubernetes Multi-Zone (3+ Nodes)</text>
+
+  <!-- Production Replicas -->
+  <rect x="990" y="195" width="50" height="60" class="pod"/>
+  <text x="1015" y="223" class="tiny" text-anchor="middle">API</text>
+  <text x="1015" y="240" class="tiny" text-anchor="middle">×5-10</text>
+
+  <rect x="1055" y="195" width="50" height="60" class="service"/>
+  <text x="1080" y="223" class="tiny" text-anchor="middle">Route</text>
+  <text x="1080" y="240" class="tiny" text-anchor="middle">×5-10</text>
+
+  <rect x="1120" y="195" width="50" height="60" class="service"/>
+  <text x="1145" y="223" class="tiny" text-anchor="middle">Auth</text>
+  <text x="1145" y="240" class="tiny" text-anchor="middle">×3-5</text>
+
+  <rect x="1185" y="195" width="50" height="60" class="service"/>
+  <text x="1210" y="223" class="tiny" text-anchor="middle">Bill</text>
+  <text x="1210" y="240" class="tiny" text-anchor="middle">×3-5</text>
+
+  <rect x="1250" y="195" width="50" height="60" class="service"/>
+  <text x="1275" y="223" class="tiny" text-anchor="middle">Cache</text>
+  <text x="1275" y="240" class="tiny" text-anchor="middle">×3</text>
+
+  <!-- Production Storage -->
+  <rect x="990" y="280" width="95" height="55" class="storage"/>
+  <text x="1037" y="300" class="tiny" text-anchor="middle">RDS</text>
+  <text x="1037" y="315" class="tiny" text-anchor="middle">Multi-AZ</text>
+
+  <rect x="1105" y="280" width="95" height="55" class="storage"/>
+  <text x="1152" y="300" class="tiny" text-anchor="middle">Elasticache</text>
+  <text x="1152" y="315" class="tiny" text-anchor="middle">Redis Cluster</text>
+
+  <rect x="1220" y="280" width="95" height="55" class="storage"/>
+  <text x="1267" y="300" class="tiny" text-anchor="middle">S3 Backup</text>
+  <text x="1267" y="315" class="tiny" text-anchor="middle">Cross-region</text>
+
+  <!-- Production Ingress -->
+  <rect x="990" y="355" width="300" height="30" fill="#f9fafb" stroke="#d1d5db" stroke-width="1" rx="4"/>
+  <text x="1140" y="372" class="tiny" text-anchor="middle">Ingress/CDN: api.example.com (WAF)</text>
+
+  <!-- Production Features -->
+  <text x="970" y="405" class="tiny">✓ 5-10 replicas, auto-scale</text>
+  <text x="970" y="420" class="tiny">✓ Multi-zone (3+ zones)</text>
+  <text x="1240" y="405" class="tiny">✓ Real-time monitoring</text>
+  <text x="1240" y="420" class="tiny">✓ Disaster recovery</text>
+
+  <!-- Bottom Section - CI/CD Pipeline -->
+  <rect x="30" y="520" width="1340" height="380" class="env-section"/>
+  <text x="700" y="545" class="subtitle" text-anchor="middle">CI/CD Pipeline &amp; Infrastructure-as-Code</text>
+
+  <!-- Source Control -->
+  <rect x="50" y="580" width="140" height="70" class="external"/>
+  <text x="120" y="605" class="small" text-anchor="middle">GitHub</text>
+  <text x="120" y="625" class="tiny" text-anchor="middle">Push / PR</text>
+
+  <!-- Arrow -->
+  <path d="M 190 615 L 250 615" class="arrow"/>
+
+  <!-- GitHub Actions -->
+  <rect x="250" y="580" width="140" height="70" class="pod"/>
+  <text x="320" y="605" class="small" text-anchor="middle">GitHub</text>
+  <text x="320" y="625" class="tiny" text-anchor="middle">Actions CI</text>
+
+  <!-- Arrow -->
+  <path d="M 390 615 L 450 615" class="arrow"/>
+
+  <!-- Tests & Lint -->
+  <rect x="450" y="580" width="140" height="70" class="pod"/>
+  <text x="520" y="595" class="small" text-anchor="middle">Test</text>
+  <text x="520" y="615" class="tiny" text-anchor="middle">Lint</text>
+  <text x="520" y="630" class="tiny" text-anchor="middle">Security Scan</text>
+
+  <!-- Arrow -->
+  <path d="M 590 615 L 650 615" class="arrow"/>
+
+  <!-- Build -->
+  <rect x="650" y="580" width="140" height="70" class="pod"/>
+  <text x="720" y="605" class="small" text-anchor="middle">Build</text>
+  <text x="720" y="625" class="tiny" text-anchor="middle">Docker Image</text>
+
+  <!-- Arrow -->
+  <path d="M 790 615 L 850 615" class="arrow"/>
+
+  <!-- Registry -->
+  <rect x="850" y="580" width="140" height="70" class="storage"/>
+  <text x="920" y="605" class="small" text-anchor="middle">Container</text>
+  <text x="920" y="625" class="tiny" text-anchor="middle">Registry (ECR)</text>
+
+  <!-- Arrow -->
+  <path d="M 990 615 L 1050 615" class="arrow"/>
+
+  <!-- Deploy -->
+  <rect x="1050" y="580" width="140" height="70" class="service"/>
+  <text x="1120" y="605" class="small" text-anchor="middle">Deploy</text>
+  <text x="1120" y="625" class="tiny" text-anchor="middle">Staging → Prod</text>
+
+  <!-- Infrastructure Boxes -->
+  <!-- IaC -->
+  <rect x="50" y="710" width="160" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="130" y="735" class="small" text-anchor="middle">IaC (Terraform)</text>
+  <text x="60" y="760" class="tiny">• VPC & Networking</text>
+  <text x="60" y="780" class="tiny">• Kubernetes Cluster</text>
+  <text x="60" y="800" class="tiny">• RDS & ElastiCache</text>
+
+  <!-- Monitoring -->
+  <rect x="250" y="710" width="160" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="330" y="735" class="small" text-anchor="middle">Monitoring Stack</text>
+  <text x="260" y="760" class="tiny">• Prometheus</text>
+  <text x="260" y="780" class="tiny">• Grafana Dashboards</text>
+  <text x="260" y="800" class="tiny">• PagerDuty Alerts</text>
+
+  <!-- Logging -->
+  <rect x="450" y="710" width="160" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="530" y="735" class="small" text-anchor="middle">Logging Stack</text>
+  <text x="460" y="760" class="tiny">• ELK (Elasticsearch)</text>
+  <text x="460" y="780" class="tiny">• Kibana Dashboards</text>
+  <text x="460" y="800" class="tiny">• Log Retention Policy</text>
+
+  <!-- Security -->
+  <rect x="650" y="710" width="160" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="730" y="735" class="small" text-anchor="middle">Security</text>
+  <text x="660" y="760" class="tiny">• WAF (CloudFront)</text>
+  <text x="660" y="780" class="tiny">• SSL/TLS Certs</text>
+  <text x="660" y="800" class="tiny">• Vault (Secrets)</text>
+
+  <!-- Backup & DR -->
+  <rect x="850" y="710" width="160" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="930" y="735" class="small" text-anchor="middle">Backup &amp; DR</text>
+  <text x="860" y="760" class="tiny">• Daily RDS Snapshots</text>
+  <text x="860" y="780" class="tiny">• Cross-region Backup</text>
+  <text x="860" y="800" class="tiny">• 4-hour RTO / 1-hour RPO</text>
+
+  <!-- Cost Optimization -->
+  <rect x="1050" y="710" width="160" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="1130" y="735" class="small" text-anchor="middle">Cost Optimization</text>
+  <text x="1060" y="760" class="tiny">• HPA (Auto-scaling)</text>
+  <text x="1060" y="780" class="tiny">• Reserved Instances</text>
+  <text x="1060" y="800" class="tiny">• Spot Instances</text>
+
+  <!-- Compliance -->
+  <rect x="1250" y="710" width="110" height="100" fill="white" stroke="#d1d5db" stroke-width="1.5" rx="6"/>
+  <text x="1305" y="735" class="small" text-anchor="middle">Compliance</text>
+  <text x="1260" y="760" class="tiny">• GDPR</text>
+  <text x="1260" y="780" class="tiny">• SOC2</text>
+  <text x="1260" y="800" class="tiny">• Audit Trail</text>
+
+  <!-- Deployment Flow Details -->
+  <text x="50" y="860" class="subtitle">Deployment Process:</text>
+  <text x="50" y="885" class="tiny">1. Commit → 2. GitHub Actions (test + lint + build) → 3. Docker image pushed to ECR</text>
+  <text x="50" y="905" class="tiny">4. Staging deployment (automatic, via Terraform) → 5. Production deployment (manual approval)</text>
+  <text x="50" y="925" class="tiny">6. Health checks + monitoring alerts activated → 7. Rollback available within 30 minutes</text>
+
+</svg>

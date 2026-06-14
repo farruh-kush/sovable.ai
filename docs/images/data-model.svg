@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900">
+  <defs>
+    <style>
+      .background { fill: #ffffff; }
+      .section { fill: #f3f4f6; stroke: #d1d5db; stroke-width: 2; rx: 12; }
+      .entity { fill: #e0f2fe; stroke: #0369a1; stroke-width: 2; rx: 6; }
+      .relation { fill: #fce7f3; stroke: #be185d; stroke-width: 2; rx: 6; }
+      .title { font: bold 18px 'Segoe UI', Arial; fill: #0f172a; }
+      .subtitle { font: 600 14px 'Segoe UI', Arial; fill: #1f2937; }
+      .field { font: 400 11px 'Segoe UI', Arial; fill: #374151; }
+      .arrow { stroke: #6b7280; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .arrow-label { font: 500 10px 'Segoe UI', Arial; fill: #6b7280; }
+    </style>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="3" markerWidth="4" markerHeight="4" orient="auto">
+      <path d="M 0 0 L 10 3 L 0 6 Z" fill="#6b7280" />
+    </marker>
+  </defs>
+
+  <rect width="1400" height="900" class="background"/>
+
+  <!-- Title -->
+  <text x="700" y="35" class="title" text-anchor="middle">Data Model - Core Entities &amp; Relationships</text>
+  <text x="700" y="55" class="subtitle" text-anchor="middle">Domain models for authentication, billing, routing, and usage tracking</text>
+
+  <!-- Users Entity -->
+  <rect x="30" y="90" width="240" height="180" class="entity"/>
+  <text x="150" y="115" class="subtitle" text-anchor="middle">User</text>
+  <line x1="40" y1="125" x2="260" y2="125" stroke="#0369a1" stroke-width="1"/>
+  <text x="50" y="145" class="field">id: UUID</text>
+  <text x="50" y="162" class="field">email: String</text>
+  <text x="50" y="179" class="field">oauth_provider: String</text>
+  <text x="50" y="196" class="field">role: enum</text>
+  <text x="50" y="213" class="field">created_at: Timestamp</text>
+  <text x="50" y="230" class="field">updated_at: Timestamp</text>
+  <text x="50" y="247" class="field">is_active: Boolean</text>
+
+  <!-- API Key Entity -->
+  <rect x="310" y="90" width="240" height="180" class="entity"/>
+  <text x="430" y="115" class="subtitle" text-anchor="middle">APIKey</text>
+  <line x1="320" y1="125" x2="540" y2="125" stroke="#0369a1" stroke-width="1"/>
+  <text x="330" y="145" class="field">id: UUID</text>
+  <text x="330" y="162" class="field">user_id: UUID (FK)</text>
+  <text x="330" y="179" class="field">key_hash: String</text>
+  <text x="330" y="196" class="field">name: String</text>
+  <text x="330" y="213" class="field">created_at: Timestamp</text>
+  <text x="330" y="230" class="field">revoked_at: Timestamp</text>
+  <text x="330" y="247" class="field">last_used_at: Timestamp</text>
+
+  <!-- Provider Entity -->
+  <rect x="590" y="90" width="240" height="180" class="entity"/>
+  <text x="710" y="115" class="subtitle" text-anchor="middle">Provider</text>
+  <line x1="600" y1="125" x2="820" y2="125" stroke="#0369a1" stroke-width="1"/>
+  <text x="610" y="145" class="field">id: UUID</text>
+  <text x="610" y="162" class="field">name: String</text>
+  <text x="610" y="179" class="field">type: enum</text>
+  <text x="610" y="196" class="field">base_url: String</text>
+  <text x="610" y="213" class="field">is_active: Boolean</text>
+  <text x="610" y="230" class="field">rate_limit: Integer</text>
+  <text x="610" y="247" class="field">health_score: Float</text>
+
+  <!-- ProviderHealth Entity -->
+  <rect x="870" y="90" width="240" height="180" class="entity"/>
+  <text x="990" y="115" class="subtitle" text-anchor="middle">ProviderHealth</text>
+  <line x1="880" y1="125" x2="1100" y2="125" stroke="#0369a1" stroke-width="1"/>
+  <text x="890" y="145" class="field">id: UUID</text>
+  <text x="890" y="162" class="field">provider_id: UUID (FK)</text>
+  <text x="890" y="179" class="field">latency_ms: Integer</text>
+  <text x="890" y="196" class="field">error_rate: Float</text>
+  <text x="890" y="213" class="field">updated_at: Timestamp</text>
+  <text x="890" y="230" class="field">circuit_state: enum</text>
+  <text x="890" y="247" class="field">request_count: Integer</text>
+
+  <!-- Model Entity -->
+  <rect x="1150" y="90" width="220" height="180" class="entity"/>
+  <text x="1260" y="115" class="subtitle" text-anchor="middle">Model</text>
+  <line x1="1160" y1="125" x2="1360" y2="125" stroke="#0369a1" stroke-width="1"/>
+  <text x="1170" y="145" class="field">id: UUID</text>
+  <text x="1170" y="162" class="field">name: String</text>
+  <text x="1170" y="179" class="field">provider_id: UUID (FK)</text>
+  <text x="1170" y="196" class="field">input_cost: Decimal</text>
+  <text x="1170" y="213" class="field">output_cost: Decimal</text>
+  <text x="1170" y="230" class="field">max_tokens: Integer</text>
+  <text x="1170" y="247" class="field">is_active: Boolean</text>
+
+  <!-- Usage Record Entity -->
+  <rect x="30" y="360" width="260" height="200" class="entity"/>
+  <text x="160" y="385" class="subtitle" text-anchor="middle">UsageRecord</text>
+  <line x1="40" y1="395" x2="280" y2="395" stroke="#0369a1" stroke-width="1"/>
+  <text x="50" y="415" class="field">id: UUID</text>
+  <text x="50" y="432" class="field">api_key_id: UUID (FK)</text>
+  <text x="50" y="449" class="field">user_id: UUID (FK)</text>
+  <text x="50" y="466" class="field">model_id: UUID (FK)</text>
+  <text x="50" y="483" class="field">provider_id: UUID (FK)</text>
+  <text x="50" y="500" class="field">tokens_in: Integer</text>
+  <text x="50" y="517" class="field">tokens_out: Integer</text>
+  <text x="50" y="534" class="field">cost_usd: Decimal</text>
+  <text x="50" y="551" class="field">timestamp: Timestamp</text>
+
+  <!-- Billing Invoice Entity -->
+  <rect x="340" y="360" width="260" height="200" class="entity"/>
+  <text x="470" y="385" class="subtitle" text-anchor="middle">BillingInvoice</text>
+  <line x1="350" y1="395" x2="590" y2="395" stroke="#0369a1" stroke-width="1"/>
+  <text x="360" y="415" class="field">id: UUID</text>
+  <text x="360" y="432" class="field">user_id: UUID (FK)</text>
+  <text x="360" y="449" class="field">billing_period: String</text>
+  <text x="360" y="466" class="field">total_amount: Decimal</text>
+  <text x="360" y="483" class="field">status: enum</text>
+  <text x="360" y="500" class="field">created_at: Timestamp</text>
+  <text x="360" y="517" class="field">due_date: Timestamp</text>
+  <text x="360" y="534" class="field">paid_at: Timestamp</text>
+  <text x="360" y="551" class="field">payment_method_id: UUID</text>
+
+  <!-- RoutingConfig Entity -->
+  <rect x="650" y="360" width="260" height="200" class="entity"/>
+  <text x="780" y="385" class="subtitle" text-anchor="middle">RoutingConfig</text>
+  <line x1="660" y1="395" x2="900" y2="395" stroke="#0369a1" stroke-width="1"/>
+  <text x="670" y="415" class="field">id: UUID</text>
+  <text x="670" y="432" class="field">name: String</text>
+  <text x="670" y="449" class="field">model_pattern: String</text>
+  <text x="670" y="466" class="field">primary_provider: UUID (FK)</text>
+  <text x="670" y="483" class="field">fallback_providers: Array</text>
+  <text x="670" y="500" class="field">cost_weight: Float</text>
+  <text x="670" y="517" class="field">latency_weight: Float</text>
+  <text x="670" y="534" class="field">availability_weight: Float</text>
+  <text x="670" y="551" class="field">enabled: Boolean</text>
+
+  <!-- RateLimit Entity -->
+  <rect x="960" y="360" width="260" height="200" class="entity"/>
+  <text x="1090" y="385" class="subtitle" text-anchor="middle">RateLimit</text>
+  <line x1="970" y1="395" x2="1210" y2="395" stroke="#0369a1" stroke-width="1"/>
+  <text x="980" y="415" class="field">id: UUID</text>
+  <text x="980" y="432" class="field">api_key_id: UUID (FK)</text>
+  <text x="980" y="449" class="field">requests_per_min: Integer</text>
+  <text x="980" y="466" class="field">requests_per_hour: Integer</text>
+  <text x="980" y="483" class="field">daily_cost_limit: Decimal</text>
+  <text x="980" y="500" class="field">monthly_cost_limit: Decimal</text>
+  <text x="980" y="517" class="field">current_requests: Integer</text>
+  <text x="980" y="534" class="field">window_reset: Timestamp</text>
+  <text x="980" y="551" class="field">is_active: Boolean</text>
+
+  <!-- AuditLog Entity -->
+  <rect x="1270" y="360" width="110" height="200" class="entity"/>
+  <text x="1325" y="385" class="subtitle" text-anchor="middle">AuditLog</text>
+  <line x1="1280" y1="395" x2="1360" y2="395" stroke="#0369a1" stroke-width="1"/>
+  <text x="1285" y="415" class="field">id: UUID</text>
+  <text x="1285" y="432" class="field">user_id: UUID</text>
+  <text x="1285" y="449" class="field">action: String</text>
+  <text x="1285" y="466" class="field">resource: String</text>
+  <text x="1285" y="483" class="field">timestamp: TS</text>
+  <text x="1285" y="500" class="field">ip_addr: String</text>
+  <text x="1285" y="517" class="field">status: enum</text>
+  <text x="1285" y="534" class="field">details: JSON</text>
+
+  <!-- Relationships -->
+  <!-- User -> APIKey -->
+  <path d="M 150 270 L 350 270" class="arrow"/>
+  <text x="240" y="260" class="arrow-label">1:N owns</text>
+
+  <!-- User -> UsageRecord -->
+  <path d="M 100 270 L 160 360" class="arrow"/>
+  <text x="110" y="315" class="arrow-label">1:N</text>
+
+  <!-- APIKey -> UsageRecord -->
+  <path d="M 270 270 L 180 360" class="arrow"/>
+  <text x="220" y="315" class="arrow-label">1:N</text>
+
+  <!-- Provider -> Model -->
+  <path d="M 830 270 L 1170 270" class="arrow"/>
+  <text x="980" y="260" class="arrow-label">1:N has</text>
+
+  <!-- Provider -> ProviderHealth -->
+  <path d="M 830 180 L 870 180" class="arrow"/>
+  <text x="840" y="170" class="arrow-label">1:1</text>
+
+  <!-- Model -> UsageRecord -->
+  <path d="M 1150 350 L 290 380" class="arrow"/>
+
+  <!-- Provider -> UsageRecord -->
+  <path d="M 590 350 L 290 380" class="arrow"/>
+
+  <!-- RoutingConfig -> Provider -->
+  <path d="M 780 360 L 710 270" class="arrow"/>
+  <text x="730" y="315" class="arrow-label">N:1 uses</text>
+
+  <!-- User -> BillingInvoice -->
+  <path d="M 220 270 L 420 360" class="arrow"/>
+  <text x="300" y="315" class="arrow-label">1:N</text>
+
+  <!-- User -> RateLimit -->
+  <path d="M 270 270 L 1000 360" class="arrow"/>
+
+  <!-- User -> AuditLog -->
+  <path d="M 220 270 L 1300 360" class="arrow"/>
+
+  <!-- RateLimit -> APIKey -->
+  <path d="M 1000 360 L 430 270" class="arrow"/>
+  <text x="700" y="315" class="arrow-label">1:1 limits</text>
+
+  <!-- Legend -->
+  <rect x="30" y="620" width="1320" height="250" class="section"/>
+  <text x="50" y="645" class="subtitle">Data Relationships &amp; Constraints:</text>
+
+  <text x="50" y="675" class="field">• Users have multiple API Keys; each key tracks its own usage records and rate limits</text>
+  <text x="50" y="695" class="field">• Models belong to Providers with pricing (input/output costs per token)</text>
+  <text x="50" y="715" class="field">• UsageRecords track consumption per user, API key, model, and provider for billing</text>
+  <text x="50" y="735" class="field">• RoutingConfig maps model patterns to providers with dynamic weighting (cost, latency, availability)</text>
+  <text x="50" y="755" class="field">• RateLimit enforces per-minute, per-hour, and daily/monthly cost quotas per API key</text>
+  <text x="50" y="775" class="field">• ProviderHealth tracks latency, error rates, and circuit breaker state for dynamic routing</text>
+  <text x="50" y="795" class="field">• BillingInvoice aggregates usage records for billing periods and tracks payment status</text>
+  <text x="50" y="815" class="field">• AuditLog maintains complete record of user actions for compliance and security analysis</text>
+
+</svg>
