@@ -105,3 +105,21 @@ class UsageRecord(BaseModel):
     tokens_in: int
     tokens_out: int
     cost_usd: float
+
+
+__all__ = [
+    "ChatMessage",
+    "ChatCompletionRequest",
+    "EmbeddingRequest",
+    "UsageInfo",
+    "ChatChoice",
+    "ChatCompletionResponse",
+    "ChatCompletionChunkDelta",
+    "ChatCompletionChunkChoice",
+    "ChatCompletionChunk",
+    "EmbeddingVector",
+    "EmbeddingResponse",
+    "ProviderErrorPayload",
+    "ProviderResult",
+    "UsageRecord",
+]

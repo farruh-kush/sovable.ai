@@ -1,6 +1,5 @@
 from setuptools import find_packages, setup
 
-
 setup(
     name="ai-routing-layer",
     version="0.1.0",

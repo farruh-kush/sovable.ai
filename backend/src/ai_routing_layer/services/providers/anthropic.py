@@ -37,7 +37,9 @@ class AnthropicProvider(BaseProvider):
             "x-api-key": self.api_key,
             "anthropic-version": "2023-06-01",
         }
-        system_messages = [message.content for message in request.messages if message.role == "system"]
+        system_messages = [
+            message.content for message in request.messages if message.role == "system"
+        ]
         user_messages = [
             {"role": "user" if message.role == "user" else "assistant", "content": message.content}
             for message in request.messages
@@ -73,12 +75,24 @@ class AnthropicProvider(BaseProvider):
             created=int(time.time()),
             model=request.model,
             provider=self.name,
-            choices=[ChatChoice(index=0, message=ChatMessage(role="assistant", content=text), finish_reason="stop")],
+            choices=[
+                ChatChoice(
+                    index=0,
+                    message=ChatMessage(role="assistant", content=text),
+                    finish_reason="stop",
+                )
+            ],
             usage=usage,
         )
 
-    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[ChatCompletionChunk]:
-        text = self._mock_text(request) if not self.api_key else "Anthropic streaming passthrough not implemented in starter"
+    async def chat_stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]:
+        text = (
+            self._mock_text(request)
+            if not self.api_key
+            else "Anthropic streaming passthrough not implemented in starter"
+        )
         for token in text.split():
             yield ChatCompletionChunk(
                 id=f"chatcmpl-{uuid.uuid4().hex}",
@@ -99,7 +113,9 @@ class AnthropicProvider(BaseProvider):
             model=request.model,
             provider=self.name,
             choices=[
-                ChatCompletionChunkChoice(index=0, delta=ChatCompletionChunkDelta(), finish_reason="stop")
+                ChatCompletionChunkChoice(
+                    index=0, delta=ChatCompletionChunkDelta(), finish_reason="stop"
+                )
             ],
         )
 
@@ -113,7 +129,9 @@ class AnthropicProvider(BaseProvider):
     def _mock_chat_response(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         text = self._mock_text(request)
         usage = UsageInfo(
-            prompt_tokens=sum(self.estimate_tokens(message.content) for message in request.messages),
+            prompt_tokens=sum(
+                self.estimate_tokens(message.content) for message in request.messages
+            ),
             completion_tokens=self.estimate_tokens(text),
         )
         usage.total_tokens = usage.prompt_tokens + usage.completion_tokens
@@ -122,13 +140,21 @@ class AnthropicProvider(BaseProvider):
             created=int(time.time()),
             model=request.model,
             provider=self.name,
-            choices=[ChatChoice(index=0, message=ChatMessage(role="assistant", content=text), finish_reason="stop")],
+            choices=[
+                ChatChoice(
+                    index=0,
+                    message=ChatMessage(role="assistant", content=text),
+                    finish_reason="stop",
+                )
+            ],
             usage=usage,
         )
 
     def _mock_embedding_response(self, request: EmbeddingRequest) -> EmbeddingResponse:
         items = request.input if isinstance(request.input, list) else [request.input]
-        usage = UsageInfo(prompt_tokens=sum(self.estimate_tokens(item) for item in items), total_tokens=0)
+        usage = UsageInfo(
+            prompt_tokens=sum(self.estimate_tokens(item) for item in items), total_tokens=0
+        )
         usage.total_tokens = usage.prompt_tokens
         return EmbeddingResponse(
             data=[

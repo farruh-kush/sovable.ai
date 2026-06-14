@@ -36,7 +36,9 @@ class OpenAIProvider(BaseProvider):
         headers = {"Authorization": f"Bearer {self.api_key}"}
         payload = request.model_dump(exclude_none=True)
         async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
-            response = await client.post(f"{self.base_url}/chat/completions", json=payload, headers=headers)
+            response = await client.post(
+                f"{self.base_url}/chat/completions", json=payload, headers=headers
+            )
             if response.status_code >= 400:
                 raise ProviderError(
                     ProviderErrorPayload(
@@ -64,7 +66,9 @@ class OpenAIProvider(BaseProvider):
             usage=usage,
         )
 
-    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[ChatCompletionChunk]:
+    async def chat_stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]:
         if not self.api_key:
             text = self._mock_text(request)
             for token in text.split():
@@ -99,12 +103,14 @@ class OpenAIProvider(BaseProvider):
         payload = request.model_dump(exclude_none=True)
         payload["stream"] = True
         async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
-            async with client.stream("POST", f"{self.base_url}/chat/completions", json=payload, headers=headers) as response:
+            async with client.stream(
+                "POST", f"{self.base_url}/chat/completions", json=payload, headers=headers
+            ) as response:
                 if response.status_code >= 400:
                     raise ProviderError(
                         ProviderErrorPayload(
                             code="openai_error",
-                            message=await response.aread(),
+                            message=(await response.aread()).decode("utf-8", errors="replace"),
                             provider=self.name,
                             retriable=response.status_code >= 500,
                         )
@@ -134,7 +140,9 @@ class OpenAIProvider(BaseProvider):
         headers = {"Authorization": f"Bearer {self.api_key}"}
         payload = request.model_dump(exclude_none=True)
         async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
-            response = await client.post(f"{self.base_url}/embeddings", json=payload, headers=headers)
+            response = await client.post(
+                f"{self.base_url}/embeddings", json=payload, headers=headers
+            )
             if response.status_code >= 400:
                 raise ProviderError(
                     ProviderErrorPayload(
@@ -160,7 +168,9 @@ class OpenAIProvider(BaseProvider):
     def _mock_chat_response(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         text = self._mock_text(request)
         usage = UsageInfo(
-            prompt_tokens=sum(self.estimate_tokens(message.content) for message in request.messages),
+            prompt_tokens=sum(
+                self.estimate_tokens(message.content) for message in request.messages
+            ),
             completion_tokens=self.estimate_tokens(text),
         )
         usage.total_tokens = usage.prompt_tokens + usage.completion_tokens
@@ -169,13 +179,21 @@ class OpenAIProvider(BaseProvider):
             created=int(time.time()),
             model=request.model,
             provider=self.name,
-            choices=[ChatChoice(index=0, message=ChatMessage(role="assistant", content=text), finish_reason="stop")],
+            choices=[
+                ChatChoice(
+                    index=0,
+                    message=ChatMessage(role="assistant", content=text),
+                    finish_reason="stop",
+                )
+            ],
             usage=usage,
         )
 
     def _mock_embedding_response(self, request: EmbeddingRequest) -> EmbeddingResponse:
         items = request.input if isinstance(request.input, list) else [request.input]
-        usage = UsageInfo(prompt_tokens=sum(self.estimate_tokens(item) for item in items), total_tokens=0)
+        usage = UsageInfo(
+            prompt_tokens=sum(self.estimate_tokens(item) for item in items), total_tokens=0
+        )
         usage.total_tokens = usage.prompt_tokens
         return EmbeddingResponse(
             data=[

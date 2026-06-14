@@ -16,7 +16,6 @@ from ai_routing_layer.models import (
     EmbeddingRequest,
     EmbeddingResponse,
     ProviderErrorPayload,
-    UsageInfo,
 )
 
 
@@ -49,7 +48,7 @@ class BaseProvider(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[ChatCompletionChunk]:
+    def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[ChatCompletionChunk]:
         raise NotImplementedError
 
     @abstractmethod
@@ -116,3 +115,12 @@ class ProviderRegistry:
 
     def health_snapshot(self) -> dict[str, ProviderHealth]:
         return {name: provider.health for name, provider in self._providers.items()}
+
+
+__all__ = [
+    "ProviderError",
+    "ProviderHealth",
+    "BaseProvider",
+    "ProviderRegistry",
+    "ProviderErrorPayload",
+]

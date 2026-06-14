@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 
 from ai_routing_layer.main import app
 
-
 client = TestClient(app)
 
 

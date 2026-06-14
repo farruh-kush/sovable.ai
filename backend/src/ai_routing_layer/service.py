@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-import time
 import uuid
 from collections.abc import AsyncIterator
 
@@ -10,7 +8,6 @@ from fastapi import HTTPException, status
 from ai_routing_layer.auth.service import Principal
 from ai_routing_layer.billing.service import BillingService
 from ai_routing_layer.models import (
-    ChatCompletionChunk,
     ChatCompletionRequest,
     ChatCompletionResponse,
     EmbeddingRequest,
@@ -41,17 +38,25 @@ class RoutingService:
         self.billing.enforce_quota(principal.api_key_id, principal.daily_quota_usd)
         errors: list[str] = []
         for provider in self.router.candidates_for_model(request.model):
-            timer = self.metrics.request_latency_seconds.labels("/v1/chat/completions", provider.name).time()
+            timer = self.metrics.request_latency_seconds.labels(
+                "/v1/chat/completions", provider.name
+            ).time()
             with timer:
                 try:
                     response = await provider.chat(request)
-                    response.usage = self.billing.enrich_usage(provider.name, request.model, response.usage)
-                    self._record_usage(response.id, principal, request.model, provider.name, response.usage)
+                    response.usage = self.billing.enrich_usage(
+                        provider.name, request.model, response.usage
+                    )
+                    self._record_usage(
+                        response.id, principal, request.model, provider.name, response.usage
+                    )
                     self.metrics.provider_requests_total.labels(provider.name, "success").inc()
                     return response
                 except ProviderError as exc:
                     errors.append(f"{provider.name}: {exc.payload.message}")
-                    self.metrics.request_errors_total.labels("/v1/chat/completions", provider.name).inc()
+                    self.metrics.request_errors_total.labels(
+                        "/v1/chat/completions", provider.name
+                    ).inc()
                     self.metrics.provider_requests_total.labels(provider.name, "error").inc()
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -66,13 +71,15 @@ class RoutingService:
         self.billing.enforce_quota(principal.api_key_id, principal.daily_quota_usd)
         provider = self.router.candidates_for_model(request.model)[0]
         request_id = f"chatcmpl-{uuid.uuid4().hex}"
-        collected_text = []
+        collected_text: list[str] = []
         async for chunk in provider.chat_stream(request):
             collected_text.extend(
                 choice.delta.content for choice in chunk.choices if choice.delta.content
             )
             yield f"data: {chunk.model_dump_json()}\n\n"
-        prompt_tokens = sum(provider.estimate_tokens(message.content) for message in request.messages)
+        prompt_tokens = sum(
+            provider.estimate_tokens(message.content) for message in request.messages
+        )
         completion_tokens = provider.estimate_tokens("".join(collected_text))
         usage = self.billing.enrich_usage(
             provider.name,
@@ -100,7 +107,9 @@ class RoutingService:
         )
         return response
 
-    def _record_usage(self, request_id: str, principal: Principal, model: str, provider: str, usage) -> None:
+    def _record_usage(
+        self, request_id: str, principal: Principal, model: str, provider: str, usage
+    ) -> None:
         self.billing.record(
             UsageRecord(
                 request_id=request_id,

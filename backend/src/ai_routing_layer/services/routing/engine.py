@@ -40,12 +40,16 @@ class RoutingEngine:
         decision = self.decision_for_model(model)
         names = [decision.primary, *decision.fallbacks]
         # Collect available providers (preserve order from routing decision)
-        providers = [self.registry.get(name) for name in names if self.registry.get(name).health.available()]
+        providers = [
+            self.registry.get(name) for name in names if self.registry.get(name).health.available()
+        ]
         # Some test/dummy providers may not implement `api_key`; prefer providers with keys but keep others as fallbacks
         providers = sorted(providers, key=lambda p: bool(getattr(p, "api_key", None)), reverse=True)
         if not providers:
             providers = [self.registry.get(name) for name in names]
-            providers = sorted(providers, key=lambda p: bool(getattr(p, "api_key", None)), reverse=True)
+            providers = sorted(
+                providers, key=lambda p: bool(getattr(p, "api_key", None)), reverse=True
+            )
         return self._rank_dynamic(model, providers)
 
     def _rank_dynamic(self, model: str, providers: list[BaseProvider]) -> list[BaseProvider]:

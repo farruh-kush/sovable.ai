@@ -28,8 +28,14 @@ class AppContainer:
         settings = get_settings()
         provider_registry = ProviderRegistry(
             [
-                OpenAIProvider(api_key=settings.openai_api_key, timeout_seconds=settings.default_timeout_seconds),
-                AnthropicProvider(api_key=settings.anthropic_api_key, timeout_seconds=settings.default_timeout_seconds),
+                OpenAIProvider(
+                    api_key=settings.openai_api_key,
+                    timeout_seconds=settings.default_timeout_seconds,
+                ),
+                AnthropicProvider(
+                    api_key=settings.anthropic_api_key,
+                    timeout_seconds=settings.default_timeout_seconds,
+                ),
             ]
         )
         billing_service = BillingService(PricingCatalog(), UsageStore())
