@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: "AI Routing Layer"
+    orgId: 1
+    folder: "AI Routing Layer"
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
