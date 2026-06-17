@@ -1,3 +1,0 @@
-from ai_routing_layer.infrastructure.config import get_settings, Settings
-
-__all__ = ["get_settings", "Settings"]
