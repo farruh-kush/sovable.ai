@@ -45,7 +45,11 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     """Application factory for the API Gateway Service."""
+    from ai_routing_shared.utils import get_logger
     settings = get_settings()
+    logger = get_logger(__name__)
+    if settings.app_env == "production" and "*" in settings.cors_origins:
+        logger.warning("cors_wildcard_in_production", message="CORS_ORIGINS is set to '*' in production. This is a security risk.")
 
     app = FastAPI(
         title="AI Routing Layer — API Gateway",

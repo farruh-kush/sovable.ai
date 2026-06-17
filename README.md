@@ -64,11 +64,11 @@ graph TD
 ---
 
 ## 🧱 Tech Stack
-
 * **Backend:** Python 3.11, FastAPI, Uvicorn, HTTPX
 * **Data Layer:** PostgreSQL (asyncpg), Redis (hiredis), SQLAlchemy 2.0, Alembic
 * **Observability:** Prometheus, Grafana, Loki, Promtail, structlog
 * **Infrastructure:** Docker, Docker Compose, Kubernetes (Helm/Manifests)
+* **Testing:** Pytest, HTTPX (tests are organised per microservice)
 
 ---
 

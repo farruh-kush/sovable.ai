@@ -31,3 +31,4 @@ This file contains instructions for AI agents working on the AI Routing Layer pr
 ## Testing
 
 When writing tests, use `pytest-asyncio`. Mock external HTTP calls using `respx` or by patching the `httpx.AsyncClient`.
+Tests are now strictly segregated by microservice. Place tests in `services/<service_name>/tests/` and run them from the respective service directory.
