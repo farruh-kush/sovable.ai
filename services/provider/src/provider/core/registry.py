@@ -14,6 +14,7 @@ from ai_routing_shared.utils import get_logger
 
 from ..adapters.anthropic_adapter import AnthropicAdapter
 from ..adapters.base import BaseProviderAdapter
+from ..adapters.google_adapter import GoogleAdapter
 from ..adapters.openai_adapter import OpenAIAdapter
 from .config import ProviderSettings
 
@@ -35,6 +36,10 @@ class ProviderRegistry:
         )
         self._adapters["anthropic"] = AnthropicAdapter(
             api_key=settings.anthropic_api_key,
+            timeout_seconds=settings.default_timeout_seconds,
+        )
+        self._adapters["google"] = GoogleAdapter(
+            api_key=settings.google_api_key,
             timeout_seconds=settings.default_timeout_seconds,
         )
         logger.info(

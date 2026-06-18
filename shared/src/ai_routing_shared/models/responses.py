@@ -13,14 +13,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from .requests import ChatMessage  # single canonical definition
 from .usage import UsageInfo
-
-
-class ChatMessage(BaseModel):
-    """A single message in a chat conversation."""
-
-    role: str
-    content: str
 
 
 class ChatChoice(BaseModel):
