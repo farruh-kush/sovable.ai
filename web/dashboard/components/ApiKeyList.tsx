@@ -1,55 +1,11 @@
-import React, {useEffect, useState} from 'react'
-import {listKeys, createKey} from '../lib/api'
-
-export default function ApiKeyList(){
-  const [keys, setKeys] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string|undefined>()
-  const [newName, setNewName] = useState('')
-
-  useEffect(()=>{
-    setLoading(true)
-    listKeys().then(data=>{
-      if((data as any).error){
-        setError((data as any).message || 'Error')
-        setKeys([])
-      }else{
-        setKeys(data || [])
-      }
-    }).catch(e=>setError(String(e))).finally(()=>setLoading(false))
-  },[])
-
-  async function handleCreate(){
-    setLoading(true)
-    try{
-      const res = await createKey(newName || 'web-ui')
-      // backend may return raw key or object; push to list
-      setKeys(prev=>[res, ...prev])
-      setNewName('')
-    }catch(e){
-      setError(String(e))
-    }finally{setLoading(false)}
-  }
-
-  return (
-    <section>
-      <h2>API Keys</h2>
-      <p>Manage your API keys. Note: backend must implement /v1/keys for real data; this UI is resilient to missing endpoints.</p>
-      <div style={{marginBottom:12}}>
-        <input placeholder="Name (optional)" value={newName} onChange={e=>setNewName(e.target.value)} />
-        <button onClick={handleCreate} disabled={loading} style={{marginLeft:8}}>Create key</button>
-      </div>
-      {loading && <div>Loading…</div>}
-      {error && <div style={{color:'red'}}>{error}</div>}
-      <ul>
-        {keys.length===0 && !loading && <li>No keys found (or backend not available).</li>}
-        {keys.map((k,i)=> (
-          <li key={i} style={{marginBottom:8}}>
-            <strong>{k.name || k.id || 'key'}</strong>
-            <div style={{fontFamily:'monospace', fontSize:12}}>{k.key ?? JSON.stringify(k)}</div>
-          </li>
-        ))}
-      </ul>
-    </section>
-  )
+import React, { useEffect, useState } from 'react'
+import { createKey, listKeys } from '../lib/api'
+type KeyRecord = { id?: string; name?: string; tier?: string; key?: string; is_active?: boolean; created_at?: string }
+export default function ApiKeyList() {
+  const [keys, setKeys] = useState<KeyRecord[]>([]); const [name, setName] = useState(''); const [tier, setTier] = useState('free'); const [adminKey, setAdminKey] = useState(''); const [newKey, setNewKey] = useState(''); const [loading, setLoading] = useState(false); const [error, setError] = useState('')
+  useEffect(() => { const saved = window.localStorage.getItem('solvable_admin_key') || ''; setAdminKey(saved); if (saved) refresh() }, [])
+  async function refresh() { setLoading(true); setError(''); try { const result = await listKeys(); setKeys(result.keys || []) } catch (e: any) { setError(e?.response?.data?.detail || 'Admin key required or gateway unavailable.') } finally { setLoading(false) } }
+  function saveAdminKey() { window.localStorage.setItem('solvable_admin_key', adminKey); refresh() }
+  async function handleCreate() { setLoading(true); setError(''); setNewKey(''); try { const result = await createKey(name || 'dashboard-key', tier); setNewKey(result.key || ''); setName(''); await refresh() } catch (e: any) { setError(e?.response?.data?.detail || 'Could not create API key.') } finally { setLoading(false) } }
+  return <section className="stack-lg"><div className="section-heading"><div><span className="eyebrow">ACCESS CONTROL</span><h2>API keys</h2><p>Issue scoped keys for applications and teams. Raw secrets are only shown at creation time.</p></div></div><div className="card key-toolbar"><div><label>Admin key</label><input type="password" value={adminKey} onChange={e => setAdminKey(e.target.value)} placeholder="x-admin-key" /></div><button className="button secondary" onClick={saveAdminKey}>Connect</button></div><div className="card key-toolbar"><div><label>Key name</label><input value={name} onChange={e => setName(e.target.value)} placeholder="Production application" /></div><div><label>Tier</label><select value={tier} onChange={e => setTier(e.target.value)}><option value="free">Free</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div><button className="button primary" onClick={handleCreate} disabled={loading}>Create key</button></div>{newKey && <div className="notice success"><strong>Copy this key now:</strong><code>{newKey}</code><span>It will not be shown again.</span></div>}{error && <div className="notice error">{error}</div>}<div className="card table-card"><div className="table-title"><h3>Issued keys</h3><button className="text-button" onClick={refresh}>Refresh</button></div><div className="table-wrap"><table><thead><tr><th>Name</th><th>Tier</th><th>Status</th><th>Created</th></tr></thead><tbody>{keys.map((key, index) => <tr key={key.id || index}><td><strong>{key.name || key.id}</strong><small>{key.id}</small></td><td><span className="pill">{key.tier || 'free'}</span></td><td><span className="status-label"><i />{key.is_active === false ? 'Disabled' : 'Active'}</span></td><td>{key.created_at ? new Date(key.created_at).toLocaleDateString() : '—'}</td></tr>)}{!keys.length && <tr><td colSpan={4} className="empty">{loading ? 'Loading…' : 'No keys available.'}</td></tr>}</tbody></table></div></div></section>
 }

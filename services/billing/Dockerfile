@@ -4,6 +4,7 @@ RUN pip install --no-cache-dir setuptools wheel
 COPY shared/ /build/shared/
 RUN pip install --no-cache-dir /build/shared
 COPY services/billing/ /build/billing/
+RUN sed -i 's|ai-routing-shared @ file:///${PROJECT_ROOT}/shared|ai-routing-shared|' /build/billing/pyproject.toml
 RUN pip install --no-cache-dir /build/billing
 
 FROM python:3.11-slim AS runtime

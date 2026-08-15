@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ai-routing-reference
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  # runtime-secrets is created separately; secret.template.yaml is documentation only.
+  - deployments.yaml
+  - services.yaml
+  - ingress.yaml
+  - network-policies.yaml
+  - pod-disruption-budgets.yaml
+configMapGenerator:
+  - name: routing-policy
+    files:
+      - routing.json
+generatorOptions:
+  disableNameSuffixHash: true
+labels:
+  - includeSelectors: false
+    pairs:
+      app.kubernetes.io/part-of: ai-routing-reference
+      app.kubernetes.io/managed-by: kustomize

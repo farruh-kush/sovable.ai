@@ -44,6 +44,10 @@ def create_app() -> FastAPI:
     app.add_middleware(RequestIdMiddleware)
     app.include_router(internal_router, prefix="/internal", tags=["Internal"])
 
+    @app.get("/health")
+    async def health() -> dict:
+        return {"status": "healthy", "service": "auth"}
+
     return app
 
 

@@ -38,7 +38,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/postgres/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh:ro
     ports:
-      - "5432:5432"
+      - "${POSTGRES_HOST_PORT:-15432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       <<: *hc-defaults
@@ -63,7 +63,7 @@ services:
       dockerfile: services/gateway/Dockerfile
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${GATEWAY_HOST_PORT:-18000}:8000"
     environment:
       <<: *common-env
       APP_ENV: "${APP_ENV:-development}"
@@ -78,7 +78,7 @@ services:
       auth:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       <<: *hc-defaults
     labels:
       - "prometheus.scrape=true"
@@ -91,7 +91,7 @@ services:
       dockerfile: services/auth/Dockerfile
     restart: unless-stopped
     ports:
-      - "8001:8001"
+      - "${AUTH_HOST_PORT:-18001}:8001"
     environment:
       <<: *common-env
       DATABASE_URL: "postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/auth_db"
@@ -100,7 +100,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8001/health || exit 1"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       <<: *hc-defaults
 
   router:
@@ -124,7 +124,7 @@ services:
       provider:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8002/health || exit 1"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
       <<: *hc-defaults
     labels:
       - "prometheus.scrape=true"
@@ -141,11 +141,12 @@ services:
     environment:
       <<: *common-env
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      OPENAI_BASE_URL: "${OPENAI_BASE_URL:-https://api.openai.com/v1}"
       ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY:-}"
       GOOGLE_API_KEY: "${GOOGLE_API_KEY:-}"
       MISTRAL_API_KEY: "${MISTRAL_API_KEY:-}"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8003/adapt/health || exit 1"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/adapt/health')"]
       <<: *hc-defaults
 
   billing:
@@ -166,7 +167,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8004/health || exit 1"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
       <<: *hc-defaults
 
   # ── Observability Stack ─────────────────────────────────────────────────────
@@ -175,7 +176,7 @@ services:
     image: prom/prometheus:v2.52.0
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_HOST_PORT:-19090}:9090"
     volumes:
       - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -192,7 +193,7 @@ services:
     image: grafana/grafana:10.4.2
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_HOST_PORT:-13000}:3000"
     environment:
       GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_PASSWORD:-admin}"
       GF_USERS_ALLOW_SIGN_UP: "false"

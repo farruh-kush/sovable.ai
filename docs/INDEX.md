@@ -316,3 +316,9 @@ Use this to verify the architecture is complete:
 **Last Updated**: 2024-06-02
 
 For questions or updates, refer to the appropriate documentation above.
+
+## Sovereign AI microservices reference
+
+- [Kubernetes deployment guide](sovereign_ai/KUBERNETES_DEPLOYMENT.md)
+- [Standalone microservices reference](sovereign_ai/microservices_reference/README.md)
+- [Standalone reference architecture](sovereign_ai/microservices_reference/docs/ARCHITECTURE.md)

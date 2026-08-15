@@ -1,36 +1,20 @@
 import axios from 'axios'
 
-const api = axios.create({
-  baseURL: '/v1',
-  headers: {
-    // default developer key for local dev; can be overridden by callers
-    Authorization: 'Bearer dev-default-key',
-    'Content-Type': 'application/json'
+const configuredBase = process.env.NEXT_PUBLIC_API_BASE_URL || '/v1'
+export const api = axios.create({ baseURL: configuredBase, headers: { 'Content-Type': 'application/json' } })
+function browserValue(key: string) { return typeof window === 'undefined' ? '' : window.localStorage.getItem(key) || '' }
+api.interceptors.request.use((config) => {
+  const apiKey = browserValue('solvable_api_key')
+  const adminKey = browserValue('solvable_admin_key')
+  if (config.headers) {
+    if (config.url?.includes('/keys')) { if (adminKey) config.headers['x-admin-key'] = adminKey }
+    else if (apiKey) config.headers.Authorization = `Bearer ${apiKey}`
   }
+  return config
 })
-
-export async function getHealth(){
-  const r = await api.get('/health')
-  return r.data
-}
-
-export async function listKeys(){
-  try{
-    const r = await api.get('/keys')
-    return r.data
-  }catch(e){
-    return {error: true, message: 'Unable to fetch keys'}
-  }
-}
-
-export async function createKey(name:string){
-  const r = await api.post('/keys', {name})
-  return r.data
-}
-
-export async function chatCompletion(payload:any){
-  const r = await api.post('/chat/completions', payload)
-  return r.data
-}
-
+export async function getHealth() { const root = configuredBase.replace(/\/v1\/?$/, '') || '/'; return (await axios.get(`${root}/health`)).data }
+export async function getModels() { return (await api.get('/models')).data }
+export async function listKeys() { return (await api.get('/keys')).data }
+export async function createKey(name: string, tier = 'free') { return (await api.post('/keys', { name, tier })).data }
+export async function chatCompletion(payload: Record<string, unknown>) { return (await api.post('/chat/completions', payload)).data }
 export default api

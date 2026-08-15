@@ -43,9 +43,9 @@ class OpenAIAdapter(BaseProviderAdapter):
 
     name = "openai"
 
-    def __init__(self, api_key: Optional[str], timeout_seconds: float = 30.0) -> None:
+    def __init__(self, api_key: Optional[str], timeout_seconds: float = 30.0, base_url: str = _OPENAI_BASE_URL) -> None:
         super().__init__(api_key, timeout_seconds)
-        self._base_url = _OPENAI_BASE_URL
+        self._base_url = base_url.rstrip("/")
 
     async def _chat_impl(
         self, request: ChatCompletionRequest

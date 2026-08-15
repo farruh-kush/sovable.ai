@@ -143,3 +143,22 @@ lint: ## Run Python linting (ruff) across all services
 
 test: ## Run the test suite
 	pytest tests/ -v
+
+# ── Standalone microservices reference Kubernetes package ─────────────────────
+reference-k8s-render: ## Render the standalone reference manifests with Kustomize
+	kubectl kustomize k8s/standalone-reference
+
+reference-k8s-validate: ## Render and perform dependency-free structural checks
+	kubectl kustomize k8s/standalone-reference >/tmp/ai-routing-reference-rendered.yaml
+	@grep -q '^kind: Deployment$$' /tmp/ai-routing-reference-rendered.yaml
+	@test "$$(grep -c '^kind: Deployment$$' /tmp/ai-routing-reference-rendered.yaml)" -eq 5
+	@test "$$(grep -c '^kind: Service$$' /tmp/ai-routing-reference-rendered.yaml)" -eq 5
+	@test "$$(grep -c '^kind: NetworkPolicy$$' /tmp/ai-routing-reference-rendered.yaml)" -eq 3
+	@echo "Standalone reference Kubernetes render passed."
+
+reference-k8s-build: ## Build the standalone reference container image
+	docker build -t $${REFERENCE_IMAGE:-ghcr.io/replace-me/ai-routing-reference:0.1.0} docs/sovereign_ai/microservices_reference
+
+reference-k8s-deploy: ## Apply the standalone reference package after creating runtime secrets
+	kubectl apply -k k8s/standalone-reference
+	kubectl -n ai-routing-reference rollout status deployment/gateway

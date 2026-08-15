@@ -20,6 +20,7 @@ class ProviderSettings(BaseSettings):
 
     # Provider API keys
     openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
+    openai_base_url: str = Field(default="https://api.openai.com/v1", alias="OPENAI_BASE_URL")
     anthropic_api_key: Optional[str] = Field(default=None, alias="ANTHROPIC_API_KEY")
     google_api_key: Optional[str] = Field(default=None, alias="GOOGLE_API_KEY")
     mistral_api_key: Optional[str] = Field(default=None, alias="MISTRAL_API_KEY")

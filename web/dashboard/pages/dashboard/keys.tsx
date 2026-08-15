@@ -1,11 +1,3 @@
-import React from 'react'
+import Layout from '../../components/Layout'
 import ApiKeyList from '../../components/ApiKeyList'
-
-export default function KeysPage(){
-  return (
-    <main>
-      <h1>Keys</h1>
-      <ApiKeyList />
-    </main>
-  )
-}
+export default function Keys() { return <Layout><ApiKeyList /></Layout> }

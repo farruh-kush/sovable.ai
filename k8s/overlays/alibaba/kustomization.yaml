@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ai-routing
+resources:
+  - ../../base
+  - security.yaml
+patches:
+  - path: ingress-patch.yaml
+    target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: gateway-ingress
+images:
+  - name: ai-routing-gateway
+    newName: registry.cn-hangzhou.aliyuncs.com/solvable/ai-routing-gateway
+    newTag: "0.1.0"
+  - name: ai-routing-auth
+    newName: registry.cn-hangzhou.aliyuncs.com/solvable/ai-routing-auth
+    newTag: "0.1.0"
+  - name: ai-routing-router
+    newName: registry.cn-hangzhou.aliyuncs.com/solvable/ai-routing-router
+    newTag: "0.1.0"
+  - name: ai-routing-provider
+    newName: registry.cn-hangzhou.aliyuncs.com/solvable/ai-routing-provider
+    newTag: "0.1.0"
+  - name: ai-routing-billing
+    newName: registry.cn-hangzhou.aliyuncs.com/solvable/ai-routing-billing
+    newTag: "0.1.0"

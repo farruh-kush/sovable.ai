@@ -128,6 +128,47 @@ class RoutingEngine:
             details={"last_error": str(last_error)},
         )
 
+    async def route_chat_stream(
+        self, request: ChatCompletionRequest, api_key_id: str, user_id: str
+    ) -> AsyncIterator[str]:
+        """Proxy normalized provider SSE chunks with fallback support."""
+        candidates = await self._resolve_candidates(request)
+        last_error: Optional[Exception] = None
+        for provider_name in candidates:
+            payload = request.model_dump()
+            payload["_provider"] = provider_name
+            try:
+                async with httpx.AsyncClient(
+                    base_url=self._provider_url, timeout=120.0
+                ) as client:
+                    async with client.stream(
+                        "POST", "/adapt/chat/completions", json=payload
+                    ) as response:
+                        if response.status_code >= 500:
+                            raise ProviderError(
+                                f"Provider '{provider_name}' returned HTTP {response.status_code}.",
+                                provider=provider_name,
+                                retriable=True,
+                            )
+                        if response.status_code >= 400:
+                            raise ProviderError(
+                                f"Provider '{provider_name}' rejected the request.",
+                                provider=provider_name,
+                                retriable=False,
+                            )
+                        async for line in response.aiter_lines():
+                            if line:
+                                yield f"{line}\n\n"
+                        return
+            except (ProviderError, httpx.HTTPError) as exc:
+                last_error = exc
+                if request.provider and not request.provider.allow_fallbacks:
+                    break
+        raise NoProvidersAvailableError(
+            "All providers in the streaming fallback chain failed.",
+            details={"last_error": str(last_error)},
+        )
+
     async def route_embedding(
         self,
         request: EmbeddingRequest,

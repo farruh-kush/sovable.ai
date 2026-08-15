@@ -9,6 +9,7 @@ COPY shared/ /build/shared/
 RUN pip install --no-cache-dir /build/shared
 
 COPY services/auth/ /build/auth/
+RUN sed -i 's|ai-routing-shared @ file:///${PROJECT_ROOT}/shared|ai-routing-shared|' /build/auth/pyproject.toml
 RUN pip install --no-cache-dir /build/auth
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────

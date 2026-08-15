@@ -271,13 +271,14 @@ class TestProviderRegistry:
         assert adapter is not None
         assert adapter.name == "google"
 
-    def test_all_three_providers_registered(self) -> None:
+    def test_all_four_providers_registered(self) -> None:
         settings = ProviderSettings()
         registry = ProviderRegistry(settings)
         providers = list(registry.all().keys())
         assert "openai" in providers
         assert "anthropic" in providers
         assert "google" in providers
+        assert "mistral" in providers
 
     def test_unknown_provider_raises(self) -> None:
         from ai_routing_shared.exceptions import NoProvidersAvailableError
@@ -286,3 +287,24 @@ class TestProviderRegistry:
         registry = ProviderRegistry(settings)
         with pytest.raises(NoProvidersAvailableError):
             registry.get("nonexistent-provider")
+
+
+class TestMistralAdapter:
+    def test_mistral_adapter_registered(self) -> None:
+        settings = ProviderSettings()
+        registry = ProviderRegistry(settings)
+        adapter = registry.get("mistral")
+        assert adapter.name == "mistral"
+        assert adapter._base_url == "https://api.mistral.ai/v1"
+
+    @pytest.mark.asyncio
+    async def test_mistral_mock_chat(self) -> None:
+        from provider.adapters.mistral_adapter import MistralAdapter
+        adapter = MistralAdapter(api_key=None)
+        request = ChatCompletionRequest(
+            model="mistral-small-latest",
+            messages=[ChatMessage(role="user", content="Hello")],
+        )
+        response = await adapter.chat(request)
+        assert response.provider == "mistral"
+        assert response.choices[0].message.role == "assistant"

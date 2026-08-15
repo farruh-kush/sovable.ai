@@ -16,6 +16,7 @@ from ..adapters.anthropic_adapter import AnthropicAdapter
 from ..adapters.base import BaseProviderAdapter
 from ..adapters.google_adapter import GoogleAdapter
 from ..adapters.openai_adapter import OpenAIAdapter
+from ..adapters.mistral_adapter import MistralAdapter
 from .config import ProviderSettings
 
 logger = get_logger(__name__)
@@ -33,6 +34,7 @@ class ProviderRegistry:
         self._adapters["openai"] = OpenAIAdapter(
             api_key=settings.openai_api_key,
             timeout_seconds=settings.default_timeout_seconds,
+            base_url=settings.openai_base_url,
         )
         self._adapters["anthropic"] = AnthropicAdapter(
             api_key=settings.anthropic_api_key,
@@ -40,6 +42,10 @@ class ProviderRegistry:
         )
         self._adapters["google"] = GoogleAdapter(
             api_key=settings.google_api_key,
+            timeout_seconds=settings.default_timeout_seconds,
+        )
+        self._adapters["mistral"] = MistralAdapter(
+            api_key=settings.mistral_api_key,
             timeout_seconds=settings.default_timeout_seconds,
         )
         logger.info(

@@ -1,0 +1,3 @@
+secret.yaml
+*.key
+*.crt

@@ -30,7 +30,7 @@ def upgrade() -> None:
     sa.Column('requests_per_minute', sa.Integer(), nullable=False),
     sa.Column('requests_per_day', sa.Integer(), nullable=False),
     sa.Column('monthly_budget_usd', sa.Float(), nullable=True),
-    sa.Column('allowed_models', postgresql.ARRAY(String()), nullable=True),
+    sa.Column('allowed_models', postgresql.ARRAY(sa.String()), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=False),
     sa.Column('last_used_at', sa.DateTime(timezone=True), nullable=True),

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata: {name: auth, labels: {app.kubernetes.io/name: auth}}
+spec: {selector: {app.kubernetes.io/name: auth}, ports: [{name: http, port: 8101, targetPort: http}], type: ClusterIP}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: router, labels: {app.kubernetes.io/name: router}}
+spec: {selector: {app.kubernetes.io/name: router}, ports: [{name: http, port: 8102, targetPort: http}], type: ClusterIP}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: provider, labels: {app.kubernetes.io/name: provider}}
+spec: {selector: {app.kubernetes.io/name: provider}, ports: [{name: http, port: 8103, targetPort: http}], type: ClusterIP}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: billing, labels: {app.kubernetes.io/name: billing}}
+spec: {selector: {app.kubernetes.io/name: billing}, ports: [{name: http, port: 8104, targetPort: http}], type: ClusterIP}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: gateway, labels: {app.kubernetes.io/name: gateway}}
+spec: {selector: {app.kubernetes.io/name: gateway}, ports: [{name: http, port: 8100, targetPort: http}], type: ClusterIP}

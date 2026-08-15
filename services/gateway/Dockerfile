@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir /build/shared
 
 # Copy and install the gateway service
 COPY services/gateway/ /build/gateway/
+RUN sed -i 's|ai-routing-shared @ file:///${PROJECT_ROOT}/shared|ai-routing-shared|' /build/gateway/pyproject.toml
 RUN pip install --no-cache-dir /build/gateway
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────

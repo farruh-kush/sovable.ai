@@ -1,0 +1,85 @@
+flowchart TB
+  subgraph UZ[Uzbekistan sovereign control plane]
+    WAF[WAF / DDoS / API ingress]
+    GW[Gateway service\nOpenAI-compatible API\nprivacy enforcement\nSSE + normalization]
+    AUTH[Auth service\nAPI keys / OAuth2 / RBAC\norganization and tenant policy]
+    ROUTER[Router service\nstatic + policy + cost/latency/quality\nfallback + circuit breaker]
+    PROVIDER[Provider service\nadapters / retries / timeouts\nprovider error mapping]
+    BILLING[Billing service\nusage metering / quotas\nmarkup / showback / invoices]
+    MASK[Privacy pipeline inside Gateway\nclassification / PII + secrets + IP detection\nredact / tokenize / FPE / generalize\nresponse re-identification]
+    VAULT[(Encrypted mapping vault\nper-tenant keys\nHSM/KMS-backed)]
+    POLICY[Policy registry\ndata classes / residency / model allowlists\nretention / action risk / egress rules]
+    REDIS[(Redis\nephemeral rate limits\ncache / cooldown / latency state)]
+    AUTHDB[(auth_db)]
+    BILLDB[(billing_db)]
+    GDB[(gateway privacy metadata\nmasked-session state\nno plaintext prompts)]
+    OTel[OpenTelemetry Collector\ntrace redaction + metrics]
+    SIEM[Local SIEM / WORM audit store\nsecurity operations + regulator export]
+  end
+
+  subgraph DATA[Domestic data and AI zone]
+    OBJ[(Encrypted object storage\nsource files / datasets)]
+    OCR[Local OCR + document parser\nUzbek Latin/Cyrillic + Russian + English]
+    DLP[Ingestion DLP + classification\nprovenance + malware + prompt-injection scan]
+    EMB[Local embedding + reranker service]
+    VDB[(Vector DB\nACL/classification metadata\ntenant partitions)]
+    LOCAL[Local model serving\nvLLM/TGI\nLLM / embedding / vision / image]
+    CODE[Ephemeral code sandbox\nmicroVM or gVisor\negress allowlist]
+    TOOLS[Tool registry + capability broker\nRBAC/ABAC + HITL approval]
+  end
+
+  subgraph EXT[Approved external provider zone]
+    EGRESS[Controlled egress relay\nallowlist / mTLS / ZDR contract\nno raw Tier-1 data]
+    P1[OpenAI / Azure OpenAI]
+    P2[Anthropic]
+    P3[Google / Vertex]
+    P4[Mistral / other approved APIs]
+  end
+
+  GOV[Government ministries\nstate enterprises] --> WAF
+  BANK[Banks / payment organizations] --> WAF
+  ENT[Private companies] --> WAF
+  IND[Individuals / developers] --> WAF
+  WAF --> GW
+  GW <--> AUTH
+  AUTH --> AUTHDB
+  GW --> MASK
+  MASK <--> VAULT
+  MASK <--> POLICY
+  GW --> ROUTER
+  ROUTER <--> POLICY
+  ROUTER <--> REDIS
+  ROUTER --> PROVIDER
+  PROVIDER --> LOCAL
+  PROVIDER --> EGRESS
+  EGRESS --> P1
+  EGRESS --> P2
+  EGRESS --> P3
+  EGRESS --> P4
+  PROVIDER --> BILLING
+  BILLING --> BILLDB
+  GW <--> GDB
+  GW --> OTel
+  AUTH --> OTel
+  ROUTER --> OTel
+  PROVIDER --> OTel
+  BILLING --> OTel
+  OTel --> SIEM
+
+  OBJ --> OCR --> DLP --> EMB --> VDB
+  AUTH -->|identity + ACL claims| VDB
+  GW -->|RAG query| VDB
+  VDB -->|authorized chunks only| GW
+  GW -->|agent task| TOOLS
+  TOOLS --> CODE
+  TOOLS -->|approved enterprise action| BANK
+  LOCAL --> CODE
+
+  classDef sovereign fill:#0e1f3d,color:#fff,stroke:#c9992e,stroke-width:2px;
+  classDef security fill:#1f9d6b,color:#fff,stroke:#127a51,stroke-width:2px;
+  classDef data fill:#eef4ff,color:#0e1f3d,stroke:#2f5fb0;
+  classDef ext fill:#fff6e5,color:#0e1f3d,stroke:#c9992e;
+  class WAF,GW,AUTH,ROUTER,PROVIDER,BILLING sovereign;
+  class MASK,VAULT,POLICY,OTel,SIEM,TOOLS security;
+  class OBJ,OCR,DLP,EMB,VDB,LOCAL,CODE,REDIS,AUTHDB,BILLDB,GDB data;
+  class EGRESS,P1,P2,P3,P4 ext;

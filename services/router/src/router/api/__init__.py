@@ -4,6 +4,7 @@ Author: Farruh
 """
 
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import StreamingResponse
 
 from ai_routing_shared.models import (
     ChatCompletionRequest,
@@ -31,7 +32,13 @@ async def route_chat(
     user_id = body.pop("_user_id", "unknown")
     chat_request = ChatCompletionRequest.model_validate(body)
 
-    return await request.app.state.routing_engine.route_chat_completion(
+    engine = request.app.state.routing_engine
+    if chat_request.stream:
+        return StreamingResponse(
+            engine.route_chat_stream(chat_request, api_key_id, user_id),
+            media_type="text/event-stream",
+        )
+    return await engine.route_chat_completion(
         request=chat_request,
         api_key_id=api_key_id,
         user_id=user_id,

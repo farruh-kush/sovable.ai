@@ -1,15 +1,14 @@
-import React from 'react';
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function Home() {
-  return (
-    <main style={{fontFamily: 'system-ui, sans-serif', padding: 24}}>
-      <h1>AI Routing Layer — Dashboard</h1>
-      <p>This is a starter Next.js dashboard. Use it to build marketing pages and the developer dashboard.</p>
-      <ul>
-        <li><Link href="/dashboard">Open Dashboard</Link></li>
-        <li><a href="/api/health">/v1/health (proxy through backend)</a></li>
-      </ul>
-    </main>
-  );
+  return <div className="landing">
+    <nav className="landing-nav"><Link href="/" className="brand"><span className="brand-mark">S</span><span>Solvable <em>AI</em></span></Link><div className="landing-links"><a href="#architecture">Architecture</a><a href="#control">Control plane</a><a href="#sovereignty">Sovereignty</a><Link href="/dashboard" className="button secondary">Open console</Link></div></nav>
+    <main>
+      <section className="hero"><div className="hero-copy"><span className="eyebrow">NATIONAL AI PLATFORM · UZBEKISTAN</span><h1>One gateway.<br /><span>Every model.</span><br />Complete control.</h1><p>Solvable is the secure AI control plane that routes every request through the right model, provider, and policy — with usage controls, data masking, and one consistent API.</p><div className="hero-actions"><Link href="/dashboard/playground" className="button primary">Try the playground</Link><a href="#architecture" className="button ghost">Explore architecture →</a></div></div><div className="hero-diagram"><div className="orbit orbit-one" /><div className="orbit orbit-two" /><div className="diagram-core"><div className="core-icon">S</div><strong>Solvable</strong><small>ROUTING CORE</small></div><div className="diagram-node node-openai">OpenAI<small>GPT family</small></div><div className="diagram-node node-claude">Claude<small>Anthropic</small></div><div className="diagram-node node-gemini">Gemini<small>Google</small></div><div className="diagram-node node-oss">Open source<small>Qwen · Llama</small></div></div></section>
+      <section className="stat-row"><div><strong>1</strong><span>Unified API</span></div><div><strong>5</strong><span>Isolated services</span></div><div><strong>4+</strong><span>Provider adapters</span></div><div><strong>0</strong><span>Vendor lock-in</span></div></section>
+      <section id="architecture" className="landing-section"><div className="section-heading"><span className="eyebrow">THE CONTROL PLANE</span><h2>Designed for the hard parts of AI infrastructure.</h2><p>Provider differences, cost leaks, data residency, and reliability are operational problems. Solvable makes them policy and configuration instead of application code.</p></div><div className="feature-grid"><article><span className="feature-index">01</span><h3>Intelligent routing</h3><p>Static mappings, cost and latency optimization, fallbacks, tier policies, and future experiments share one routing contract.</p></article><article><span className="feature-index">02</span><h3>Privacy by default</h3><p>Keep sensitive content inside your boundary with masking hooks and provider data-policy filters before a request leaves the platform.</p></article><article><span className="feature-index">03</span><h3>Usage as a product</h3><p>Every generation records tokens, provider, latency, cost, cache state, and fallback usage for budgets, alerts, and billing.</p></article></div></section>
+      <section id="control" className="pipeline"><span className="eyebrow">REQUEST LIFECYCLE</span><div className="pipeline-row"><div>Client<span>OpenAI-compatible</span></div><b>→</b><div className="highlight">Gateway<span>Auth · limits · cache</span></div><b>→</b><div>Router<span>Policy · cost · latency</span></div><b>→</b><div>Providers<span>Adapters · retries</span></div><b>→</b><div className="success-node">Response<span>Normalized · billed</span></div></div></section>
+      <section id="sovereignty" className="closing-banner"><div><span className="eyebrow">READY FOR THE NEXT LAYER</span><h2>Build once. Route intelligently. Operate with confidence.</h2></div><Link href="/dashboard" className="button primary">Open Solvable console →</Link></section>
+    </main><footer><span>© 2026 Solvable AI</span><span>Unified intelligence infrastructure</span></footer>
+  </div>
 }

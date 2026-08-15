@@ -154,6 +154,14 @@ models:
     max_output_tokens: 4096
     supports_function_calling: true
 
+  # Alibaba Model Studio via the OpenAI-compatible endpoint
+  "qwen-plus":
+    provider: openai
+    context_window: 131072
+    max_output_tokens: 4096
+    supports_function_calling: true
+    supports_json_mode: true
+
 # ── Static Routing Table ──────────────────────────────────────────────────────
 # Defines the primary provider and fallback chain per model alias.
 # The router tries providers in order until one succeeds.
@@ -258,3 +266,8 @@ tier_policies:
     enable_fallbacks: true
     enable_ab_testing: true
     zero_data_retention: true
+
+  "qwen-plus":
+    primary: openai
+    fallback: ["mistral"]
+    strategy: static

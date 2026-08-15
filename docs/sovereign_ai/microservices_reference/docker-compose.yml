@@ -1,0 +1,69 @@
+services:
+  auth:
+    build: .
+    command: ["python", "-m", "uvicorn", "services.auth.app:app", "--host", "0.0.0.0", "--port", "8101"]
+    environment: &service-env
+      INTERNAL_SECRET: ${INTERNAL_SECRET:-local-dev-internal-secret}
+      GATEWAY_API_KEY: ${GATEWAY_API_KEY:-sk-local-demo}
+      AUTH_URL: http://auth:8101
+      ROUTER_URL: http://router:8102
+      PROVIDER_URL: http://provider:8103
+      BILLING_URL: http://billing:8104
+      PROVIDER_MODE: ${PROVIDER_MODE:-fake}
+      MONTHLY_BUDGET_USD: ${MONTHLY_BUDGET_USD:-100}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8101/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  router:
+    build: .
+    command: ["python", "-m", "uvicorn", "services.router.app:app", "--host", "0.0.0.0", "--port", "8102"]
+    environment: *service-env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8102/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  provider:
+    build: .
+    command: ["python", "-m", "uvicorn", "services.provider.app:app", "--host", "0.0.0.0", "--port", "8103"]
+    environment: *service-env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8103/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  billing:
+    build: .
+    command: ["python", "-m", "uvicorn", "services.billing.app:app", "--host", "0.0.0.0", "--port", "8104"]
+    environment: *service-env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8104/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  gateway:
+    build: .
+    command: ["python", "-m", "uvicorn", "services.gateway.app:app", "--host", "0.0.0.0", "--port", "8100"]
+    environment: *service-env
+    depends_on:
+      auth:
+        condition: service_healthy
+      router:
+        condition: service_healthy
+      provider:
+        condition: service_healthy
+      billing:
+        condition: service_healthy
+    ports:
+      - "8100:8100"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8100/ready')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

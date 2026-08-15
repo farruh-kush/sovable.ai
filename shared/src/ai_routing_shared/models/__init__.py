@@ -21,7 +21,7 @@ from .responses import (
     EmbeddingResponse,
     EmbeddingVector,
 )
-from .usage import UsageInfo, UsageRecord, GenerationRecord
+from .usage import UsageInfo, UsageRecord, GenerationRecord, GenerationCost
 from .keys import ApiKey, ApiKeyTier
 
 __all__ = [
@@ -42,6 +42,7 @@ __all__ = [
     "UsageInfo",
     "UsageRecord",
     "GenerationRecord",
+    "GenerationCost",
     # Keys
     "ApiKey",
     "ApiKeyTier",

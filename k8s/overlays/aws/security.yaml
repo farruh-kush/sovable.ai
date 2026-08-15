@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-egress
+  namespace: ai-routing
+spec:
+  podSelector:
+    matchLabels:
+      app: gateway
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: router
+    - to:
+        - podSelector:
+            matchLabels:
+              app: auth
+    - to:
+        - podSelector:
+            matchLabels:
+              app: billing
+    - ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
