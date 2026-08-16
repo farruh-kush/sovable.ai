@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="850" viewBox="0 0 1400 850">
+  <defs>
+    <style>
+      .background { fill: #ffffff; }
+      .service { fill: #dbeafe; stroke: #0284c7; stroke-width: 2; rx: 8; }
+      .title { font: bold 16px 'Segoe UI', Arial; fill: #0f172a; }
+      .subtitle { font: 500 12px 'Segoe UI', Arial; fill: #1f2937; }
+      .small { font: 400 11px 'Segoe UI', Arial; fill: #4b5563; }
+      .arrow-sync { stroke: #0284c7; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead-sync); }
+      .arrow-async { stroke: #d97706; stroke-width: 2.5; stroke-dasharray: 5,5; fill: none; marker-end: url(#arrowhead-async); }
+      .label-sync { font: 500 11px 'Segoe UI', Arial; fill: #0284c7; background: white; }
+      .label-async { font: 500 11px 'Segoe UI', Arial; fill: #d97706; background: white; }
+    </style>
+    <marker id="arrowhead-sync" viewBox="0 0 10 10" refX="9" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 3 L 0 6 Z" fill="#0284c7" />
+    </marker>
+    <marker id="arrowhead-async" viewBox="0 0 10 10" refX="9" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 3 L 0 6 Z" fill="#d97706" />
+    </marker>
+  </defs>
+
+  <rect width="1400" height="850" class="background"/>
+
+  <!-- Title -->
+  <text x="700" y="30" class="title" text-anchor="middle">Service Interactions &amp; Communication Patterns</text>
+  <text x="700" y="50" class="small" text-anchor="middle">Synchronous (solid) and Asynchronous (dashed) communication flows</text>
+
+  <!-- Services Layout -->
+  <!-- API Gateway -->
+  <rect x="50" y="100" width="180" height="100" class="service"/>
+  <text x="140" y="130" class="subtitle" text-anchor="middle">API Gateway</text>
+  <text x="140" y="150" class="small" text-anchor="middle">Req Validation</text>
+  <text x="140" y="165" class="small" text-anchor="middle">Auth / Rate Limit</text>
+
+  <!-- Routing Service -->
+  <rect x="350" y="100" width="180" height="100" class="service"/>
+  <text x="440" y="130" class="subtitle" text-anchor="middle">Routing Service</text>
+  <text x="440" y="150" class="small" text-anchor="middle">Route Selection</text>
+  <text x="440" y="165" class="small" text-anchor="middle">Retry Logic</text>
+
+  <!-- Provider Service -->
+  <rect x="650" y="100" width="180" height="100" class="service"/>
+  <text x="740" y="130" class="subtitle" text-anchor="middle">Provider Service</text>
+  <text x="740" y="150" class="small" text-anchor="middle">Provider Calls</text>
+  <text x="740" y="165" class="small" text-anchor="middle">Health Checks</text>
+
+  <!-- Billing Service -->
+  <rect x="950" y="100" width="180" height="100" class="service"/>
+  <text x="1040" y="130" class="subtitle" text-anchor="middle">Billing Service</text>
+  <text x="1040" y="150" class="small" text-anchor="middle">Usage Tracking</text>
+  <text x="1040" y="165" class="small" text-anchor="middle">Cost Calculation</text>
+
+  <!-- Auth Service -->
+  <rect x="1200" y="100" width="150" height="100" class="service"/>
+  <text x="1275" y="130" class="subtitle" text-anchor="middle">Auth Service</text>
+  <text x="1275" y="150" class="small" text-anchor="middle">Token Validation</text>
+  <text x="1275" y="165" class="small" text-anchor="middle">Key Management</text>
+
+  <!-- Primary Flow Paths -->
+  <!-- Gateway -> Routing (Sync) -->
+  <path d="M 230 150 L 350 150" class="arrow-sync"/>
+  <text x="280" y="140" class="label-sync">Sync: Route Request</text>
+
+  <!-- Gateway -> Auth (Sync) -->
+  <path d="M 140 100 L 1275 200" class="arrow-sync" stroke-width="2"/>
+  <text x="700" y="90" class="label-sync">Sync: Validate Token</text>
+
+  <!-- Routing -> Provider (Sync) -->
+  <path d="M 530 150 L 650 150" class="arrow-sync"/>
+  <text x="580" y="140" class="label-sync">Sync: Select Provider</text>
+
+  <!-- Provider -> Billing (Async) -->
+  <path d="M 830 150 L 950 150" class="arrow-async"/>
+  <text x="870" y="140" class="label-async">Async: Log Usage</text>
+
+  <!-- Bidirectional: Routing <-> Provider -->
+  <path d="M 740 100 L 740 50 L 440 50 L 440 100" class="arrow-sync" stroke-width="1.5"/>
+  <text x="590" y="45" class="label-sync">Health Status Updates</text>
+
+  <!-- Second Row Services -->
+  <!-- Cache Service -->
+  <rect x="50" y="350" width="180" height="100" class="service"/>
+  <text x="140" y="380" class="subtitle" text-anchor="middle">Cache Service</text>
+  <text x="140" y="400" class="small" text-anchor="middle">Rate Limits</text>
+  <text x="140" y="415" class="small" text-anchor="middle">Session Storage</text>
+
+  <!-- Observability -->
+  <rect x="350" y="350" width="180" height="100" class="service"/>
+  <text x="440" y="380" class="subtitle" text-anchor="middle">Observability</text>
+  <text x="440" y="400" class="small" text-anchor="middle">Metrics</text>
+  <text x="440" y="415" class="small" text-anchor="middle">Tracing &amp; Logs</text>
+
+  <!-- Database -->
+  <rect x="650" y="350" width="180" height="100" class="service"/>
+  <text x="740" y="380" class="subtitle" text-anchor="middle">Database</text>
+  <text x="740" y="400" class="small" text-anchor="middle">PostgreSQL</text>
+  <text x="740" y="415" class="small" text-anchor="middle">Persistence</text>
+
+  <!-- Dashboard -->
+  <rect x="950" y="350" width="180" height="100" class="service"/>
+  <text x="1040" y="380" class="subtitle" text-anchor="middle">Dashboard</text>
+  <text x="1040" y="400" class="small" text-anchor="middle">Web UI</text>
+  <text x="1040" y="415" class="small" text-anchor="middle">Admin Console</text>
+
+  <!-- Support Arrows -->
+  <!-- Gateway -> Cache (Sync) -->
+  <path d="M 140 200 L 140 350" class="arrow-sync"/>
+  <text x="150" y="275" class="label-sync">Check Rate Limit</text>
+
+  <!-- Routing -> Cache (Sync) -->
+  <path d="M 440 200 L 440 350" class="arrow-sync"/>
+  <text x="450" y="275" class="label-sync">Provider Health</text>
+
+  <!-- All services -> Observability (Async) -->
+  <path d="M 140 300 L 380 350" class="arrow-async" stroke-width="1.5"/>
+  <path d="M 440 300 L 440 350" class="arrow-async" stroke-width="1.5"/>
+  <path d="M 740 300 L 520 350" class="arrow-async" stroke-width="1.5"/>
+  <path d="M 1040 300 L 660 350" class="arrow-async" stroke-width="1.5"/>
+  <text x="350" y="320" class="label-async">Emit Metrics/Logs</text>
+
+  <!-- Services -> Database (Sync/Async) -->
+  <path d="M 230 400 L 650 400" class="arrow-sync" stroke-width="2"/>
+  <text x="430" y="390" class="label-sync">Read/Write Operations</text>
+
+  <!-- Billing -> Database (Sync) -->
+  <path d="M 1040 200 L 740 350" class="arrow-sync"/>
+  <text x="850" y="275" class="label-sync">Store Records</text>
+
+  <!-- Dashboard -> Database (Sync) -->
+  <path d="M 1040 350 L 830 350" class="arrow-sync"/>
+  <text x="920" y="340" class="label-sync">Query Data</text>
+
+  <!-- Legend -->
+  <text x="50" y="550" class="subtitle">Communication Patterns:</text>
+  
+  <!-- Sync Legend -->
+  <line x1="50" y1="575" x2="100" y2="575" class="arrow-sync"/>
+  <text x="120" y="580" class="small">Synchronous (Blocking) - HTTP/gRPC calls</text>
+
+  <!-- Async Legend -->
+  <line x1="50" y1="610" x2="100" y2="610" class="arrow-async"/>
+  <text x="120" y="615" class="small">Asynchronous (Non-blocking) - Message Queue / Events</text>
+
+  <!-- Service Patterns Box -->
+  <rect x="50" y="650" width="1300" height="150" fill="#f3f4f6" stroke="#d1d5db" stroke-width="1" rx="8"/>
+  <text x="60" y="675" class="subtitle">Key Integration Patterns:</text>
+  
+  <text x="60" y="700" class="small">• API Gateway acts as single entry point, validates all requests before routing</text>
+  <text x="60" y="720" class="small">• Routing Service orchestrates provider selection with fallback and retry logic</text>
+  <text x="60" y="740" class="small">• Provider Service abstracts external API calls, maintains health status, handles rate limits</text>
+  <text x="60" y="760" class="small">• Billing Service logs usage asynchronously to avoid blocking request path</text>
+  <text x="60" y="780" class="small">• Observability layer passively collects metrics from all services (non-intrusive)</text>
+
+</svg>

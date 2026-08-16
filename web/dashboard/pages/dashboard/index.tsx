@@ -1,0 +1,12 @@
+import { useEffect, useState } from 'react'
+import Layout from '../../components/Layout'
+import UsageChart from '../../components/UsageChart'
+import { getHealth, getModels } from '../../lib/api'
+
+export default function Dashboard() {
+  const [health, setHealth] = useState<any>(null)
+  const [models, setModels] = useState<any[]>([])
+  useEffect(() => { getHealth().then(setHealth).catch(() => setHealth({ status: 'unreachable' })); getModels().then(data => setModels(data.data || [])).catch(() => setModels([])) }, [])
+  const providerCount = health?.providers ? Object.keys(health.providers).length : 4
+  return <Layout><div className="section-heading"><div><span className="eyebrow">OPERATIONS / OVERVIEW</span><h2>Good morning, Farruh.</h2><p>Monitor the routing layer, inspect provider health, and keep spend inside policy.</p></div><div className="live-badge"><i />Live control plane</div></div><div className="metric-grid"><div className="metric-card"><span>Requests</span><strong>1,248</strong><small className="positive">↑ 18.4% vs last month</small></div><div className="metric-card"><span>Estimated spend</span><strong>$184.26</strong><small className="positive">↓ 12.1% with routing</small></div><div className="metric-card"><span>p95 latency</span><strong>842<span>ms</span></strong><small>Across active providers</small></div><div className="metric-card"><span>Provider health</span><strong>{health?.status === 'unreachable' ? '—' : `${providerCount}/4`}</strong><small className={health?.status === 'unreachable' ? 'negative' : 'positive'}>{health?.status === 'unreachable' ? 'Gateway unavailable' : 'All registered adapters'}</small></div></div><div className="dashboard-grid"><div className="card"><div className="table-title"><div><span className="eyebrow">TRAFFIC</span><h3>Request volume</h3></div><span className="pill">Last 12 months</span></div><UsageChart /></div><div className="card"><div className="table-title"><div><span className="eyebrow">MODEL CATALOG</span><h3>Available models</h3></div><span className="pill">{models.length || 0} configured</span></div><div className="model-list">{models.slice(0, 6).map(model => <div className="model-row" key={model.id}><span className="model-dot" /><div><strong>{model.id}</strong><small>{model.provider} · {model.data_policy?.trains_on_data ? 'standard policy' : 'policy tagged'}</small></div><span className="arrow">→</span></div>)}{!models.length && <div className="empty">Connect the gateway to load the model catalog.</div>}</div></div></div></Layout>
+}

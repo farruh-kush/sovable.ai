@@ -1,0 +1,51 @@
+# Alerting rules for the AI Routing Layer
+# Author: Farruh
+
+groups:
+  - name: ai_routing_layer
+    interval: 30s
+    rules:
+
+      # High error rate on the Gateway
+      - alert: GatewayHighErrorRate
+        expr: |
+          rate(http_requests_total{service="gateway",status=~"5.."}[5m])
+          / rate(http_requests_total{service="gateway"}[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Gateway error rate > 5%"
+          description: "The API Gateway is returning HTTP 5xx errors at {{ $value | humanizePercentage }}."
+
+      # Provider circuit breaker opened
+      - alert: ProviderCircuitOpen
+        expr: ai_routing_circuit_open{} == 1
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Provider circuit breaker OPEN: {{ $labels.provider }}"
+          description: "The circuit breaker for provider {{ $labels.provider }} has been OPEN for more than 1 minute."
+
+      # High P99 latency
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service="gateway"}[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P99 latency > 5s on Gateway"
+          description: "The 99th percentile request latency is {{ $value }}s."
+
+      # Rate limit hit rate spike
+      - alert: RateLimitSpike
+        expr: |
+          rate(ai_routing_rate_limit_exceeded_total{}[5m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Rate limit exceeded > 10 times/s"
+          description: "Rate limiting is being triggered at {{ $value }} times per second."

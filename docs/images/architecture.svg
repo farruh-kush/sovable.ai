@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+  <style>
+    .box { fill:#f8fafc; stroke:#1f2937; stroke-width:1.5px; rx:8; }
+    .title { font: 600 18px 'Helvetica Neue', Arial; fill:#0f172a; }
+    .label { font: 500 14px 'Helvetica Neue', Arial; fill:#111827; }
+    .small { font: 400 12px 'Helvetica Neue', Arial; fill:#374151; }
+    .arrow { stroke:#0f172a; stroke-width:2; fill:none; marker-end:url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f172a" />
+    </marker>
+  </defs>
+
+  <!-- API Gateway -->
+  <rect x="30" y="40" width="300" height="100" class="box"/>
+  <text x="50" y="70" class="title">API Gateway (FastAPI)</text>
+  <text x="50" y="95" class="small">Auth, rate limit, request validation, docs</text>
+
+  <!-- Router Service -->
+  <rect x="380" y="40" width="420" height="160" class="box"/>
+  <text x="400" y="70" class="title">Routing Service</text>
+  <text x="400" y="95" class="small">Static &amp; dynamic routing, retries, circuit breaker</text>
+  <text x="400" y="115" class="small">Streaming (SSE) support</text>
+
+  <!-- Provider Adapters -->
+  <rect x="840" y="40" width="330" height="240" class="box"/>
+  <text x="860" y="70" class="title">Provider Adapters</text>
+  <text x="860" y="95" class="small">OpenAI, Anthropic, others</text>
+  <text x="860" y="115" class="small">Pluggable, health &amp; metrics</text>
+
+  <!-- Billing & Usage -->
+  <rect x="380" y="230" width="300" height="100" class="box"/>
+  <text x="400" y="260" class="title">Billing &amp; Usage</text>
+  <text x="400" y="285" class="small">Token counting, cost estimation, invoices</text>
+
+  <!-- Observability -->
+  <rect x="30" y="230" width="300" height="100" class="box"/>
+  <text x="50" y="260" class="title">Observability</text>
+  <text x="50" y="285" class="small">Prometheus, OpenTelemetry, Logs</text>
+
+  <!-- Dashboard / Web UI -->
+  <rect x="30" y="360" width="300" height="140" class="box"/>
+  <text x="50" y="395" class="title">Dashboard &amp; Website</text>
+  <text x="50" y="420" class="small">Signup, Docs, Playground, Admin</text>
+
+  <!-- SDKs -->
+  <rect x="380" y="360" width="420" height="140" class="box"/>
+  <text x="400" y="395" class="title">SDKs &amp; CLI</text>
+  <text x="400" y="420" class="small">Python, JavaScript, examples</text>
+
+  <!-- DB / Redis -->
+  <rect x="840" y="320" width="330" height="180" class="box"/>
+  <text x="860" y="350" class="title">Persistence</text>
+  <text x="860" y="375" class="small">Postgres, Redis, Migrations</text>
+
+  <!-- Arrows -->
+  <path d="M 330 90 L 380 90" class="arrow"/>
+  <path d="M 800 120 L 840 120" class="arrow"/>
+  <path d="M 640 200 L 640 230" class="arrow"/>
+  <path d="M 530 330 L 530 360" class="arrow"/>
+  <path d="M 700 420 L 840 420" class="arrow"/>
+
+  <!-- Notes -->
+  <text x="860" y="520" class="small">This SVG is editable — update labels/colors in a text editor.</text>
+</svg>

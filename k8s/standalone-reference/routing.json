@@ -1,0 +1,7 @@
+{
+  "models": {
+    "local": {"provider": "local-fake", "provider_model": "local-fake", "endpoint": "http://provider:8103", "cost_per_1k_tokens": 0.0005, "external": false},
+    "gpt-4o-mini": {"provider": "external-fake", "provider_model": "external-fake", "endpoint": "http://provider:8103", "cost_per_1k_tokens": 0.003, "external": true}
+  },
+  "fallbacks": {"local": [], "gpt-4o-mini": ["local"]}
+}

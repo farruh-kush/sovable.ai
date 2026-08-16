@@ -1,0 +1,61 @@
+flowchart LR
+  A[Client app\nGovernment / bank / enterprise / individual] --> B[Unified API\n/v1/chat/completions\n/v1/embeddings\n/v1/images]
+  B --> C[Authenticate + tenant context\nAPI key/OAuth2\nRBAC/ABAC claims]
+  C --> D[Data classification\nPII / bank secrecy / health / secret / IP\nrequest risk + residency]
+  D -->|Tier 1 restricted| E[Local-only policy\nno external egress]
+  D -->|Tier 2 internal| F[Local masking + approved egress]
+  D -->|Tier 3 public| G[Standard policy\napproved providers]
+
+  E --> H[Pre-processing guardrails\nsecrets + prompt injection + malware\ncontent and schema checks]
+  F --> H
+  G --> H
+  H --> I{Sensitive entities found?}
+  I -->|No| J[Canonical prompt]
+  I -->|Yes, reversible task| K[Deterministic tokenization / pseudonyms\nstore mapping in encrypted vault]
+  I -->|Yes, irreversible task| L[Redaction / generalization / suppression]
+  K --> J
+  L --> J
+
+  J --> M{RAG / agent / coding / image?}
+  M -->|RAG| N[Local ingestion and retrieval\nACL-filtered chunks only\nembedding + reranker local]
+  M -->|Agentic| O[Plan + tool policy\ncapability token + sandbox\nHITL for high-impact action]
+  M -->|Coding| P[Ephemeral code workspace\nsecret/IP scanning\nnetwork egress allowlist]
+  M -->|Image / multimodal| Q[Local OCR/vision/DLP\nimage redaction + metadata stripping]
+  M -->|Chat / embedding| R[Standard model request]
+  N --> S[Routing decision\nmodel allowlist + cost + latency + quality\nhealth + quota + fallback chain]
+  O --> S
+  P --> S
+  Q --> S
+  R --> S
+  S -->|Local-only| T[Domestic model endpoint\nvLLM/TGI / vision / image]
+  S -->|Approved external| U[Controlled egress\nmasked payload only\nprovider adapter]
+  U --> V[External provider\nOpenAI / Anthropic / Google / Mistral]
+  T --> W[Response adapter + normalizer]
+  V --> W
+  W --> X[Post-response controls\nschema/content/PII/secrets/action validation]
+  X --> Y{Token mapping present?}
+  Y -->|Yes| Z[Restore approved entities\nonly for authorized tenant/session]
+  Y -->|No| AA[Keep response de-identified]
+  Z --> AB[Return normalized response\nSSE stream or JSON]
+  AA --> AB
+  AB --> A
+
+  C -.-> AC[Audit event\nidentity / policy / model / latency / usage]
+  D -.-> AC
+  S -.-> AC
+  O -.-> AC
+  X -.-> AC
+  AC --> AD[Immutable local audit/SIEM\nredacted payload fingerprints\nno raw prompt by default]
+  S -.-> AE[Usage + cost meter\ninput/output/cache tokens\nprovider cost + markup]
+  AE --> AF[Quota / billing / alerts]
+
+  classDef edge fill:#0e1f3d,color:#fff,stroke:#c9992e,stroke-width:2px;
+  classDef privacy fill:#1f9d6b,color:#fff,stroke:#127a51,stroke-width:2px;
+  classDef process fill:#eef4ff,color:#0e1f3d,stroke:#2f5fb0;
+  classDef ext fill:#fff6e5,color:#0e1f3d,stroke:#c9992e;
+  classDef audit fill:#f5eaff,color:#0e1f3d,stroke:#7a4fa3;
+  class A,B,C,D,S,AB edge;
+  class E,F,G,H,I,K,L,X,Y,Z,AA privacy;
+  class J,M,N,O,P,Q,R,T,W,AE,AF process;
+  class U,V ext;
+  class AC,AD audit;

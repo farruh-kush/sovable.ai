@@ -1,0 +1,38 @@
+{
+  "event_id": "evt_01JEXAMPLE",
+  "event_type": "ai.request.completed.v1",
+  "schema_version": "1",
+  "occurred_at": "2026-08-16T12:00:00Z",
+  "producer": "gateway",
+  "environment": "production",
+  "request_id": "req_01JEXAMPLE",
+  "organization_id": "org_01JEXAMPLE",
+  "workspace_id": "ws_01JEXAMPLE",
+  "project_id": "proj_01JEXAMPLE",
+  "actor": {
+    "type": "api_key",
+    "id": "key_01JEXAMPLE"
+  },
+  "data_classification": "metadata_only",
+  "trace": {
+    "trace_id": "trace_01JEXAMPLE",
+    "span_id": "span_01JEXAMPLE"
+  },
+  "payload": {
+    "endpoint": "/v1/chat/completions",
+    "status": "completed",
+    "model_requested": "qwen-plus",
+    "provider": "alibaba-model-studio",
+    "model_used": "qwen-plus",
+    "input_tokens": 31,
+    "output_tokens": 42,
+    "total_tokens": 73,
+    "latency_ms": 842,
+    "cache_status": "miss",
+    "privacy_action": "mask",
+    "route_decision_id": "rtd_01JEXAMPLE"
+  },
+  "idempotency": {
+    "dedupe_key": "req_01JEXAMPLE:ai.request.completed.v1"
+  }
+}

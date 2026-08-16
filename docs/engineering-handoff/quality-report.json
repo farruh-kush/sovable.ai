@@ -1,0 +1,206 @@
+{
+  "documents": [
+    {
+      "file": "01_SYSTEM_ARCHITECTURE.md",
+      "bytes": 10865,
+      "headings": 13,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "02_SERVICE_CATALOG.md",
+      "bytes": 10356,
+      "headings": 18,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "03_API_CONTRACTS.md",
+      "bytes": 12128,
+      "headings": 24,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "04_DATA_MODEL_AND_EVENTS.md",
+      "bytes": 10133,
+      "headings": 16,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "05_ROUTING_SPEC.md",
+      "bytes": 7955,
+      "headings": 13,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "06_DATA_MASKING_SPEC.md",
+      "bytes": 7805,
+      "headings": 14,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "07_AGENT_APP_STORE_SPEC.md",
+      "bytes": 8054,
+      "headings": 14,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "08_IDENTITY_RBAC_BILLING.md",
+      "bytes": 6847,
+      "headings": 12,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "09_USER_ADMIN_CONSOLE.md",
+      "bytes": 9481,
+      "headings": 17,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "10_DATA_PLATFORM.md",
+      "bytes": 7635,
+      "headings": 17,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "11_DEVOPS_CICD_ENVIRONMENTS.md",
+      "bytes": 7609,
+      "headings": 17,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "12_KUBERNETES_RUNBOOK.md",
+      "bytes": 9000,
+      "headings": 20,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "13_OBSERVABILITY_SLO_ALERTS.md",
+      "bytes": 9014,
+      "headings": 23,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "14_SECURITY_THREAT_MODEL.md",
+      "bytes": 8212,
+      "headings": 13,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "15_IMPLEMENTATION_BACKLOG.md",
+      "bytes": 5987,
+      "headings": 13,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "16_DECISION_REGISTER.md",
+      "bytes": 5472,
+      "headings": 5,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    },
+    {
+      "file": "17_TEST_STRATEGY.md",
+      "bytes": 7504,
+      "headings": 15,
+      "has_author": true,
+      "has_version": true,
+      "has_status": true,
+      "has_acceptance_or_criteria": true,
+      "secret_matches": []
+    }
+  ],
+  "supporting": {
+    "diagrams_mmd": [
+      "architecture.mmd",
+      "data-flow.mmd",
+      "deployment-topology.mmd",
+      "request-lifecycle.mmd",
+      "trust-boundaries.mmd"
+    ],
+    "diagrams_png": [
+      "architecture.png",
+      "data-flow.png",
+      "deployment-topology.png",
+      "request-lifecycle.png",
+      "trust-boundaries.png"
+    ],
+    "runbooks": [
+      "credential-rotation.md",
+      "data-recovery.md",
+      "incident-response.md",
+      "provider-disablement.md"
+    ],
+    "contracts": [
+      "app-manifest.yaml",
+      "event-envelope.json",
+      "masking-policy.yaml",
+      "provider-adapter-contract.yaml",
+      "routing-policy.yaml"
+    ]
+  },
+  "document_count": 17,
+  "all_structural_checks_passed": true,
+  "all_secret_pattern_checks_passed": true
+}

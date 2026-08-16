@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1000" viewBox="0 0 1400 1000">
+  <defs>
+    <style>
+      .background { fill: #ffffff; }
+      .step-box { fill: #dbeafe; stroke: #0284c7; stroke-width: 2; rx: 8; }
+      .error-box { fill: #fee2e2; stroke: #dc2626; stroke-width: 2; rx: 8; }
+      .success-box { fill: #d1fae5; stroke: #059669; stroke-width: 2; rx: 8; }
+      .title { font: bold 18px 'Segoe UI', Arial; fill: #0f172a; }
+      .subtitle { font: 600 14px 'Segoe UI', Arial; fill: #1f2937; }
+      .small { font: 400 12px 'Segoe UI', Arial; fill: #4b5563; }
+      .tiny { font: 400 10px 'Segoe UI', Arial; fill: #6b7280; }
+      .arrow { stroke: #1f2937; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead); }
+      .error-arrow { stroke: #dc2626; stroke-width: 2.5; fill: none; marker-end: url(#arrowhead-error); }
+    </style>
+    <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 3 L 0 6 Z" fill="#1f2937" />
+    </marker>
+    <marker id="arrowhead-error" viewBox="0 0 10 10" refX="9" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 3 L 0 6 Z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <rect width="1400" height="1000" class="background"/>
+
+  <!-- Title -->
+  <text x="700" y="35" class="title" text-anchor="middle">Request Flow - Complete Lifecycle with Error Handling</text>
+  <text x="700" y="55" class="small" text-anchor="middle">End-to-end request journey from client to response with retry logic and circuit breaker</text>
+
+  <!-- Timeline Steps -->
+  <!-- Step 1: Client Request -->
+  <rect x="30" y="80" width="160" height="100" class="step-box"/>
+  <text x="110" y="105" class="subtitle" text-anchor="middle">1. Client</text>
+  <text x="110" y="130" class="tiny" text-anchor="middle">Send Request</text>
+  <text x="110" y="145" class="tiny" text-anchor="middle">with API Key</text>
+  <text x="110" y="160" class="tiny" text-anchor="middle">Authentication</text>
+
+  <!-- Arrow -->
+  <path d="M 190 130 L 240 130" class="arrow"/>
+
+  <!-- Step 2: API Gateway -->
+  <rect x="240" y="80" width="160" height="100" class="step-box"/>
+  <text x="320" y="105" class="subtitle" text-anchor="middle">2. Gateway</text>
+  <text x="320" y="130" class="tiny" text-anchor="middle">Validate Token</text>
+  <text x="320" y="145" class="tiny" text-anchor="middle">Check Rate Limit</text>
+  <text x="320" y="160" class="tiny" text-anchor="middle">Log Request</text>
+
+  <!-- Error Path from Gateway -->
+  <path d="M 310 180 L 310 210 L 250 210 L 250 260" class="error-arrow"/>
+  <text x="260" y="205" class="tiny" fill="#dc2626">Error: Auth Failed</text>
+
+  <!-- Arrow to Router -->
+  <path d="M 400 130 L 450 130" class="arrow"/>
+
+  <!-- Step 3: Routing -->
+  <rect x="450" y="80" width="160" height="100" class="step-box"/>
+  <text x="530" y="105" class="subtitle" text-anchor="middle">3. Router</text>
+  <text x="530" y="130" class="tiny" text-anchor="middle">Select Provider</text>
+  <text x="530" y="145" class="tiny" text-anchor="middle">Check Health</text>
+  <text x="530" y="160" class="tiny" text-anchor="middle">Score Options</text>
+
+  <!-- Arrow to Provider -->
+  <path d="M 610 130 L 660 130" class="arrow"/>
+
+  <!-- Step 4: Provider Call -->
+  <rect x="660" y="80" width="160" height="100" class="step-box"/>
+  <text x="740" y="105" class="subtitle" text-anchor="middle">4. Provider</text>
+  <text x="740" y="130" class="tiny" text-anchor="middle">Call External API</text>
+  <text x="740" y="145" class="tiny" text-anchor="middle">(OpenAI, Claude)</text>
+  <text x="740" y="160" class="tiny" text-anchor="middle">Stream Response</text>
+
+  <!-- Provider Error Handling -->
+  <path d="M 740 180 L 740 220" class="error-arrow"/>
+  <text x="750" y="205" class="tiny" fill="#dc2626">Timeout / Error</text>
+
+  <!-- Error Flow: Retry Logic -->
+  <rect x="660" y="240" width="160" height="90" class="error-box"/>
+  <text x="740" y="265" class="subtitle" text-anchor="middle">Retry Logic</text>
+  <text x="740" y="290" class="tiny" text-anchor="middle">Exponential Backoff</text>
+  <text x="740" y="305" class="tiny" text-anchor="middle">Max Retries: 3</text>
+
+  <!-- Fallback decision -->
+  <path d="M 740 330 L 740 370" class="error-arrow"/>
+  <text x="750" y="355" class="tiny" fill="#dc2626">Still Failing?</text>
+
+  <!-- Fallback Provider -->
+  <rect x="660" y="380" width="160" height="90" class="error-box"/>
+  <text x="740" y="405" class="subtitle" text-anchor="middle">Fallback</text>
+  <text x="740" y="430" class="tiny" text-anchor="middle">Try Alternative</text>
+  <text x="740" y="445" class="tiny" text-anchor="middle">Provider</text>
+
+  <!-- Return from fallback -->
+  <path d="M 820 415 L 870 415 L 870 155 L 820 155" class="arrow"/>
+  <text x="875" y="285" class="small" fill="#059669">Success</text>
+
+  <!-- Main success flow continues -->
+  <path d="M 820 130 L 870 130" class="arrow"/>
+
+  <!-- Step 5: Response Processing -->
+  <rect x="870" y="80" width="160" height="100" class="step-box"/>
+  <text x="950" y="105" class="subtitle" text-anchor="middle">5. Process</text>
+  <text x="950" y="130" class="tiny" text-anchor="middle">Count Tokens</text>
+  <text x="950" y="145" class="tiny" text-anchor="middle">Format Response</text>
+  <text x="950" y="160" class="tiny" text-anchor="middle">Add Metadata</text>
+
+  <!-- Arrow -->
+  <path d="M 1030 130 L 1080 130" class="arrow"/>
+
+  <!-- Step 6: Billing Log -->
+  <rect x="1080" y="80" width="160" height="100" class="step-box"/>
+  <text x="1160" y="105" class="subtitle" text-anchor="middle">6. Billing</text>
+  <text x="1160" y="130" class="tiny" text-anchor="middle">Log Usage</text>
+  <text x="1160" y="145" class="tiny" text-anchor="middle">Calculate Cost</text>
+  <text x="1160" y="160" class="tiny" text-anchor="middle">Update Quota</text>
+
+  <!-- Async arrow (dashed) -->
+  <path d="M 1160 180 L 1160 210" class="arrow" stroke-dasharray="5,5"/>
+
+  <!-- Step 7: Return to Client -->
+  <path d="M 1080 155 L 1000 155" class="arrow" stroke="#059669" stroke-width="3"/>
+  <text x="1040" y="145" class="small" fill="#059669">Response</text>
+
+  <!-- Error path: Return error to gateway -->
+  <rect x="200" y="250" width="160" height="100" class="error-box"/>
+  <text x="280" y="275" class="subtitle" text-anchor="middle">Error</text>
+  <text x="280" y="300" class="tiny" text-anchor="middle">Auth Failed</text>
+  <text x="280" y="315" class="tiny" text-anchor="middle">Rate Limited</text>
+  <text x="280" y="330" class="tiny" text-anchor="middle">Validation</text>
+
+  <!-- Return error to client -->
+  <path d="M 200 300 L 100 300 L 100 180" class="error-arrow"/>
+  <text x="50" y="240" class="small" fill="#dc2626">Error Response</text>
+
+  <!-- Observability Layer (background) -->
+  <rect x="30" y="500" width="1320" height="450" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" stroke-dasharray="5,5" rx="12"/>
+  <text x="50" y="525" class="subtitle">Observability &amp; Monitoring (Passive Collection)</text>
+
+  <!-- Metrics Collection -->
+  <rect x="50" y="550" width="300" height="120" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="200" y="575" class="small" text-anchor="middle">Metrics</text>
+  <text x="60" y="595" class="tiny">• Request latency (ms)</text>
+  <text x="60" y="610" class="tiny">• Error rate (%)</text>
+  <text x="60" y="625" class="tiny">• Throughput (req/sec)</text>
+  <text x="60" y="640" class="tiny">• Provider response time</text>
+  <text x="60" y="655" class="tiny">• Cache hit/miss ratio</text>
+
+  <!-- Tracing Collection -->
+  <rect x="380" y="550" width="300" height="120" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="530" y="575" class="small" text-anchor="middle">Distributed Tracing</text>
+  <text x="390" y="595" class="tiny">• Request trace IDs</text>
+  <text x="390" y="610" class="tiny">• Service call spans</text>
+  <text x="390" y="625" class="tiny">• Call duration breakdown</text>
+  <text x="390" y="640" class="tiny">• Dependency analysis</text>
+  <text x="390" y="655" class="tiny">• Error context</text>
+
+  <!-- Logging Collection -->
+  <rect x="710" y="550" width="300" height="120" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="860" y="575" class="small" text-anchor="middle">Structured Logs</text>
+  <text x="720" y="595" class="tiny">• Request/response logs</text>
+  <text x="720" y="610" class="tiny">• Error stack traces</text>
+  <text x="720" y="625" class="tiny">• User actions</text>
+  <text x="720" y="640" class="tiny">• Audit trail</text>
+  <text x="720" y="655" class="tiny">• Security events</text>
+
+  <!-- Alerting -->
+  <rect x="1040" y="550" width="300" height="120" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="1190" y="575" class="small" text-anchor="middle">Alerting &amp; Dashboards</text>
+  <text x="1050" y="595" class="tiny">• Alert on high errors</text>
+  <text x="1050" y="610" class="tiny">• Latency thresholds</text>
+  <text x="1050" y="625" class="tiny">• Provider health</text>
+  <text x="1050" y="640" class="tiny">• Quota exhaustion</text>
+  <text x="1050" y="655" class="tiny">• Grafana dashboards</text>
+
+  <!-- Feedback Loops -->
+  <text x="50" y="705" class="subtitle">Feedback Loops &amp; Optimization:</text>
+
+  <!-- Health Status Updates -->
+  <rect x="50" y="730" width="400" height="80" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="250" y="755" class="small" text-anchor="middle">Provider Health Monitoring</text>
+  <text x="60" y="775" class="tiny">Updates routing scores based on latency, error rates, and availability</text>
+  <text x="60" y="790" class="tiny">Dynamically enables/disables providers, triggers circuit breaker</text>
+
+  <!-- Cost Optimization -->
+  <rect x="480" y="730" width="400" height="80" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="680" y="755" class="small" text-anchor="middle">Dynamic Cost Optimization</text>
+  <text x="490" y="775" class="tiny">Adjusts routing weights based on cost-effectiveness and quota limits</text>
+  <text x="490" y="790" class="tiny">Prioritizes cheaper providers while maintaining quality</text>
+
+  <!-- Performance Tuning -->
+  <rect x="910" y="730" width="440" height="80" fill="white" stroke="#6b7280" stroke-width="1" rx="6"/>
+  <text x="1130" y="755" class="small" text-anchor="middle">Performance &amp; Reliability Tuning</text>
+  <text x="920" y="775" class="tiny">Automatically adjusts timeouts, retry counts, and cache TTLs based on SLA requirements</text>
+  <text x="920" y="790" class="tiny">Machine learning for optimal provider selection over time</text>
+
+</svg>

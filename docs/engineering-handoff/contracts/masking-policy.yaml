@@ -1,0 +1,69 @@
+apiVersion: solvable.ai/v1
+kind: PrivacyPolicy
+metadata:
+  id: standard-masking
+  version: 2
+  status: active
+  owner: org_01JEXAMPLE
+spec:
+  precedence:
+    - platform-security-hard-stop
+    - organization
+    - workspace
+    - project
+    - application
+    - api-key
+    - request
+  classifications:
+    credential:
+      action: block
+      confidenceThreshold: 0.90
+      providerEligibility: none
+      logRawValue: false
+    personal_contact:
+      action: mask
+      confidenceThreshold: 0.85
+      providerEligibility: reviewed
+      logRawValue: false
+    financial:
+      action: tokenize
+      confidenceThreshold: 0.90
+      providerEligibility: approved-financial-data
+      logRawValue: false
+    health:
+      action: route_restrict
+      confidenceThreshold: 0.90
+      providerEligibility: approved-health-data
+      logRawValue: false
+    confidential_business:
+      action: route_restrict
+      confidenceThreshold: 0.80
+      providerEligibility: reviewed
+      logRawValue: false
+  tokenization:
+    enabled: false
+    scope: request
+    ttlSeconds: 300
+    encryptedStore: short-lived-memory-or-encrypted-cache
+    restoreAfterProvider: false
+  logging:
+    requestBodies: disabled
+    responseBodies: disabled
+    matchedValues: disabled
+    evidenceFields:
+      - classification
+      - ruleId
+      - detectorVersion
+      - action
+      - providerEligibility
+  retention:
+    privacyEvidenceDays: 30
+    transformedContentDays: 0
+    rawContentDays: 0
+  failureMode:
+    highSecurity: fail_closed
+    standard: apply_safe_fallback
+  review:
+    requiredApprovers: 1
+    testFixturesRequired: true
+    activationRequiresSimulation: true

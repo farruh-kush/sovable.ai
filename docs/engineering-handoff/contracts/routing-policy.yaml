@@ -1,0 +1,64 @@
+apiVersion: solvable.ai/v1
+kind: RoutingPolicy
+metadata:
+  id: balanced-default
+  version: 3
+  status: active
+  owner: org_01JEXAMPLE
+  createdBy: user_01JEXAMPLE
+spec:
+  hard:
+    allowedProviders:
+      - alibaba-model-studio
+      - openrouter
+    allowedRegions:
+      - ap-southeast-1
+    requiredCapabilities:
+      - chat
+    requireStreaming: false
+    maxEstimatedCostUsd: "0.050000"
+    maxLatencyMs: 30000
+    requireProviderDataPolicy: reviewed
+    freeQuotaOnly: true
+  preferences:
+    weights:
+      cost: 0.35
+      latency: 0.25
+      quality: 0.25
+      health: 0.15
+    normalization:
+      method: min_max
+      window: rolling_24h
+  candidates:
+    - provider: alibaba-model-studio
+      model: qwen-plus
+      priority: 10
+    - provider: openrouter
+      model: openai/gpt-4o-mini
+      priority: 20
+  fallbackChain:
+    - provider: alibaba-model-studio
+      model: qwen-plus
+    - provider: openrouter
+      model: openai/gpt-4o-mini
+  retry:
+    maxAttempts: 2
+    deadlineMs: 30000
+    backoff: exponential_jitter
+    retryableErrors:
+      - timeout
+      - upstream_5xx
+      - rate_limit
+    streamFallbackBeforeFirstChunk: true
+    streamReplayAfterFirstChunk: false
+  cache:
+    mode: read-write
+    ttlSeconds: 300
+    includePolicyVersion: true
+    excludeSensitiveContent: true
+  budget:
+    hardStop: true
+    reserveBeforeInvoke: true
+  audit:
+    recordCandidateExclusions: true
+    recordScoreComponents: true

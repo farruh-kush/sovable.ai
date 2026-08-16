@@ -1,0 +1,30 @@
+flowchart TB
+    Internet[Internet / Customers] --> DNS[Alibaba DNS]
+    DNS --> VIP[ACK Ingress VIP]
+    VIP --> Ingress[ingress-nginx + cert-manager]
+    Ingress --> Dashboard[Dashboard Nginx Deployment]
+    Ingress --> Gateway[Gateway Deployment]
+    Gateway --> Auth[Auth Deployment]
+    Gateway --> Router[Router Deployment]
+    Router --> Provider[Provider Deployment]
+    Gateway --> Billing[Billing Deployment]
+    Auth --> AuthDB[(PostgreSQL auth_db)]
+    Billing --> BillingDB[(PostgreSQL billing_db)]
+    Gateway --> Redis[(Redis / Valkey)]
+    Provider --> ModelStudio[Model Studio API]
+    Provider --> OtherProviders[Approved Provider APIs]
+    Gateway --> OTel[OpenTelemetry Collector]
+    Auth --> OTel
+    Router --> OTel
+    Provider --> OTel
+    Billing --> OTel
+    OTel --> Prom[Prometheus]
+    OTel --> Loki[Loki]
+    OTel --> Grafana[Grafana]
+    Registry[ACR Registry] --> Pull[Image Pull]
+    Pull --> Gateway
+    Pull --> Auth
+    Pull --> Router
+    Pull --> Provider
+    Pull --> Billing
+    Pull --> Dashboard

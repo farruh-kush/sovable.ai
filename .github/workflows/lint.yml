@@ -1,0 +1,25 @@
+name: Lint & Format
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install linting tools and type stubs
+        run: |
+          pip install black ruff mypy
+          pip install types-PyYAML types-setuptools
+          pip install -e "backend/[dev]"
+
+      - name: Black formatting check
+        run: cd backend && black --check --target-version py311 src/ tests/
+
+      - name: Ruff lint check
+        run: cd backend && ruff check src/ tests/
+
+      - name: Mypy type check
+        run: cd backend && mypy src/ --ignore-missing-imports --no-strict-optional
