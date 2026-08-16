@@ -259,3 +259,18 @@
   }
 }
 
+
+
+/* Architecture connector fix v7 — three frontier model groups. Author: Farruh */
+@media (min-width: 1201px) {
+  /* Three grouped model cards occupy the first three shared rows. */
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(1) { top: 84px; }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(2) { top: 174px; }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(3) { top: 264px; }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(n+4) { display: none; }
+  .national-architecture > .national-connectors:nth-child(2)::after {
+    top: 84px;
+    height: 180px;
+  }
+}
+
