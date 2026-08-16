@@ -1,29 +1,22 @@
-"""Auth & Identity Service — application entry point.
-
-Manages API keys, user identities, and access policies. Exposes
-internal endpoints consumed by the Gateway Service, not by external clients.
-
+"""Auth and Identity Service application entry point.
 Author: Farruh
 """
-
 from __future__ import annotations
-
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
-
 from fastapi import FastAPI
-
 from ai_routing_shared.middleware import RequestIdMiddleware, error_handler_middleware
 from ai_routing_shared.utils import configure_logging
-
-from .api import internal_router
+from .api import internal_router, public_router
+from .api.identity import router as identity_router
+from .api.keys import router as keys_router
+from .api.validate import router as validate_router
 from .core.config import get_settings
 from .db.database import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    """Initialise the database on startup."""
     settings = get_settings()
     configure_logging(level=settings.log_level, service_name="auth")
     await init_db()
@@ -31,18 +24,18 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app() -> FastAPI:
-    """Application factory for the Auth & Identity Service."""
     app = FastAPI(
-        title="AI Routing Layer — Auth Service",
-        version="0.1.0",
-        description="Internal API key management and authentication service.",
+        title="AI Routing Layer - Auth Service",
+        version="0.2.0",
+        description="Identity registration, federated login, sessions, and API-key management.",
         docs_url="/docs",
         lifespan=lifespan,
     )
-
     app.middleware("http")(error_handler_middleware)
     app.add_middleware(RequestIdMiddleware)
-    app.include_router(internal_router, prefix="/internal", tags=["Internal"])
+    app.include_router(identity_router, tags=["Identity"])
+    app.include_router(validate_router, prefix="/internal", tags=["Internal"])
+    app.include_router(keys_router, prefix="/internal/keys", tags=["Internal"])
 
     @app.get("/health")
     async def health() -> dict:

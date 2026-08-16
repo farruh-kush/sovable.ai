@@ -39,6 +39,14 @@ spec:
                 secretKeyRef:
                   name: auth-secret
                   key: secret-key
+            - name: PUBLIC_BASE_URL
+              value: "https://api.sovable.ai"
+            - name: FRONTEND_BASE_URL
+              value: "https://sovable.ai"
+            - name: OTP_DELIVERY_MODE
+              value: "disabled"
+            - name: ALLOW_DEV_OTP
+              value: "false"
           livenessProbe:
             httpGet:
               path: /health
