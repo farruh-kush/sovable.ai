@@ -124,3 +124,138 @@
 .national-architecture > .national-connectors:nth-child(2) span { --wire-color: #aeb9ca; }
 .national-architecture > .national-connectors.gold-connectors span { --wire-color: #c9992e; }
 @media (max-width: 1200px) { .national-architecture > .national-connectors { display: none; } }
+
+
+/* Architecture connector fix v6 — centered middle columns and complete endpoint paths. Author: Farruh */
+@media (min-width: 1201px) {
+  .national-architecture {
+    align-items: stretch;
+    grid-template-columns: 1.1fr 46px 1.2fr 46px 1.1fr 46px .9fr;
+  }
+
+  .national-architecture > .national-column {
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: 32px repeat(4, 76px);
+    row-gap: 14px;
+    min-height: 392px;
+  }
+
+  .national-architecture > .national-column .national-column-label {
+    grid-row: 1;
+    height: 32px;
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .national-architecture > .national-column .national-node {
+    min-height: 76px;
+    margin: 0;
+  }
+
+  /* The two sovereign middle columns occupy the visual center of the four-row field. */
+  .national-architecture > .core-column > .national-node:nth-child(2),
+  .national-architecture > .platform-column > .national-node:nth-child(2) {
+    grid-row: 3;
+  }
+
+  .national-architecture > .core-column > .national-node:nth-child(3),
+  .national-architecture > .platform-column > .national-node:nth-child(3) {
+    grid-row: 4;
+  }
+
+  .national-architecture > .national-connectors {
+    position: relative;
+    display: block;
+    align-self: stretch;
+    height: 392px;
+    min-height: 392px;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .national-architecture > .national-connectors span,
+  .national-architecture > .national-connectors:nth-child(2) span,
+  .national-architecture > .national-connectors:nth-child(4) span,
+  .national-architecture > .national-connectors:nth-child(6) span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: block;
+    width: 100%;
+    height: 3px;
+    margin: 0;
+    background: var(--wire-color, #aeb9ca);
+    transform: none;
+  }
+
+  /* Model stack: four model endpoints feed the sovereign-core bus. */
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(1) { top: 84px; }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(2) { top: 174px; }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(3) { top: 264px; }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(4) { top: 354px; }
+  .national-architecture > .national-connectors:nth-child(2)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 84px;
+    width: 3px;
+    height: 270px;
+    border-radius: 999px;
+    background: var(--wire-color, #aeb9ca);
+  }
+
+  /* Core to platform: both centered sovereign nodes have direct lines. */
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(1) { top: 174px; }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(2) { top: 264px; }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(n+3) { display: none; }
+
+  /* User stack: all three audiences connect to the platform-side bus. */
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(1) { top: 84px; }
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(2) { top: 174px; }
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(3) { top: 264px; }
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(n+4) { display: none; }
+  .national-architecture > .national-connectors:nth-child(6)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 84px;
+    width: 3px;
+    height: 180px;
+    border-radius: 999px;
+    background: var(--wire-color, #c9992e);
+  }
+
+  .national-architecture > .national-connectors:nth-child(2) span::before,
+  .national-architecture > .national-connectors:nth-child(2) span::after,
+  .national-architecture > .national-connectors:nth-child(4) span::before,
+  .national-architecture > .national-connectors:nth-child(4) span::after,
+  .national-architecture > .national-connectors:nth-child(6) span::before,
+  .national-architecture > .national-connectors:nth-child(6) span::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--wire-color, #aeb9ca);
+    transform: translateY(-50%);
+    box-shadow: 0 0 0 2px rgba(255,255,255,.88);
+  }
+
+  .national-architecture > .national-connectors span::before { left: -1px; }
+  .national-architecture > .national-connectors span::after { right: -1px; }
+  .national-architecture > .national-connectors:nth-child(2) span { --wire-color: #aeb9ca; }
+  .national-architecture > .national-connectors.gold-connectors span { --wire-color: #c9992e; }
+  .national-architecture > .national-connectors:nth-child(6)::after { background: #c9992e; }
+}
+
+@media (max-width: 1200px) {
+  .national-architecture > .national-column.core-column > .national-node,
+  .national-architecture > .national-column.platform-column > .national-node {
+    grid-row: auto;
+  }
+}
+
