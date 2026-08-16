@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant C as Client
+    participant G as Gateway
+    participant A as Auth
+    participant P as Privacy
+    participant R as Router
+    participant V as Provider Adapter
+    participant U as Upstream Provider
+    participant B as Billing
+    participant E as Event Bus
+
+    C->>G: POST /v1/chat/completions
+    G->>A: Validate API key and scopes
+    A-->>G: Principal, limits, policy context
+    G->>P: Classify and transform request
+    P-->>G: Privacy decision and eligible provider classes
+    G->>R: Select route under policy and budget
+    R-->>G: Route decision and fallback chain
+    G->>V: Normalized invocation
+    V->>U: Provider request
+    U-->>V: Response or stream chunks
+    V-->>G: Normalized response, usage, provider ID
+    G-->>C: Normalized response or SSE chunks
+    G->>B: Usage and cost event
+    G->>E: Request, route, privacy, and provider events
+    B-->>E: Billing ledger event

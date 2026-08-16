@@ -210,6 +210,8 @@ pricing:
     "gpt-4o-mini":     { input_per_token: 0.00000015, output_per_token: 0.00000060 }
     "gpt-4-turbo":     { input_per_token: 0.00001,    output_per_token: 0.00003 }
     "gpt-3.5-turbo":   { input_per_token: 0.0000005,  output_per_token: 0.0000015 }
+    "qwen-plus":      { input_per_token: 0.0000004,  output_per_token: 0.0000012 }
+    "text-embedding-v4": { input_per_token: 0.00000007, output_per_token: 0.0 }
 
   anthropic:
     "claude-3-5-sonnet-20241022": { input_per_token: 0.000003,   output_per_token: 0.000015 }

@@ -1,16 +1,5 @@
-FROM node:18-alpine
-
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-# install deps and build
-COPY package.json package-lock.json* ./
-COPY . .
-
-RUN npm ci --omit=dev || npm install --production
-RUN npm run build
-
-EXPOSE 3000
-
-CMD ["npm","start"]
+FROM nginx:1.27-alpine
+COPY web/dashboard/nginx.conf /etc/nginx/conf.d/default.conf
+COPY site/ /usr/share/nginx/html/
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD wget -q -O /dev/null http://127.0.0.1:8080/health || exit 1

@@ -1,0 +1,57 @@
+apiVersion: solvable.ai/v1
+kind: AgentPackage
+metadata:
+  id: app.document-review
+  name: Document Review Agent
+  version: 1.2.0
+  publisher: pub_01JEXAMPLE
+  description: Reviews approved documents and returns a structured summary.
+  license: commercial
+spec:
+  type: agent
+  entrypoint: run
+  artifact:
+    image: registry.example.com/apps/document-review@sha256:exampledigest
+    signature: cosign-signature-reference
+    sbom: sbom-reference
+  compatibility:
+    solvableApi: ">=1.0 <2.0"
+    runtime: ">=0.5 <1.0"
+  models:
+    allowed:
+      - qwen-plus
+      - openai/gpt-4o-mini
+  tools:
+    required:
+      - name: document.read
+        scopes:
+          - project.files.read
+      - name: export.write
+        scopes:
+          - project.exports.write
+  connectors: []
+  data:
+    reads:
+      - document_content
+    writes:
+      - summary
+    sendsExternal: false
+    retention: request_policy
+  network:
+    egress: []
+  sideEffects:
+    level: none
+    approvalRequired: false
+  resources:
+    cpuLimit: 500m
+    memoryLimit: 512Mi
+    timeoutSeconds: 120
+    maxConcurrency: 2
+    maxOutputBytes: 1048576
+  billing:
+    pricing: pass_through_plus_markup
+    maxRunCostUsd: "0.05"
+  security:
+    declaredSecrets: []
+    riskLevel: low
+    requiresHumanReview: false

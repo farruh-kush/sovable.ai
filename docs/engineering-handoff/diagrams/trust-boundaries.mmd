@@ -1,0 +1,47 @@
+flowchart LR
+    subgraph Untrusted[Untrusted Inputs]
+        Client[Client Requests]
+        Prompt[Prompts / Documents / Tool Results]
+        Package[Third-party App Package]
+    end
+    subgraph Core[Solvable Trusted Control Plane]
+        Edge[Edge and Gateway]
+        Auth[Auth / RBAC]
+        Policy[Policy and Privacy]
+        Router[Router]
+        Billing[Billing]
+        Audit[Audit and Events]
+    end
+    subgraph Data[Protected Data Plane]
+        AuthDB[(Auth DB)]
+        BillingDB[(Billing DB)]
+        Cache[(Redis)]
+        Store[(Encrypted Object Store)]
+    end
+    subgraph External[External Provider Boundary]
+        Provider[Provider Adapters]
+        LLM[External LLM Providers]
+    end
+    subgraph Runtime[Isolated Runtime Boundary]
+        Agent[Agent Runtime]
+        Broker[Permission Broker]
+        Tools[Approved Tools]
+    end
+    Client --> Edge
+    Prompt --> Policy
+    Package --> Agent
+    Edge --> Auth
+    Edge --> Policy
+    Policy --> Router
+    Router --> Provider
+    Provider --> LLM
+    Auth --> AuthDB
+    Billing --> BillingDB
+    Edge --> Cache
+    Audit --> Store
+    Agent --> Broker
+    Broker --> Tools
+    Agent --> Edge
+    Policy --> Audit
+    Router --> Audit
+    Billing --> Audit

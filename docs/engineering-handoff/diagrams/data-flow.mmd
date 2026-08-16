@@ -1,0 +1,19 @@
+flowchart LR
+    G[Gateway] --> O[Outbox]
+    R[Router] --> O
+    P[Privacy] --> O
+    V[Provider Adapter] --> O
+    B[Billing] --> O
+    O --> Q[Durable Event Bus]
+    Q --> I[Encrypted Landing Zone]
+    Q --> Ops[Operational Consumers]
+    I --> DQ[Schema, Privacy, and Quality Checks]
+    DQ --> Facts[Curated Facts]
+    Facts --> Marts[Serving Marts]
+    Marts --> Dash[Console Dashboards]
+    Marts --> Export[Governed Export Jobs]
+    Export --> ObjectStore[Encrypted Object Storage]
+    Ops --> BillingLedger[(Append-only Billing Ledger)]
+    Ops --> Audit[(Append-only Audit Evidence)]
+    Facts --> Lineage[Lineage Metadata]
+    Lineage --> Dash

@@ -1,0 +1,82 @@
+apiVersion: solvable.ai/v1
+kind: ProviderAdapterContract
+metadata:
+  id: provider-adapter-contract
+  version: 1
+spec:
+  adapter:
+    interface: ProviderAdapter
+    methods:
+      - name: capabilities
+        input: ProviderConfig
+        output: CapabilitySet
+      - name: invoke
+        input: NormalizedRequest
+        output: NormalizedResponse
+      - name: stream
+        input: NormalizedRequest
+        output: Stream[NormalizedChunk]
+      - name: healthCheck
+        input: HealthCheckRequest
+        output: HealthCheckResult
+  normalizedRequest:
+    required:
+      - requestId
+      - model
+      - messagesOrInput
+      - deadlineAt
+      - policyContext
+    fields:
+      requestId: string
+      model: string
+      messagesOrInput: object
+      generationParameters: object
+      tools: array
+      responseFormat: object
+      stream: boolean
+      timeoutMs: integer
+      deadlineAt: rfc3339
+      policyContext: object
+  normalizedResponse:
+    fields:
+      id: string
+      model: string
+      provider: string
+      output: object
+      finishReason: string
+      usage:
+        inputTokens: integer
+        outputTokens: integer
+        totalTokens: integer
+        cachedTokens: integer
+        source: measured|estimated|unavailable
+      providerRequestId: string|null
+      latencyMs: integer
+  errorMapping:
+    - providerClass: authentication
+      solvableType: provider_unavailable
+      retryable: false
+    - providerClass: rate_limit
+      solvableType: provider_rate_limit
+      retryable: true
+    - providerClass: timeout
+      solvableType: provider_timeout
+      retryable: true
+    - providerClass: invalid_request
+      solvableType: validation_error
+      retryable: false
+    - providerClass: server_error
+      solvableType: provider_unavailable
+      retryable: true
+    - providerClass: malformed_response
+      solvableType: upstream_invalid_response
+      retryable: false
+  security:
+    secretSource: secret-manager-reference
+    logProviderBodies: false
+    allowArbitraryBaseUrl: false
+    egressAllowlistRequired: true
+  health:
+    maxDurationMs: 5000
+    mustUseSyntheticInput: true
+    mustRespectBudget: true

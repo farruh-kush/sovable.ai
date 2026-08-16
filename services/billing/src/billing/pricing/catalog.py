@@ -22,6 +22,9 @@ DEFAULT_PRICING: Dict[Tuple[str, str], Tuple[float, float]] = {
     ("openai", "gpt-3.5-turbo"):             (0.0000005,  0.0000015),
     ("openai", "text-embedding-3-small"):    (0.00000002, 0.0),
     ("openai", "text-embedding-3-large"):    (0.00000013, 0.0),
+    # Alibaba Model Studio International / Singapore standard rates
+    ("openai", "qwen-plus"):                 (0.0000004, 0.0000012),
+    ("openai", "text-embedding-v4"):         (0.00000007, 0.0),
     # Anthropic
     ("anthropic", "claude-3-5-sonnet-20241022"): (0.000003,  0.000015),
     ("anthropic", "claude-3-5-haiku-20241022"):  (0.0000008, 0.000004),

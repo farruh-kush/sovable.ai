@@ -6,6 +6,7 @@ resources:
   - gateway.yaml
   - microservices.yaml
   - hpa.yaml
+  - dashboard.yaml
 configMapGenerator:
   - name: routing-config
     files:
