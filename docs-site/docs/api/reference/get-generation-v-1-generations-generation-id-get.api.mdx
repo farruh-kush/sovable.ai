@@ -1,0 +1,74 @@
+---
+id: get-generation-v-1-generations-generation-id-get
+title: "Get Generation"
+description: "Retrieve detailed metadata for a specific generation."
+sidebar_label: "Get Generation"
+hide_title: true
+hide_table_of_contents: true
+api: eJzdV81u4zYQfhWCp11Adv568s3NplmjCTZInWKBJLBpaWRxQ5FacuSN1xDQh+gT9kmKoSSbiu3E3aKXnmyRM98MZ74ZDlccxdzxwT2/BA1WoDTa8ceIJ+BiKwv65gN+C2glLIAlgEIqSFgOKBKBgqXGMsFcAbFMZczma5j+g37Qdw6sY7HQzGi1ZLbFwQykZeabDhRcn40zYNPpZmkik+n0QUtHmqXVkDCpSZlNp597G5d7o2Q6ZRZcYbQDloFIwDKTMliAXT7oOBPIYpMXCkicWfhagsM+j7gpGoxRwgd8DjgJzC9Ogi83mXQ8o0/kES+EFTkgWIrjimuRg0cKRHnEJcWxEJjxiJN5aSHhA7QlRNzFGeSCD1YclwUpO7RSz3nEUaKihc1R2SjhVRWt7YgSM2Pld7/Z2qkD0LGUCuU6poRefkq9x12jhN2s6FIpXj1u3Bh2jIVuPPdEIXtPsPyvXfjcGxay9ysseUXLbc4d4Z0eH9NPl7u/lXEMzqWlYreNMI94bDSCRu9FUSgZ+yMdfXGkswp8LCwxBGVtQSavZYlSE/HcJKBeE7v2AlVE2AtJUXpF+KaVqSIeWxAIyUTgLo3U2Jx2eCIQeihzCGDOa1U2RAIqnZjD9ukKa/ICJ2ieQLvAhNQIc5/MwKu8QDauJaldpKJUyAfH5Oa60A6BOt+U5W44NCjUIUhjEtwDAg5l7oMXG4eT0oWJ1GU+6yBdtNLs3Dhkdy7ZOqOIM0gOOp+X3Bcq2pwk0sWm1G+65aHYh0Z6r1uTTIYEmRmjQOgtnI8SQ3VfnRXFu1Yzsy8QY6B1R6QZ6dTwl9eDPxvzpNpcDAKxPjmaug13G3BdiX1Pa+NwLxkPSVfDxnWuuhw8BCEgYQfl36ZnTd9DnKj5G9rPhX0qi7f0rr1UqzOTSkHyls7PXqrW2ZHzTdO+30rE7uDuDNbW6TtH6vj6uOuyo1hsse1DO4MQKptZEE8JTRLNJCL1XEE4h1BQlEDQ8XKSu9eCclVLsWtHOqlQaibip0npIHm1nn5pJNkdSf5AGb6VAj9B1PdKcGt0LoS2qTfl1Dnyy7OEDu6M+y3ExiZbkb8pZ0rGvVTEUs+DEDdjIXt3kwkH7Iz99cefbCzcEzvrnw3Y0eLkKBij3vvJ8LYd6GZLNp1eXoxfih2tOiNUNZ32eVVRpH46Pd2+5n8XSia1NxfWGvvjd3x9GH/bI+RuW0CZuLN7wBjTXgvV4ybTwlqxDNln4mauinju5q9OEOB8stdg+0V9MNiYdisazYqyJmU7svgFoiw+BzBbzf+cYvn8NlMpNrX7jVzAr02K6gztD0Vd4juNtSIfx+ObLcCaHzlgZppp3s/nmPEBf4Nefm5NTRib4YjdmhKJ61diCdbTengzYpcC4Zt3uMvBOy1TCQn7VIAejnrUJgXKmQKvNa+1fJ/KS4WyUMCurq5ZW9CO3iMLsK5GO+6f9I/9mGgc5sJztpm2LwHZplpf+rHaMP///HJrmEG0PCqUkL5wSusrt875PV+c8Ch4ilErHHRfZo8Rz/z8cc9Xq5lwcGdVVdHy1xLskg/uHyO+EFaKGZHifsUT6ej/5kGzN/jvbpvKeM/2+dsWgCY2LYQq6YtHnF5SLx+Rvnk076p/5sg+67WV8O22doGaV709jGMoMNjbaqb0EFsX3eXFmFfV33zTrY4=
+sidebar_class_name: "get api-method"
+info_path: api/reference/ai-routing-layer-api-gateway
+custom_edit_url: null
+hide_send_button: true
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+import Translate from "@docusaurus/Translate";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Get Generation"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"get"}
+  path={"/v1/generations/{generation_id}"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Retrieve detailed metadata for a specific generation.
+
+Users can only retrieve their own generations. The ``generation_id``
+is returned in the ``X-Generation-Id`` response header of every
+chat completion request.
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+>
+  <Translate id="theme.openapi.request.title">Request</Translate>
+</Heading>
+
+<ParamsDetails
+  {...require("./get-generation-v-1-generations-generation-id-get.ParamsDetails.json")}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  {...require("./get-generation-v-1-generations-generation-id-get.RequestSchema.json")}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  {...require("./get-generation-v-1-generations-generation-id-get.StatusCodes.json")}
+>
+  
+</StatusCodes>
+
+
+      

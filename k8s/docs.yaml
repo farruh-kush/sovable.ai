@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docs
+  namespace: ai-routing
+  labels:
+    app: docs
+    app.kubernetes.io/component: documentation
+    app.kubernetes.io/part-of: solvable-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docs
+      app.kubernetes.io/part-of: solvable-ai
+  template:
+    metadata:
+      labels:
+        app: docs
+        app.kubernetes.io/part-of: solvable-ai
+    spec:
+      containers:
+        - name: docs
+          image: crpi-7cplpymy1o4s0ghb.ap-southeast-1.personal.cr.aliyuncs.com/sovable/ai-routing-docs:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docs
+  namespace: ai-routing
+  labels:
+    app: docs
+    app.kubernetes.io/part-of: solvable-ai
+spec:
+  selector:
+    app: docs
+    app.kubernetes.io/part-of: solvable-ai
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: docs-ingress
+  namespace: ai-routing
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - docs.sovable.ai
+      secretName: docs-tls
+  rules:
+    - host: docs.sovable.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: docs
+                port:
+                  number: 80
