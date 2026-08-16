@@ -69,3 +69,58 @@
 .national-auth-prompt a { display: inline-flex; align-items: center; min-height: 30px; padding: 0 11px; border: 1px solid #e3e7ef; border-radius: 8px; background: #fff; color: #102a43; font-size: 12px; font-weight: 750; line-height: 1; text-decoration: none; white-space: nowrap; transition: .18s ease; }
 .national-auth-prompt a:hover { border-color: #c9992e; color: #8b6719; box-shadow: 0 4px 14px rgba(14,31,61,.08); transform: translateY(-1px); }
 @media (max-width: 720px) { .national-auth-prompt { width: 100%; align-items: stretch; gap: 7px; padding: 10px; } .national-auth-prompt span { width: 100%; } .national-auth-prompt a { flex: 1 1 calc(50% - 7px); justify-content: center; white-space: normal; text-align: center; } }
+.national-architecture { column-gap: 0; position: relative; }
+.national-architecture > .national-column { position: relative; z-index: 1; }
+.national-architecture > .national-connectors { position: relative; z-index: 0; display: grid; align-self: stretch; align-content: center; height: auto; min-height: 0; padding: 42px 0 12px; gap: 0; }
+.national-architecture > .national-connectors span { position: relative; display: block; width: 100%; height: 2px; align-self: center; transform: none; background: #b8c2d2; }
+.national-architecture > .national-connectors.gold-connectors span { background: #c9992e; }
+.national-architecture > .national-connectors span::before,
+.national-architecture > .national-connectors span::after { content: ''; position: absolute; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: inherit; transform: translateY(-50%); }
+.national-architecture > .national-connectors span::before { left: -1px; }
+.national-architecture > .national-connectors span::after { right: -1px; }
+.national-architecture > .national-connectors:nth-child(2) { grid-template-rows: repeat(4, 1fr); }
+.national-architecture > .national-connectors:nth-child(4) { grid-template-rows: repeat(2, 1fr); padding-top: 38px; padding-bottom: 28px; }
+.national-architecture > .national-connectors:nth-child(6) { grid-template-rows: repeat(3, 1fr); padding-top: 45px; padding-bottom: 16px; }
+@media (max-width: 1200px) { .national-architecture > .national-connectors { display: none; } }
+.national-architecture > .national-connectors { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 14px; padding: 28px 0 0; height: auto; min-height: 0; }
+.national-architecture > .national-connectors span,
+.national-architecture > .national-connectors:nth-child(2) span,
+.national-architecture > .national-connectors:nth-child(4) span,
+.national-architecture > .national-connectors:nth-child(6) span { position: relative; display: block; flex: 0 0 76px; width: 100%; height: 76px; align-self: stretch; margin: 0; transform: none; background: transparent; }
+.national-architecture > .national-connectors:nth-child(4) span,
+.national-architecture > .national-connectors:nth-child(6) span { flex-basis: 80px; height: 80px; }
+.national-architecture > .national-connectors span::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 3px; border-radius: 999px; background: var(--wire-color, #aeb9ca); transform: translateY(-50%); }
+.national-architecture > .national-connectors span::after { content: ''; position: absolute; right: -1px; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--wire-color, #aeb9ca); transform: translateY(-50%); box-shadow: 0 0 0 2px rgba(255,255,255,.88); }
+.national-architecture > .national-connectors.gold-connectors span { --wire-color: #c9992e; }
+.national-architecture > .national-connectors:nth-child(2) span { --wire-color: #aeb9ca; }
+.national-architecture > .national-connectors:nth-child(4) { padding-top: 28px; padding-bottom: 0; }
+.national-architecture > .national-connectors:nth-child(6) { padding-top: 28px; padding-bottom: 0; }
+@media (max-width: 1200px) { .national-architecture > .national-connectors { display: none; } }
+.national-architecture { align-items: start; }
+.national-architecture > .national-column { align-self: start; display: grid; grid-template-rows: 32px repeat(4, 76px); row-gap: 14px; }
+.national-architecture > .national-column .national-column-label { grid-row: 1; margin: 0; height: 32px; display: flex; align-items: flex-end; justify-content: center; }
+.national-architecture > .national-column .national-node { margin: 0; min-height: 76px; }
+.national-architecture > .national-connectors { align-self: start; display: grid; grid-template-rows: 32px repeat(4, 76px); row-gap: 14px; padding: 0; height: auto; min-height: 0; }
+.national-architecture > .national-connectors span,
+.national-architecture > .national-connectors:nth-child(2) span,
+.national-architecture > .national-connectors:nth-child(4) span,
+.national-architecture > .national-connectors:nth-child(6) span { grid-row: auto; display: block; align-self: center; width: 100%; height: 3px; margin: 0; background: var(--wire-color, #aeb9ca); transform: none; }
+.national-architecture > .national-connectors span::before { left: -1px; right: auto; top: 50%; width: 8px; height: 8px; background: var(--wire-color, #aeb9ca); transform: translateY(-50%); }
+.national-architecture > .national-connectors span::after { right: -1px; top: 50%; width: 8px; height: 8px; background: var(--wire-color, #aeb9ca); transform: translateY(-50%); }
+.national-architecture > .national-connectors:nth-child(2) span { --wire-color: #aeb9ca; }
+.national-architecture > .national-connectors.gold-connectors span { --wire-color: #c9992e; }
+@media (max-width: 1200px) { .national-architecture > .national-connectors { display: none; } .national-architecture > .national-column { display: flex; } .national-architecture > .national-column .national-column-label { height: auto; } }
+.national-architecture > .national-connectors { position: relative; display: block; align-self: stretch; height: 392px; min-height: 392px; padding: 0; overflow: visible; }
+.national-architecture > .national-connectors span,
+.national-architecture > .national-connectors:nth-child(2) span,
+.national-architecture > .national-connectors:nth-child(4) span,
+.national-architecture > .national-connectors:nth-child(6) span { position: absolute; left: 0; right: 0; top: 84px; display: block; width: 100%; height: 3px; margin: 0; background: var(--wire-color, #aeb9ca); transform: none; }
+.national-architecture > .national-connectors span:nth-child(2) { top: 174px; }
+.national-architecture > .national-connectors span:nth-child(n+3) { display: none; }
+.national-architecture > .national-connectors span::before,
+.national-architecture > .national-connectors span::after { content: ''; position: absolute; top: 50%; width: 8px; height: 8px; border-radius: 50%; background: var(--wire-color, #aeb9ca); transform: translateY(-50%); box-shadow: 0 0 0 2px rgba(255,255,255,.88); }
+.national-architecture > .national-connectors span::before { left: -1px; }
+.national-architecture > .national-connectors span::after { right: -1px; }
+.national-architecture > .national-connectors:nth-child(2) span { --wire-color: #aeb9ca; }
+.national-architecture > .national-connectors.gold-connectors span { --wire-color: #c9992e; }
+@media (max-width: 1200px) { .national-architecture > .national-connectors { display: none; } }
