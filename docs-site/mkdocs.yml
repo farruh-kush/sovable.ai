@@ -54,6 +54,7 @@ nav:
       - Platform rules: platform/rules.md
       - Architecture: platform/architecture.md
       - Security: platform/security.md
+      - Data masking: platform/masking.md
       - Reliability: operations/reliability.md
   - Portals:
       - Overview: portals/overview.md
@@ -72,6 +73,8 @@ nav:
       - Permissions and testing: creator/permissions-testing.md
       - Review and release: creator/review-release.md
       - Settlements: creator/settlements.md
+  - Developers:
+      - Frontend/backend interaction contract: developers/interaction-contract.md
   - API:
       - Quickstart: api/quickstart.md
       - Generated API reference: api/reference.md

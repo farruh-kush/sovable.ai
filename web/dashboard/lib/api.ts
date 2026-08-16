@@ -13,4 +13,5 @@ export async function listKeys() { return (await api.get('/keys')).data }
 export async function createKey(name: string, tier = 'free') { return (await api.post('/keys', { name, tier })).data }
 export async function chatCompletion(payload: Record<string, unknown>) { return (await api.post('/chat/completions', payload)).data }
 export async function getAdminOverview() { return (await api.get('/admin/overview')).data }
+export async function previewMasking(messages: Array<{ role: string; content: string }>) { return (await api.post('/privacy/preview', { messages })).data }
 export default api
