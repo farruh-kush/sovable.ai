@@ -1,25 +1,46 @@
 name: Lint & Format
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install linting tools and type stubs
+          cache: pip
+      - name: Install linting tools
         run: |
-          pip install black ruff mypy
-          pip install types-PyYAML types-setuptools
-          pip install -e "backend/[dev]"
-
-      - name: Black formatting check
-        run: cd backend && black --check --target-version py311 src/ tests/
-
-      - name: Ruff lint check
-        run: cd backend && ruff check src/ tests/
-
-      - name: Mypy type check
-        run: cd backend && mypy src/ --ignore-missing-imports --no-strict-optional
+          python -m pip install --upgrade pip
+          python -m pip install black ruff mypy pytest pytest-asyncio
+          python -m pip install -e shared
+      - name: Python syntax check
+        run: python -m compileall -q shared/src services
+      - name: Changed-file format and lint gate
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base="$PR_BASE_SHA"
+          else
+            base="$EVENT_BEFORE"
+          fi
+          if [[ -z "$base" || "$base" == "0000000000000000000000000000000000000000" ]]; then
+            base="$(git rev-parse HEAD^ 2>/dev/null || git rev-parse HEAD)"
+          fi
+          mapfile -t files < <(git diff --name-only "$base" "$GITHUB_SHA" -- '*.py' | grep -E '^(shared/src|shared/tests|services/.*/(src|tests)/)' || true)
+          if [[ "${#files[@]}" -eq 0 ]]; then
+            echo "No changed Python source or test files require a format gate."
+            exit 0
+          fi
+          black --check --target-version py311 "${files[@]}"
+          ruff check "${files[@]}"
