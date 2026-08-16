@@ -38,7 +38,8 @@ export default function PortalAuthCard({ mode, accountType, title, eyebrow, succ
     event.preventDefault(); setBusy(true); setMessage('')
     try {
       await verifyVerification(channel, destination, code, isRegister ? 'registration' : 'login', displayName || undefined, accountType)
-      await router.push(successHref)
+      const requested = typeof router.query.next === 'string' && router.query.next.startsWith('/') ? router.query.next : successHref
+      await router.push(requested)
     } catch (error) { setMessage(error instanceof Error ? error.message : 'Verification failed.') }
     finally { setBusy(false) }
   }
