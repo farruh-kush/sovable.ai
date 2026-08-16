@@ -36,6 +36,7 @@ class GatewaySettings(BaseSettings):
     billing_service_url: str = Field(
         default="http://billing:8004", alias="BILLING_SERVICE_URL"
     )
+    provider_service_url: str = Field(default="http://provider:8003", alias="PROVIDER_SERVICE_URL")
 
     # Redis (for rate limiting — Phase 1 Task 1.1)
     redis_url: str = Field(

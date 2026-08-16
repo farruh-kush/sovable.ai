@@ -22,7 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from ai_routing_shared.middleware import RequestIdMiddleware, error_handler_middleware
 from ai_routing_shared.utils import configure_logging
 
-from .api.v1 import chat, embeddings, keys, models, generations, health
+from .api.v1 import admin, chat, embeddings, keys, models, generations, health
 from .core.config import get_settings
 from .core.redis_client import RedisClient
 
@@ -73,6 +73,7 @@ def create_app() -> FastAPI:
 
     # Route registration
     app.include_router(health.router, tags=["Health"])
+    app.include_router(admin.router, prefix="/v1", tags=["Admin"])
     app.include_router(chat.router, prefix="/v1", tags=["Chat Completions"])
     app.include_router(embeddings.router, prefix="/v1", tags=["Embeddings"])
     app.include_router(keys.router, prefix="/v1", tags=["API Keys"])

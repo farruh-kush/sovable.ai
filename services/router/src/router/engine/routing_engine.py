@@ -380,3 +380,30 @@ class RoutingEngine:
         except Exception as exc:
             # Billing failures must never impact the client response
             logger.error("billing_emit_failed", error=str(exc), generation_id=generation_id)
+
+    def get_routing_summary(self) -> dict:
+        """Return a non-secret summary of configured routing policies and pricing."""
+        routing = self._config.get("routing", {})
+        pricing = self._config.get("pricing", {})
+        policies = []
+        for alias, policy in routing.items():
+            if not isinstance(policy, dict):
+                continue
+            policies.append(
+                {
+                    "alias": alias,
+                    "strategy": policy.get("strategy", "static"),
+                    "primary": policy.get("primary"),
+                    "fallback": policy.get("fallback", []),
+                    "candidates": policy.get("candidates", []),
+                }
+            )
+        return {
+            "policies": sorted(policies, key=lambda item: item["alias"]),
+            "pricing": {
+                "providers": sorted(pricing.keys()),
+                "model_count": sum(
+                    len(value) for value in pricing.values() if isinstance(value, dict)
+                ),
+            },
+        }
