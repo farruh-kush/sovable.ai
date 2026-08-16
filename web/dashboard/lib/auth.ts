@@ -18,12 +18,12 @@ async function request(path: string, init: RequestInit = {}): Promise<AuthRespon
   return payload
 }
 
-export async function startVerification(channel: 'email' | 'phone', destination: string, purpose: 'registration' | 'login' = 'login') {
-  return request(`/auth/register/${channel}/start`, { method: 'POST', body: JSON.stringify({ destination, purpose }) })
+export async function startVerification(channel: 'email' | 'phone', destination: string, purpose: 'registration' | 'login' = 'login', account_type: 'user' | 'admin' = 'user') {
+  return request(`/auth/register/${channel}/start`, { method: 'POST', body: JSON.stringify({ destination, purpose, account_type }) })
 }
 
-export async function verifyVerification(channel: 'email' | 'phone', destination: string, code: string, purpose: 'registration' | 'login', display_name?: string) {
-  const result = await request(`/auth/register/${channel}/verify`, { method: 'POST', body: JSON.stringify({ destination, code, purpose, display_name }) })
+export async function verifyVerification(channel: 'email' | 'phone', destination: string, code: string, purpose: 'registration' | 'login', display_name?: string, account_type: 'user' | 'admin' = 'user') {
+  const result = await request(`/auth/register/${channel}/verify`, { method: 'POST', body: JSON.stringify({ destination, code, purpose, display_name, account_type }) })
   if (result.access_token) window.localStorage.setItem('solvable_session_token', result.access_token)
   if (result.refresh_token) window.localStorage.setItem('solvable_refresh_token', result.refresh_token)
   return result
