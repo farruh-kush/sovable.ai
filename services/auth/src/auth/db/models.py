@@ -57,6 +57,7 @@ class VerificationChallenge(Base):
     destination_hash: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
     code_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     purpose: Mapped[str] = mapped_column(String(32), default="registration", nullable=False)
+    account_type: Mapped[str] = mapped_column(String(16), default="user", nullable=False)
     attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     consumed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

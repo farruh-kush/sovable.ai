@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import secrets
 from datetime import timedelta
-from typing import Any
+from typing import Any, Literal
 from urllib.parse import urlencode
 
 import httpx
@@ -37,12 +37,14 @@ router = APIRouter(prefix="/auth", tags=["Identity"])
 class ChallengeStart(BaseModel):
     destination: str = Field(min_length=3, max_length=320)
     purpose: str = Field(default="registration", pattern="^(registration|login|link|recovery)$")
+    account_type: Literal["user", "admin"] = "user"
 
 
 class ChallengeVerify(BaseModel):
     destination: str = Field(min_length=3, max_length=320)
     code: str = Field(min_length=6, max_length=6, pattern="^[0-9]{6}$")
     purpose: str = Field(default="registration", pattern="^(registration|login|link|recovery)$")
+    account_type: Literal["user", "admin"] = "user"
     display_name: str | None = Field(default=None, max_length=255)
 
 
@@ -146,6 +148,7 @@ async def start_challenge(
         destination_hash=hash_value(settings, destination),
         code_hash=hash_value(settings, code),
         purpose=body.purpose,
+        account_type=body.account_type,
         expires_at=now_utc() + timedelta(seconds=settings.otp_ttl_seconds),
     ))
     await session.commit()
@@ -179,6 +182,7 @@ async def verify_challenge(
             VerificationChallenge.channel == channel,
             VerificationChallenge.destination_hash == hash_value(settings, destination),
             VerificationChallenge.purpose == body.purpose,
+            VerificationChallenge.account_type == body.account_type,
             VerificationChallenge.consumed.is_(False),
         )
         .order_by(desc(VerificationChallenge.created_at))
@@ -193,19 +197,26 @@ async def verify_challenge(
     if channel == "email":
         user = await session.scalar(select(UserAccount).where(UserAccount.email == destination))
         if user is None:
-            user = UserAccount(id=secrets.token_hex(16), email=destination, email_verified=True, display_name=body.display_name)
+            user = UserAccount(id=secrets.token_hex(16), email=destination, email_verified=True, display_name=body.display_name, role="org_admin" if body.account_type == "admin" and body.purpose == "registration" else "user")
             session.add(user)
             await session.flush()
         else:
             user.email_verified = True
+            if body.account_type == "admin" and body.purpose == "registration" and user.role == "user":
+                user.role = "org_admin"
     else:
         user = await session.scalar(select(UserAccount).where(UserAccount.phone_e164 == destination))
         if user is None:
-            user = UserAccount(id=secrets.token_hex(16), phone_e164=destination, phone_verified=True, display_name=body.display_name)
+            user = UserAccount(id=secrets.token_hex(16), phone_e164=destination, phone_verified=True, display_name=body.display_name, role="org_admin" if body.account_type == "admin" and body.purpose == "registration" else "user")
             session.add(user)
             await session.flush()
         else:
             user.phone_verified = True
+            if body.account_type == "admin" and body.purpose == "registration" and user.role == "user":
+                user.role = "org_admin"
+    if body.account_type == "admin" and body.purpose == "login" and user.role not in {"org_admin", "platform_controller"}:
+        await session.rollback()
+        raise HTTPException(status_code=403, detail="This identity is not registered for the Admin Portal")
     session.add(UserIdentity(
         id=secrets.token_hex(16),
         user_id=user.id,

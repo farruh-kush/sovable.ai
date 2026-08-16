@@ -3,9 +3,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 
 const groups = [
-  { label: 'Workspace', items: [['/dashboard', 'Overview'], ['/dashboard/playground', 'Playground'], ['/dashboard/models', 'Models catalog'], ['/dashboard/usage', 'Usage & analytics']] },
+  { label: 'User Portal', items: [['/portal', 'Portal home'], ['/dashboard', 'Overview'], ['/dashboard/playground', 'Playground'], ['/dashboard/models', 'Models catalog'], ['/dashboard/usage', 'Usage & analytics']] },
   { label: 'Account', items: [['/dashboard/keys', 'API keys'], ['/dashboard/billing', 'Billing'], ['/dashboard/team', 'Team & roles'], ['/dashboard/privacy', 'Privacy & masking'], ['/dashboard/agents', 'Agents & apps'], ['/dashboard/security', 'Security & sessions']] },
-  { label: 'Administration', items: [['/admin', 'Platform overview'], ['/admin/organizations', 'Organizations'], ['/admin/users', 'Users & RBAC'], ['/admin/providers', 'Providers'], ['/admin/models', 'Models & pricing'], ['/admin/routing', 'Routing policy'], ['/admin/privacy', 'Privacy governance']] },
 ]
 
 const authBase = process.env.NEXT_PUBLIC_AUTH_BASE_URL || 'https://api.sovable.ai'
@@ -48,7 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="side-bottom"><div className="status-dot" /> All systems ready<div className="side-note">Gateway · Router · Providers</div></div>
     </aside>
     <main className="main-panel">
-      <header className="topbar"><div><span className="eyebrow">SOVEREIGN AI INFRASTRUCTURE</span><h1>Unified intelligence layer</h1></div><div className="top-actions"><Link href="/" className="text-link">sovable.ai</Link>{loading ? <span className="auth-pill">Checking session…</span> : user ? <><span className="auth-user">{user.display_name || user.email || 'Account'}</span><button className="text-button" onClick={logout}>Log out</button></> : <><Link href="/auth/login" className="text-link">Sign in</Link><Link href="/auth/register" className="button primary compact">Create account</Link></>}</div></header>
+      <header className="topbar"><div><span className="eyebrow">SOVEREIGN AI INFRASTRUCTURE</span><h1>Unified intelligence layer</h1></div><div className="top-actions"><Link href="/" className="text-link">sovable.ai</Link><Link href="/admin" className="text-link">Admin Portal</Link><Link href="/controller" className="text-link">Controller</Link>{loading ? <span className="auth-pill">Checking session…</span> : user ? <><span className="auth-user">{user.display_name || user.email || 'Account'}</span><button className="text-button" onClick={logout}>Log out</button></> : <><Link href="/portal/login" className="text-link">Sign in</Link><Link href="/portal/register" className="button primary compact">Create account</Link></>}</div></header>
       <div className="content">{children}</div>
     </main>
   </div>
