@@ -845,3 +845,114 @@
 .national-node-link:active {
   transform: translateY(0) scale(1);
 }
+
+
+/* Selected reference architecture: data governance pipeline above the control plane. Author: Farruh */
+.governance-pipeline {
+  margin: 34px 0 28px;
+  padding: 0 0 4px;
+}
+.governance-pipeline-heading {
+  display: grid;
+  grid-template-columns: minmax(40px, 1fr) auto minmax(40px, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.governance-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d8b45a 20%, #d8b45a 80%, transparent);
+}
+.governance-pipeline-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #a87c1f;
+}
+.governance-pipeline-title-wrap .eyebrow {
+  color: #a87c1f;
+  letter-spacing: .16em;
+}
+.governance-lock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 23px;
+  height: 23px;
+  border: 1px solid #c9992e;
+  border-radius: 50%;
+  color: #a87c1f;
+  font-size: 12px;
+}
+.governance-pipeline-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0;
+}
+.governance-step {
+  min-width: 0;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 18px;
+  border: 1px solid #e1e6ee;
+  border-radius: 13px;
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 8px 22px rgba(14,31,61,.045);
+}
+.governance-step-icon {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: linear-gradient(145deg,#d8ad42,#a87c1f);
+  color: #fff;
+  font-size: 20px;
+  box-shadow: 0 5px 12px rgba(168,124,31,.18);
+}
+.governance-step div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.governance-step strong {
+  color: #0e1f3d;
+  font-size: 14px;
+  letter-spacing: -.01em;
+}
+.governance-step small {
+  color: #7b879b;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.governance-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #bd8d22;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+}
+@media (max-width: 1200px) {
+  .governance-pipeline { margin-top: 24px; }
+  .governance-pipeline-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .governance-arrow {
+    min-height: 18px;
+    transform: rotate(90deg);
+  }
+}
+@media (max-width: 560px) {
+  .governance-pipeline-heading { gap: 10px; }
+  .governance-pipeline-title-wrap .eyebrow { font-size: 9px; letter-spacing: .1em; }
+  .governance-step { padding: 14px; }
+}
