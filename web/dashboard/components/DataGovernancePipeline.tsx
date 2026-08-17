@@ -1,3 +1,5 @@
+import { Fragment } from 'react'
+
 const steps = [
   { icon: '▤', title: 'Request', body: 'Intake and validate user request' },
   { icon: '◉', title: 'Masking', body: 'PII detection and secure masking' },
@@ -19,8 +21,8 @@ export default function DataGovernancePipeline() {
       </div>
       <div className="governance-pipeline-row">
         {steps.map((step, index) => (
-          <>
-            <div key={step.title} className="governance-step">
+          <Fragment key={step.title}>
+            <div className="governance-step">
               <span className="governance-step-icon" aria-hidden="true">{step.icon}</span>
               <div>
                 <strong>{step.title}</strong>
@@ -28,7 +30,7 @@ export default function DataGovernancePipeline() {
               </div>
             </div>
             {index < steps.length - 1 && <span className="governance-arrow" aria-hidden="true">→</span>}
-          </>
+          </Fragment>
         ))}
       </div>
     </section>
