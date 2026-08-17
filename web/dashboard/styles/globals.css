@@ -826,3 +826,22 @@
   }
   .workflow-steps > .workflow-arrow { display: none; }
 }
+
+/* Interactive architecture nodes. Author: Farruh */
+.national-node-link {
+  text-decoration: none !important;
+  color: inherit !important;
+  display: block;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.national-node-link:hover {
+  transform: translateY(-2px) scale(1.01);
+  filter: brightness(1.02);
+}
+.national-node-link:hover .national-node {
+  border-color: #c9992e !important;
+  box-shadow: 0 10px 30px rgba(14,31,61,0.08);
+}
+.national-node-link:active {
+  transform: translateY(0) scale(1);
+}
