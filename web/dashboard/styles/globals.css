@@ -320,3 +320,42 @@
     top: 219px;
   }
 }
+
+/* Responsive pager overflow fix. Author: Farruh */
+.national-pager {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.national-pager > span,
+.national-pager > a {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.national-pager > span { display: block; }
+.national-pager a {
+  box-sizing: border-box;
+  overflow: hidden;
+  white-space: normal;
+}
+.national-pager a small,
+.national-pager a b {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  line-height: 1.3;
+}
+@media (max-width: 720px) {
+  .national-pager {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .national-pager .next {
+    margin-left: 0;
+    text-align: left;
+  }
+}
