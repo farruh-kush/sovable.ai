@@ -784,3 +784,45 @@
     display: none;
   }
 }
+/* Explicit workflow arrow grid items. Author: Farruh */
+@media (min-width:721px) {
+  .workflow-step { grid-column: span 2; }
+  .workflow-arrow {
+    display: grid;
+    place-items: center;
+    align-self: center;
+    justify-self: center;
+    width: 22px;
+    height: 30px;
+    color: #c9992e;
+    font-size: 23px;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+@media (max-width:720px) {
+  .workflow-arrow { display: none; }
+  .workflow-step { grid-column: auto; }
+}
+/* Final workflow arrow grid flow. Author: Farruh */
+@media (min-width:721px) {
+  .workflow-steps > .workflow-step,
+  .workflow-steps > .workflow-arrow {
+    grid-column: auto !important;
+  }
+  .workflow-steps > .workflow-step {
+    min-width: 0;
+  }
+  .workflow-steps > .workflow-arrow {
+    position: static;
+    align-self: center;
+    justify-self: center;
+  }
+}
+@media (max-width:720px) {
+  .workflow-steps > .workflow-step,
+  .workflow-steps > .workflow-arrow {
+    grid-column: auto !important;
+  }
+  .workflow-steps > .workflow-arrow { display: none; }
+}
