@@ -547,3 +547,43 @@
   }
   .national-pager .next { text-align: left; }
 }
+/* Dedicated pipeline arrow gaps. Author: Farruh */
+@media (min-width:721px) {
+  .workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr) 22px) minmax(0,1fr);
+    gap: 0;
+    align-items: stretch;
+  }
+  .workflow-step {
+    position: relative;
+    grid-column: span 2;
+    min-width: 0;
+  }
+  .workflow-step:nth-child(1) { grid-column: 1; }
+  .workflow-step:nth-child(2) { grid-column: 3; }
+  .workflow-step:nth-child(3) { grid-column: 5; }
+  .workflow-step:nth-child(4) { grid-column: 7; }
+  .workflow-step:nth-child(5) { grid-column: 9; }
+  .workflow-step i {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: -17px;
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 28px;
+    margin: 0;
+    transform: translateY(-50%);
+    background: #fff;
+    color: #c9992e;
+    font-style: normal;
+    line-height: 1;
+  }
+}
+@media (max-width:720px) {
+  .workflow-steps { grid-template-columns:1fr 1fr; }
+  .workflow-step { grid-column:auto; }
+  .workflow-step i { display:none; }
+}
