@@ -587,3 +587,200 @@
   .workflow-step { grid-column:auto; }
   .workflow-step i { display:none; }
 }
+/* Explicit architecture card-center endpoints. Author: Farruh */
+@media (min-width:1201px) {
+  .national-architecture > .national-column > .national-node {
+    position: relative;
+    overflow: visible;
+  }
+  .national-architecture > .national-column:first-child > .national-node {
+    --endpoint-color: #aeb9ca;
+  }
+  .national-architecture > .core-column > .national-node,
+  .national-architecture > .platform-column > .national-node {
+    --endpoint-color: #c9992e;
+  }
+  .national-architecture > .audience-column > .national-node {
+    --endpoint-color: #c9992e;
+  }
+  .national-architecture > .national-column:first-child > .national-node::after,
+  .national-architecture > .core-column > .national-node::before,
+  .national-architecture > .core-column > .national-node::after,
+  .national-architecture > .platform-column > .national-node::before,
+  .national-architecture > .platform-column > .national-node::after,
+  .national-architecture > .audience-column > .national-node::before {
+    content: '';
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: var(--endpoint-color);
+    transform: translateY(-50%);
+    box-shadow: 0 0 0 1px var(--endpoint-color), 0 1px 4px rgba(14,31,61,.16);
+    pointer-events: none;
+  }
+  .national-architecture > .national-column:first-child > .national-node::after,
+  .national-architecture > .core-column > .national-node::after,
+  .national-architecture > .platform-column > .national-node::after {
+    right: -12px;
+  }
+  .national-architecture > .core-column > .national-node::before,
+  .national-architecture > .platform-column > .national-node::before,
+  .national-architecture > .audience-column > .national-node::before {
+    left: -12px;
+  }
+  .national-architecture > .national-connectors span {
+    z-index: 4;
+  }
+}
+/* Shared bus center routing. Author: Farruh */
+@media (min-width:1201px) {
+  .national-architecture > .national-connectors:nth-child(2),
+  .national-architecture > .national-connectors:nth-child(6) {
+    position: relative;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span,
+  .national-architecture > .national-connectors:nth-child(6) span {
+    display: block;
+    top: auto;
+    right: auto;
+    width: auto;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(1),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(1) {
+    top: 84px;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(2) {
+    top: 129px;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(3),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(3) {
+    top: 174px;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(4) {
+    top: 219px;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(5),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(5) {
+    top: 264px;
+  }
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(2) {
+    top: 129px;
+  }
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(4) {
+    top: 219px;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(1),
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(3),
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(5),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(2),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(4) {
+    left: 0;
+    right: 50%;
+  }
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(2),
+  .national-architecture > .national-connectors:nth-child(2) span:nth-child(4),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(1),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(3),
+  .national-architecture > .national-connectors:nth-child(6) span:nth-child(5) {
+    left: 50%;
+    right: 0;
+  }
+  .national-architecture > .national-connectors:nth-child(2)::after,
+  .national-architecture > .national-connectors:nth-child(6)::after {
+    top: 84px;
+    left: 50%;
+    right: auto;
+    width: 3px;
+    height: 180px;
+    transform: translateX(-50%);
+  }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(1) {
+    top: 129px;
+    left: 0;
+    right: 0;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(2) {
+    top: 219px;
+    left: 0;
+    right: 0;
+  }
+}
+/* Strict two-wire core transition. Author: Farruh */
+@media (min-width:1201px) {
+  .national-architecture > .national-connectors:nth-child(4) span {
+    display: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(1),
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(2) {
+    display: block !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(1) {
+    top: 129px !important;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(2) {
+    top: 219px !important;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span::before,
+  .national-architecture > .national-connectors:nth-child(4) span::after {
+    display: block !important;
+  }
+}
+/* Explicit core-to-platform lines. Author: Farruh */
+@media (min-width:1201px) {
+  .national-architecture > .national-connectors:nth-child(4) {
+    position: relative;
+    background: transparent;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span {
+    display: none !important;
+  }
+  .national-architecture > .national-connectors:nth-child(4)::before,
+  .national-architecture > .national-connectors:nth-child(4)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 6;
+    height: 3px;
+    background:
+      radial-gradient(circle at 0 50%,#c9992e 0 5px,transparent 6px),
+      radial-gradient(circle at 100% 50%,#c9992e 0 5px,transparent 6px),
+      linear-gradient(#c9992e,#c9992e) center/100% 3px no-repeat;
+    pointer-events: none;
+  }
+  .national-architecture > .national-connectors:nth-child(4)::before { top: 129px; }
+  .national-architecture > .national-connectors:nth-child(4)::after { top: 219px; }
+}
+/* DOM-measured architecture overlay. Author: Farruh */
+@media (min-width:1201px) {
+  .national-architecture {
+    position: relative;
+  }
+  .national-architecture > .national-connectors {
+    visibility: hidden;
+  }
+  .national-architecture .architecture-overlay {
+    position: absolute;
+    z-index: 8;
+    inset: 0;
+    width: 100%;
+    height: 392px;
+    overflow: visible;
+    pointer-events: none;
+  }
+}
+@media (max-width:1200px) {
+  .national-architecture .architecture-overlay {
+    display: none;
+  }
+}
