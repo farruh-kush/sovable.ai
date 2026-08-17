@@ -18,7 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.config import AuthSettings, get_settings
 from ..db.database import get_session
-from ..db.models import AuthSession, UserAccount, UserIdentity, VerificationChallenge
+from ..db.models import AuthSession, EmailActivationToken, UserAccount, UserIdentity, VerificationChallenge
+from ..security.email import send_activation_email
 from ..security.identity import (
     create_access_token,
     create_refresh_token,
@@ -46,6 +47,12 @@ class ChallengeVerify(BaseModel):
     purpose: str = Field(default="registration", pattern="^(registration|login|link|recovery)$")
     account_type: Literal["user", "admin", "creator"] = "user"
     display_name: str | None = Field(default=None, max_length=255)
+class ActivationStart(BaseModel):
+    email: str = Field(min_length=3, max_length=320)
+    display_name: str | None = Field(default=None, max_length=255)
+    account_type: Literal["user", "admin", "creator"] = "user"
+class ActivationComplete(BaseModel):
+    token: str = Field(min_length=32, max_length=256)
 
 
 class RefreshRequest(BaseModel):
@@ -162,6 +169,76 @@ async def start_challenge(
     if settings.allow_dev_otp and settings.app_env != "production":
         result["dev_code"] = code
     return result
+
+@router.post("/email/activation/start")
+async def start_email_activation(
+    body: ActivationStart,
+    settings: AuthSettings = Depends(get_settings),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    """Create a single-use registration link and deliver it through the configured email provider."""
+    email = normalize_email(body.email)
+    existing = await session.scalar(select(UserAccount).where(UserAccount.email == email))
+    if existing and existing.email_verified:
+        raise HTTPException(status_code=409, detail="An account with this email already exists. Sign in instead.")
+    raw_token = secrets.token_urlsafe(48)
+    session.add(EmailActivationToken(
+        id=secrets.token_hex(16),
+        token_hash=hash_value(settings, raw_token),
+        email=email,
+        display_name=body.display_name,
+        account_type=body.account_type,
+        expires_at=now_utc() + timedelta(seconds=settings.activation_link_ttl_seconds),
+    ))
+    await session.commit()
+    activation_url = f"{settings.frontend_base_url.rstrip('/')}/auth/activate?token={raw_token}"
+    try:
+        await send_activation_email(settings, email, activation_url)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="Email delivery is not available. Check the configured email provider and try again.") from exc
+    return {"status": "accepted", "delivery": settings.activation_email_provider, "expires_in": settings.activation_link_ttl_seconds}
+
+@router.post("/email/activation/complete")
+async def complete_email_activation(
+    body: ActivationComplete,
+    request: Request,
+    settings: AuthSettings = Depends(get_settings),
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    """Consume an activation link and create the requested account session."""
+    token = await session.scalar(
+        select(EmailActivationToken).where(
+            EmailActivationToken.token_hash == hash_value(settings, body.token),
+            EmailActivationToken.consumed.is_(False),
+        )
+    )
+    if not token or token.expires_at <= now_utc():
+        raise HTTPException(status_code=400, detail="This activation link is invalid, expired, or already used.")
+    user = await session.scalar(select(UserAccount).where(UserAccount.email == token.email))
+    if user is not None and user.email_verified:
+        token.consumed = True
+        await session.commit()
+        raise HTTPException(status_code=409, detail="An account with this email already exists. Sign in instead.")
+    if user is None:
+        role = "org_admin" if token.account_type == "admin" else "agent_creator" if token.account_type == "creator" else "user"
+        user = UserAccount(
+            id=secrets.token_hex(16),
+            email=token.email,
+            email_verified=True,
+            display_name=token.display_name,
+            role=role,
+        )
+        session.add(user)
+        await session.flush()
+    else:
+        user.email_verified = True
+        if token.account_type == "admin" and user.role == "user":
+            user.role = "org_admin"
+        elif token.account_type == "creator" and user.role == "user":
+            user.role = "agent_creator"
+    token.consumed = True
+    await session.commit()
+    return await _create_session(session, settings, user, request)
 
 
 @router.post("/register/{channel}/verify")

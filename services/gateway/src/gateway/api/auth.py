@@ -39,6 +39,14 @@ async def register_verify(channel: str, request: Request) -> JSONResponse:
     return await _json_proxy(request, f"/auth/register/{channel}/verify", await request.json())
 
 
+@router.post("/auth/email/activation/start")
+async def activation_start(request: Request) -> JSONResponse:
+    return await _json_proxy(request, "/auth/email/activation/start", await request.json())
+
+@router.post("/auth/email/activation/complete")
+async def activation_complete(request: Request) -> JSONResponse:
+    return await _json_proxy(request, "/auth/email/activation/complete", await request.json())
+
 @router.post("/auth/refresh")
 async def refresh(request: Request) -> JSONResponse:
     return await _json_proxy(request, "/auth/refresh", await request.json())
