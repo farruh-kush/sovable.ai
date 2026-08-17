@@ -274,3 +274,49 @@
   }
 }
 
+
+/* Architecture connector fix v8 — mathematically centered middle columns. Author: Farruh */
+@media (min-width: 1201px) {
+  .national-architecture > .core-column,
+  .national-architecture > .platform-column {
+    position: relative;
+    display: block;
+    align-self: stretch;
+    min-height: 392px;
+  }
+  .national-architecture > .core-column > .national-column-label,
+  .national-architecture > .platform-column > .national-column-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    margin: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .national-architecture > .core-column > .national-node,
+  .national-architecture > .platform-column > .national-node {
+    position: absolute;
+    left: 0;
+    right: 0;
+    width: auto;
+    margin: 0;
+    grid-row: auto;
+  }
+  .national-architecture > .core-column > .national-node:nth-child(2),
+  .national-architecture > .platform-column > .national-node:nth-child(2) {
+    top: 91px;
+  }
+  .national-architecture > .core-column > .national-node:nth-child(3),
+  .national-architecture > .platform-column > .national-node:nth-child(3) {
+    top: 181px;
+  }
+  .national-architecture > .national-connectors:nth-chi  .national-archited(1) {
+    top: 129px;
+  }
+  .national-architecture > .national-connectors:nth-child(4) span:nth-child(2) {
+    top: 219px;
+  }
+}
