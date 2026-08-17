@@ -508,3 +508,42 @@
 .portal-onboarding-steps b { color:#c9992e; font-size:15px; }
 @media (max-width:900px) { .portal-onboarding { display:block; }.portal-onboarding-steps { justify-content:flex-start; margin-top:15px; } }
 @media (max-width:600px) { .portal-onboarding-steps { display:grid; grid-template-columns:1fr; }.portal-onboarding-steps a { justify-content:space-between; } }
+/* Equal pager cards. Author: Farruh */
+.national-pager {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+.national-pager > span,
+.national-pager > a {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+.national-pager > span > a {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: 100%;
+}
+.national-pager > a.next {
+  justify-self: stretch;
+  margin-left: 0;
+}
+@media (max-width:720px) {
+  .national-pager {
+    grid-template-columns: minmax(0,1fr);
+    gap: 10px;
+  }
+  .national-pager > span > a,
+  .national-pager > a.next {
+    width: 100%;
+    margin: 0;
+  }
+  .national-pager .next { text-align: left; }
+}
