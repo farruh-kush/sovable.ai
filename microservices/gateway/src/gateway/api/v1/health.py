@@ -4,8 +4,12 @@ Author: Farruh
 """
 
 from fastapi import APIRouter, Request
+from redis.exceptions import RedisError
+
+from ai_routing_shared.utils import get_logger
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.get("/health")
@@ -15,8 +19,13 @@ async def health(request: Request) -> dict:
     try:
         await request.app.state.redis.client.ping()
         redis_ok = True
-    except Exception:
-        pass
+    except (RedisError, AttributeError, ConnectionError, TimeoutError) as exc:
+        # Health checks must degrade gracefully, but the reason belongs in logs.
+        logger.warning(
+            "redis_health_check_failed",
+            error_type=type(exc).__name__,
+            error=str(exc),
+        )
 
     return {
         "status": "healthy" if redis_ok else "degraded",

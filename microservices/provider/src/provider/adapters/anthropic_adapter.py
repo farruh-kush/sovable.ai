@@ -174,7 +174,9 @@ class AnthropicAdapter(BaseProviderAdapter):
                         import json
                         try:
                             event = json.loads(line[6:])
-                        except Exception:
+                        except json.JSONDecodeError:
+                            # Providers can emit keep-alive or partial SSE frames.
+                            # Ignore only malformed JSON frames; transport errors must propagate.
                             continue
                         if event.get("type") == "content_block_delta":
                             delta_text = event.get("delta", {}).get("text", "")
