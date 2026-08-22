@@ -12,6 +12,7 @@ This document helps you navigate the comprehensive architecture documentation an
 4. **Integrating into your system?** → [docs/SERVICE_ARCHITECTURE.md](docs/SERVICE_ARCHITECTURE.md)
 5. **Updating code imports?** → [docs/IMPORT_MIGRATION.md](docs/IMPORT_MIGRATION.md)
 6. **Understanding stream ownership and release gates?** → [PROJECT_STREAM_ALIGNMENT.md](PROJECT_STREAM_ALIGNMENT.md)
+7. **Finding the independent repository and server for a task?** → [REPOSITORY_SPLIT.md](REPOSITORY_SPLIT.md)
 
 ## 📊 Architecture Diagrams
 
@@ -19,7 +20,7 @@ All diagrams are in `/docs/images/` and viewable in any SVG viewer or web browse
 
 ### 1. **System Architecture** 
    📄 File: `docs/images/system-architecture.svg` (12 KB)
-   
+
    **Shows**: High-level component overview
    - Client layer and SDKs
    - API Gateway Service
@@ -28,53 +29,53 @@ All diagrams are in `/docs/images/` and viewable in any SVG viewer or web browse
    - Support services (Billing, Auth, Cache, Observability)
    - Database and infrastructure
    - Three environment topologies
-   
+
    **Use when**: Understanding overall system design, explaining to stakeholders
 
 ### 2. **Service Interactions**
    📄 File: `docs/images/service-interactions.svg` (8 KB)
-   
+
    **Shows**: How services communicate
    - Synchronous (solid) vs Asynchronous (dashed) flows
    - Service dependencies
    - Integration patterns
-   
+
    **Use when**: Understanding service relationships, API contracts, communication protocols
 
 ### 3. **Request Flow**
    📄 File: `docs/images/request-flow.svg` (11 KB)
-   
+
    **Shows**: Complete request lifecycle
    - Client to response flow
    - Error handling with retries and fallback
    - Observability collection at each step
    - Circuit breaker logic
    - Async billing recording
-   
+
    **Use when**: Debugging requests, understanding error handling, optimizing latency
 
 ### 4. **Data Model**
    📄 File: `docs/images/data-model.svg` (11 KB)
-   
+
    **Shows**: Database schema and relationships
    - User and APIKey entities
    - Provider and Model entities
    - Usage, Billing, and RateLimit tables
    - Audit logging
    - Relationships between entities
-   
+
    **Use when**: Designing database queries, understanding billing logic, schema design
 
 ### 5. **Deployment Architecture**
    📄 File: `docs/images/deployment-architecture.svg` (13 KB)
-   
+
    **Shows**: Infrastructure topology
    - Development (Docker Compose)
    - Staging (K8s single node)
    - Production (Multi-zone HA)
    - CI/CD pipeline
    - Monitoring and backup systems
-   
+
    **Use when**: Planning infrastructure, setting up deployment, scaling strategies
 
 ## 📚 Comprehensive Documentation
@@ -84,10 +85,15 @@ All diagrams are in `/docs/images/` and viewable in any SVG viewer or web browse
 
    **Contents:** Seven service/frontend/release streams, ownership boundaries, dependency order, handoffs, and local validation commands.
 
+### **REPOSITORY_SPLIT.md**
+   🔗 Location: `docs/REPOSITORY_SPLIT.md`
+
+   **Contents:** Independent GitHub repositories, service ownership, server names, ports, public/internal exposure, dependencies, and task-routing rules.
+
 
 ### **SERVICE_ARCHITECTURE.md** (18.5 KB)
    🔗 Location: `docs/SERVICE_ARCHITECTURE.md`
-   
+
    **Contents**:
    - System overview and principles
    - Detailed service responsibilities
@@ -97,12 +103,12 @@ All diagrams are in `/docs/images/` and viewable in any SVG viewer or web browse
    - Security considerations
    - Testing approaches
    - Troubleshooting guide
-   
+
    **Best for**: Deep understanding of system design, implementation details
 
 ### **DEPLOYMENT.md** (10.5 KB)
    🔗 Location: `docs/DEPLOYMENT.md`
-   
+
    **Contents**:
    - Local development setup
    - Staging deployment procedures
@@ -112,24 +118,24 @@ All diagrams are in `/docs/images/` and viewable in any SVG viewer or web browse
    - Health checks and monitoring
    - Backup and disaster recovery
    - Troubleshooting deployment issues
-   
+
    **Best for**: DevOps, operations, deployment planning
 
 ### **IMPORT_MIGRATION.md** (8.6 KB)
    🔗 Location: `docs/IMPORT_MIGRATION.md`
-   
+
    **Contents**:
    - Old vs new import paths
    - Automated migration script
    - Common patterns
    - Troubleshooting import errors
    - Backward compatibility options
-   
+
    **Best for**: Developers updating code, migration planning
 
 ### **README.md** (Updated)
    🔗 Location: `README.md`
-   
+
    **Contents**:
    - Feature overview
    - Architecture diagram references
@@ -138,19 +144,19 @@ All diagrams are in `/docs/images/` and viewable in any SVG viewer or web browse
    - Configuration guide
    - Testing instructions
    - Project structure overview
-   
+
    **Best for**: Quick reference, getting started
 
 ### **ARCHITECTURE_SUMMARY.md** (This repo)
    🔗 Location: `ARCHITECTURE_SUMMARY.md`
-   
+
    **Contents**:
    - Completed tasks overview
    - Architecture principles
    - Verification checklist
    - Key improvements
    - Next steps
-   
+
    **Best for**: Understanding what was accomplished
 
 ## 🏗️ Project Structure Overview
