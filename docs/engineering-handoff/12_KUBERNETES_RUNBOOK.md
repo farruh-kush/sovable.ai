@@ -18,7 +18,7 @@ Minimum platform resources are a Kubernetes cluster, worker capacity sized for g
 
 ```bash
 # Render and inspect
-kubectl kustomize k8s/overlays/alibaba > /tmp/solvable-alibaba.yaml
+kubectl kustomize infrastructure/k8s/overlays/alibaba > /tmp/solvable-alibaba.yaml
 kubectl apply --dry-run=client -f /tmp/solvable-alibaba.yaml
 
 # Confirm no real credentials appear
@@ -37,7 +37,7 @@ Use a dedicated namespace such as `ai-routing`. Apply namespace labels, default-
 ```bash
 kubectl create namespace ai-routing --dry-run=client -o yaml | kubectl apply -f -
 kubectl label namespace ai-routing pod-security.kubernetes.io/enforce=baseline --overwrite
-kubectl apply -f k8s/standalone-reference/network-policies.yaml
+kubectl apply -f infrastructure/k8s/standalone-reference/network-policies.yaml
 ```
 
 Adjust the policy for the actual ingress controller, DNS, secret manager, database, cache, registry, and provider egress paths. Do not blindly apply a policy that prevents DNS or required provider traffic.
@@ -95,7 +95,7 @@ The actual job manifests must be generated from the release and must reference t
 ## 9. Application deployment
 
 ```bash
-kubectl apply -k k8s/overlays/alibaba
+kubectl apply -k infrastructure/k8s/overlays/alibaba
 kubectl -n ai-routing rollout status deployment/auth --timeout=300s
 kubectl -n ai-routing rollout status deployment/billing --timeout=300s
 kubectl -n ai-routing rollout status deployment/provider --timeout=300s

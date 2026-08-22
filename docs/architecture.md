@@ -116,8 +116,8 @@
   - python/, js/
 - web/
   - marketing/ (static), dashboard/ (React/Next.js)
-- infra/
-  - docker-compose.yml, k8s/, terraform/
+- infrastructure/observability/
+  - docker-compose.yml, infrastructure/k8s/, terraform/
 - docs/
   - openapi.yaml, architecture.md (this file)
 

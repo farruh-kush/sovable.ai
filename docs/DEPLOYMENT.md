@@ -57,7 +57,7 @@ docker compose down -v
 
 ```bash
 # 1. Create AWS resources (VPC, RDS, ElastiCache)
-cd infra/terraform/environments/staging
+cd infrastructure/observability/terraform/environments/staging
 terraform init
 terraform apply -var-file="staging.tfvars"
 
@@ -84,10 +84,10 @@ aws ecr get-login-password | docker login --username AWS --password-stdin 123456
 docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/routing-layer:staging
 
 # 2. Update Kubernetes manifests
-sed -i 's|IMAGE_TAG|staging|g' infra/kubernetes/overlays/staging/kustomization.yaml
+sed -i 's|IMAGE_TAG|staging|g' infrastructure/observability/kubernetes/overlays/staging/kustomization.yaml
 
 # 3. Apply Kubernetes manifests
-kubectl apply -k infra/kubernetes/overlays/staging/
+kubectl apply -k infrastructure/observability/kubernetes/overlays/staging/
 
 # 4. Verify deployment
 kubectl get pods -l app=routing-layer
@@ -95,7 +95,7 @@ kubectl get svc routing-layer-api
 kubectl logs -l app=routing-layer -f
 
 # 5. Run smoke tests
-./scripts/test-staging.sh
+./testing/scripts/test-staging.sh
 ```
 
 ### Health Checks
@@ -121,7 +121,7 @@ curl -X POST https://staging-api.example.com/v1/health \
 
 ```bash
 # 1. Create production AWS resources
-cd infra/terraform/environments/production
+cd infrastructure/observability/terraform/environments/production
 terraform init
 terraform apply -var-file="production.tfvars"
 
@@ -180,7 +180,7 @@ EOF
 kubectl get pods -l version=v1.2.0-canary -w
 
 # 3. Gradually increase traffic (using Istio/Flagger)
-kubectl apply -f infra/kubernetes/istio/canary-rollout.yaml
+kubectl apply -f infrastructure/observability/kubernetes/istio/canary-rollout.yaml
 
 # 4. Once stable, promote to production
 kubectl scale deployment routing-layer-v1.2.0-canary --replicas=0
@@ -193,7 +193,7 @@ kubectl scale deployment routing-layer-v1.2.0-canary --replicas=0
 curl -I https://api.example.com/health
 
 # 2. Smoke tests
-bash ./scripts/test-production.sh
+bash ./testing/scripts/test-production.sh
 
 # 3. Monitor dashboards
 # - Grafana: https://monitoring.example.com
@@ -206,7 +206,7 @@ kubectl logs -l app=routing-layer -f --all-containers=true
 kubectl exec -it <pod> -- python -m scripts.verify_db_integrity
 
 # 6. Run synthetic tests
-bash ./scripts/synthetic-tests.sh
+bash ./testing/scripts/synthetic-tests.sh
 ```
 
 ## Rollback Procedures
@@ -268,10 +268,10 @@ kubectl scale deployment routing-layer-api --replicas=5
 
 ```bash
 # Deploy Prometheus
-kubectl apply -f infra/kubernetes/monitoring/prometheus.yaml
+kubectl apply -f infrastructure/observability/kubernetes/monitoring/prometheus.yaml
 
 # Create PrometheusRule for alerts
-kubectl apply -f infra/kubernetes/monitoring/prometheus-rules.yaml
+kubectl apply -f infrastructure/observability/kubernetes/monitoring/prometheus-rules.yaml
 
 # Port-forward to access
 kubectl port-forward -n monitoring svc/prometheus 9090:9090
@@ -281,7 +281,7 @@ kubectl port-forward -n monitoring svc/prometheus 9090:9090
 
 ```bash
 # Deploy Grafana
-kubectl apply -f infra/kubernetes/monitoring/grafana.yaml
+kubectl apply -f infrastructure/observability/kubernetes/monitoring/grafana.yaml
 
 # Access: http://localhost:3000 (after port-forward)
 # Default credentials: admin/prom-operator
@@ -291,7 +291,7 @@ kubectl apply -f infra/kubernetes/monitoring/grafana.yaml
 
 ```bash
 # Deploy ELK
-kubectl apply -f infra/kubernetes/logging/elk.yaml
+kubectl apply -f infrastructure/observability/kubernetes/logging/elk.yaml
 
 # Verify
 kubectl get pods -n logging
@@ -313,7 +313,7 @@ kubectl get deployment routing-layer-api
 kubectl scale deployment routing-layer-api --replicas=10
 
 # Auto-scaling (requires HPA)
-kubectl apply -f infra/kubernetes/hpa/routing-layer-hpa.yaml
+kubectl apply -f infrastructure/observability/kubernetes/hpa/routing-layer-hpa.yaml
 
 # Verify
 kubectl get hpa routing-layer-api -w
@@ -411,10 +411,10 @@ kubectl exec -it <pod> -- psql $DATABASE_URL -c \
 
 ```bash
 # Restrict ingress to API
-kubectl apply -f infra/kubernetes/network-policies/api-ingress.yaml
+kubectl apply -f infrastructure/observability/kubernetes/network-policies/api-ingress.yaml
 
 # Restrict egress (whitelist external APIs)
-kubectl apply -f infra/kubernetes/network-policies/egress-providers.yaml
+kubectl apply -f infrastructure/observability/kubernetes/network-policies/egress-providers.yaml
 ```
 
 ### RBAC
@@ -424,7 +424,7 @@ kubectl apply -f infra/kubernetes/network-policies/egress-providers.yaml
 kubectl create serviceaccount routing-layer-app
 
 # Create role
-kubectl apply -f infra/kubernetes/rbac/routing-layer-role.yaml
+kubectl apply -f infrastructure/observability/kubernetes/rbac/routing-layer-role.yaml
 
 # Bind role
 kubectl create rolebinding routing-layer-app-binding \

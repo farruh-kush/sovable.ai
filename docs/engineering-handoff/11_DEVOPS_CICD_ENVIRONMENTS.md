@@ -102,10 +102,10 @@ cp .env.example .env.local
 make up
 
 # Run service tests
-./scripts/run_tests.sh
+./testing/scripts/run_tests.sh
 
 # Render the selected Kubernetes overlay
-kubectl kustomize k8s/overlays/alibaba > /tmp/solvable-alibaba.yaml
+kubectl kustomize infrastructure/k8s/overlays/alibaba > /tmp/solvable-alibaba.yaml
 
 # Run the dashboard checks
 cd web/dashboard && npm run typecheck && npm run build

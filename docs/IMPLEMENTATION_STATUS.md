@@ -16,12 +16,12 @@ Kubernetes packaging now includes a self-contained Kustomize base, an Alibaba AC
 
 | Check | Result | Evidence |
 |---|---|---|
-| Backend and shared tests | Passed: 37 tests | `./scripts/run_tests.sh` |
+| Backend and shared tests | Passed: 37 tests | `./testing/scripts/run_tests.sh` |
 | Python syntax compilation | Passed | Shared, router, and provider packages compiled |
 | Dashboard strict type check | Passed | `npx tsc --noEmit` |
 | Dashboard production build | Passed | `NEXT_TELEMETRY_DISABLED=1 CI=1 npm run build` |
-| Kustomize Alibaba overlay | Passed | `kubectl kustomize k8s/overlays/alibaba` |
-| Kustomize AWS overlay | Passed | `kubectl kustomize k8s/overlays/aws` |
+| Kustomize Alibaba overlay | Passed | `kubectl kustomize infrastructure/k8s/overlays/alibaba` |
+| Kustomize AWS overlay | Passed | `kubectl kustomize infrastructure/k8s/overlays/aws` |
 | Docker image build | Blocked by environment | Docker CLI exists, but Docker Desktop daemon socket is unavailable |
 | External provider live calls | Not attempted | No provider credentials were used or exposed |
 

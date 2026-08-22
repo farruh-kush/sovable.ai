@@ -18,7 +18,7 @@ This folder is a self-contained reference implementation of the AI Routing Layer
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-PYTHONPATH=. python3 scripts/e2e_smoke.py
+PYTHONPATH=. python3 testing/scripts/e2e_smoke.py
 ```
 
 The E2E runner starts all five services on ports `8200–8204`, uses the deterministic fake provider, and terminates all child processes after the checks complete. The expected result is:
@@ -30,7 +30,7 @@ E2E smoke test passed on ports 8200-8204
 To run the long-lived local stack on the default ports:
 
 ```bash
-PYTHONPATH=. python3 scripts/run_local.py --provider-mode fake
+PYTHONPATH=. python3 testing/scripts/run_local.py --provider-mode fake
 ```
 
 Then call the gateway:
@@ -59,8 +59,8 @@ The sandbox used for validation did not contain the Docker executable, so Compos
 ```bash
 python3 -m compileall -q shared services scripts tests
 PYTHONPATH=. pytest -q
-PYTHONPATH=. python3 scripts/e2e_smoke.py
-python3 scripts/validate_deployment.py
+PYTHONPATH=. python3 testing/scripts/e2e_smoke.py
+python3 testing/scripts/validate_deployment.py
 ```
 
 The tested reference currently passes five unit/contract tests, a multi-process E2E test covering authentication, readiness, local routing, PII masking and restoration, external-policy rejection, approved external routing, and billing idempotency, plus Compose structure validation.

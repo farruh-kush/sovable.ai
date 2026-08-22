@@ -1,4 +1,4 @@
-name: Tests
+name: Solvable AI Release Gate
 
 on:
   push:
@@ -22,16 +22,11 @@ jobs:
             'sqlalchemy[asyncio]' structlog prometheus-client \
             pydantic pydantic-settings PyJWT pyyaml \
             pytest pytest-asyncio respx uvicorn
-          python -m pip install -e shared
-      - name: Run service and shared tests
-        env:
-          PYTHONPATH: shared/src:services/auth/src:services/billing/src:services/gateway/src:services/provider/src:services/router/src
-        run: |
-          python -m pytest \
-            shared/tests \
-            services/auth/tests \
-            services/billing/tests \
-            services/gateway/tests \
-            services/provider/tests \
-            services/router/tests \
-            -v
+          python -m pip install -e backend/shared
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/dashboard/package-lock.json
+      - name: Run whole-platform release gate
+        run: ./testing/scripts/release_gate.sh

@@ -36,7 +36,7 @@ services:
       POSTGRES_MULTIPLE_DATABASES: "auth_db,billing_db"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/postgres/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh:ro
+      - ./infrastructure/observability/postgres/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh:ro
     ports:
       - "${POSTGRES_HOST_PORT:-15432}:5432"
     healthcheck:
@@ -60,7 +60,7 @@ services:
   gateway:
     build:
       <<: *build-context
-      dockerfile: services/gateway/Dockerfile
+      dockerfile: microservices/gateway/Dockerfile
     restart: unless-stopped
     ports:
       - "${GATEWAY_HOST_PORT:-18000}:8000"
@@ -88,7 +88,7 @@ services:
   auth:
     build:
       <<: *build-context
-      dockerfile: services/auth/Dockerfile
+      dockerfile: microservices/auth/Dockerfile
     restart: unless-stopped
     ports:
       - "${AUTH_HOST_PORT:-18001}:8001"
@@ -106,7 +106,7 @@ services:
   router:
     build:
       <<: *build-context
-      dockerfile: services/router/Dockerfile
+      dockerfile: microservices/router/Dockerfile
     restart: unless-stopped
     ports:
       - "8002:8002"
@@ -117,7 +117,7 @@ services:
       BILLING_SERVICE_URL: "http://billing:8004"
       ROUTING_CONFIG_PATH: "/app/config/routing.yaml"
     volumes:
-      - ./config:/app/config:ro
+      - ./ai/config:/app/config:ro
     depends_on:
       redis:
         condition: service_healthy
@@ -134,7 +134,7 @@ services:
   provider:
     build:
       <<: *build-context
-      dockerfile: services/provider/Dockerfile
+      dockerfile: microservices/provider/Dockerfile
     restart: unless-stopped
     ports:
       - "8003:8003"
@@ -152,7 +152,7 @@ services:
   billing:
     build:
       <<: *build-context
-      dockerfile: services/billing/Dockerfile
+      dockerfile: microservices/billing/Dockerfile
     restart: unless-stopped
     ports:
       - "8004:8004"
@@ -178,7 +178,7 @@ services:
     ports:
       - "${PROMETHEUS_HOST_PORT:-19090}:9090"
     volumes:
-      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -199,8 +199,8 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./infrastructure/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
 
@@ -212,7 +212,7 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./infra/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - ./infrastructure/observability/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
 
@@ -222,7 +222,7 @@ services:
     volumes:
       - /var/log:/var/log:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - ./infra/promtail/promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - ./infrastructure/observability/promtail/promtail-config.yaml:/etc/promtail/config.yaml:ro
     command: -config.file=/etc/promtail/config.yaml
     depends_on:
       - loki

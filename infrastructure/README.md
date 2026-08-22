@@ -4,7 +4,7 @@
 
 - `kubernetes/` - Kubernetes manifests (K8s deployments)
 - `terraform/` - Terraform configurations (AWS provisioning)
-- `scripts/` - Infrastructure scripts
+- `testing/scripts/` - Infrastructure scripts
 
 ## Deployment
 

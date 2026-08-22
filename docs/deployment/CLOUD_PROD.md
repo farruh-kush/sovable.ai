@@ -34,11 +34,11 @@ export REGISTRY="YOUR_REGISTRY"
 export VERSION=$(git rev-parse --short HEAD)
 
 # Build
-docker build -t $REGISTRY/ai-routing-gateway:$VERSION -f services/gateway/Dockerfile .
-docker build -t $REGISTRY/ai-routing-auth:$VERSION -f services/auth/Dockerfile .
-docker build -t $REGISTRY/ai-routing-router:$VERSION -f services/router/Dockerfile .
-docker build -t $REGISTRY/ai-routing-provider:$VERSION -f services/provider/Dockerfile .
-docker build -t $REGISTRY/ai-routing-billing:$VERSION -f services/billing/Dockerfile .
+docker build -t $REGISTRY/ai-routing-gateway:$VERSION -f microservices/gateway/Dockerfile .
+docker build -t $REGISTRY/ai-routing-auth:$VERSION -f microservices/auth/Dockerfile .
+docker build -t $REGISTRY/ai-routing-router:$VERSION -f microservices/router/Dockerfile .
+docker build -t $REGISTRY/ai-routing-provider:$VERSION -f microservices/provider/Dockerfile .
+docker build -t $REGISTRY/ai-routing-billing:$VERSION -f microservices/billing/Dockerfile .
 
 # Push
 docker push $REGISTRY/ai-routing-gateway:$VERSION
@@ -56,16 +56,16 @@ Do not commit raw secrets to version control. We will use the provided template 
 
 1. Copy the template:
    ```bash
-   cp k8s/base/secrets.yaml.template k8s/base/secrets.yaml
+   cp infrastructure/k8s/base/secrets.yaml.template infrastructure/k8s/base/secrets.yaml
    ```
 
-2. Edit `k8s/base/secrets.yaml` and replace all placeholder values (`REPLACE_WITH_...`) with your actual production credentials.
+2. Edit `infrastructure/k8s/base/secrets.yaml` and replace all placeholder values (`REPLACE_WITH_...`) with your actual production credentials.
    *Ensure your PostgreSQL URLs point to your managed RDS instance, and Redis URLs point to your ElastiCache instance.*
 
 3. Create the namespace and apply the secrets:
    ```bash
-   kubectl apply -f k8s/base/namespace.yaml
-   kubectl apply -f k8s/base/secrets.yaml
+   kubectl apply -f infrastructure/k8s/base/namespace.yaml
+   kubectl apply -f infrastructure/k8s/base/secrets.yaml
    ```
 
 *(Best Practice: In a true enterprise environment, use ExternalSecrets, AWS Secrets Manager, or HashiCorp Vault instead of static Secret objects).*
@@ -80,7 +80,7 @@ Create the ConfigMap from the local file:
 
 ```bash
 kubectl create configmap routing-config \
-  --from-file=config/routing.yaml \
+  --from-file=ai/config/routing.yaml \
   -n ai-routing \
   --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -91,7 +91,7 @@ kubectl create configmap routing-config \
 
 You must update the Kubernetes manifests to use the specific image tags you pushed in Step 1.
 
-Using `sed` (Linux) or manually editing the files, replace `latest` with your `$VERSION` tag in `k8s/services/gateway.yaml` and `k8s/services/microservices.yaml`. Also, ensure the image paths point to your `$REGISTRY`.
+Using `sed` (Linux) or manually editing the files, replace `latest` with your `$VERSION` tag in `infrastructure/k8s/services/gateway.yaml` and `infrastructure/k8s/services/microservices.yaml`. Also, ensure the image paths point to your `$REGISTRY`.
 
 Example manual edit in `gateway.yaml`:
 ```yaml
@@ -108,13 +108,13 @@ Apply the Horizontal Pod Autoscalers (HPA) and the service manifests:
 
 ```bash
 # Apply HPAs
-kubectl apply -f k8s/base/hpa.yaml
+kubectl apply -f infrastructure/k8s/base/hpa.yaml
 
 # Apply Microservices (Auth, Router, Provider, Billing)
-kubectl apply -f k8s/services/microservices.yaml
+kubectl apply -f infrastructure/k8s/services/microservices.yaml
 
 # Apply Gateway (Deployment, Service, and Ingress)
-kubectl apply -f k8s/services/gateway.yaml
+kubectl apply -f infrastructure/k8s/services/gateway.yaml
 ```
 
 ---
@@ -154,10 +154,10 @@ Remove the migration command from the Dockerfile entrypoint, and instead execute
 
 To update routing rules, pricing, or add new models without redeploying code:
 
-1. Update your local `config/routing.yaml`.
+1. Update your local `ai/config/routing.yaml`.
 2. Update the ConfigMap:
    ```bash
-   kubectl create configmap routing-config --from-file=config/routing.yaml -n ai-routing --dry-run=client -o yaml | kubectl apply -f -
+   kubectl create configmap routing-config --from-file=ai/config/routing.yaml -n ai-routing --dry-run=client -o yaml | kubectl apply -f -
    ```
 3. Perform a rollout restart of the Router deployment to pick up the new ConfigMap:
    ```bash

@@ -125,4 +125,4 @@ build/
 # Public repository safety
 backend/.env.production
 backend/.env.staging
-web/dashboard/out
+frontend/dashboard/out

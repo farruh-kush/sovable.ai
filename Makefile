@@ -14,7 +14,7 @@
         local-up local-down local-logs local-reset local-key local-test \
         dev-deploy dev-update dev-logs \
         prod-build prod-push prod-deploy prod-update prod-status \
-        lint test
+        lint test frontend-checks release-gate
 
 REGISTRY   ?= ghcr.io/k-farruh
 VERSION    ?= $(shell git rev-parse --short HEAD)
@@ -89,7 +89,7 @@ prod-build: ## Build all Docker images tagged with the current git SHA
 	@echo "Building images with tag: $(VERSION)"
 	@for svc in $(SERVICES); do \
 		echo "  Building $$svc..."; \
-		docker build -t $(REGISTRY)/ai-routing-$$svc:$(VERSION) -f services/$$svc/Dockerfile . ; \
+		docker build -t $(REGISTRY)/ai-routing-$$svc:$(VERSION) -f microservices/$$svc/Dockerfile . ; \
 	done
 	@echo "All images built."
 
@@ -102,14 +102,14 @@ prod-push: ## Push all Docker images to the container registry
 	@echo "All images pushed."
 
 prod-deploy: ## Deploy all manifests to the Kubernetes cluster
-	kubectl apply -f k8s/base/namespace.yaml
-	kubectl apply -f k8s/base/secrets.yaml
+	kubectl apply -f infrastructure/k8s/base/namespace.yaml
+	kubectl apply -f infrastructure/k8s/base/secrets.yaml
 	kubectl create configmap routing-config \
-		--from-file=config/routing.yaml -n $(NAMESPACE) \
+		--from-file=ai/config/routing.yaml -n $(NAMESPACE) \
 		--dry-run=client -o yaml | kubectl apply -f -
-	kubectl apply -f k8s/base/hpa.yaml
-	kubectl apply -f k8s/services/microservices.yaml
-	kubectl apply -f k8s/services/gateway.yaml
+	kubectl apply -f infrastructure/k8s/base/hpa.yaml
+	kubectl apply -f infrastructure/k8s/services/microservices.yaml
+	kubectl apply -f infrastructure/k8s/services/gateway.yaml
 	@echo "Production deployment applied."
 
 prod-update: ## Update image tags in K8s deployments to current VERSION
@@ -131,7 +131,7 @@ prod-status: ## Check the status of all pods and HPAs in the cluster
 
 prod-routing-update: ## Update routing config in K8s without redeploying code
 	kubectl create configmap routing-config \
-		--from-file=config/routing.yaml -n $(NAMESPACE) \
+		--from-file=ai/config/routing.yaml -n $(NAMESPACE) \
 		--dry-run=client -o yaml | kubectl apply -f -
 	kubectl rollout restart deployment router -n $(NAMESPACE)
 	@echo "Routing config updated and router restarted."
@@ -139,17 +139,23 @@ prod-routing-update: ## Update routing config in K8s without redeploying code
 # ── Development Utilities ─────────────────────────────────────────────────────
 
 lint: ## Run Python linting (ruff) across all services
-	ruff check services/ shared/
+	ruff check microservices/ backend/
 
-test: ## Run the test suite
-	pytest tests/ -v
+test: ## Run the backend test suite
+	./testing/scripts/run_tests.sh
+
+frontend-checks: ## Type-check, lint, and build the static dashboard
+	cd frontend/dashboard && npm ci --ignore-scripts && npm run typecheck && npm run lint && npm run build
+
+release-gate: ## Run repository, backend, frontend, and Kubernetes release checks
+	./testing/scripts/release_gate.sh
 
 # ── Standalone microservices reference Kubernetes package ─────────────────────
 reference-k8s-render: ## Render the standalone reference manifests with Kustomize
-	kubectl kustomize k8s/standalone-reference
+	kubectl kustomize infrastructure/k8s/standalone-reference
 
 reference-k8s-validate: ## Render and perform dependency-free structural checks
-	kubectl kustomize k8s/standalone-reference >/tmp/ai-routing-reference-rendered.yaml
+	kubectl kustomize infrastructure/k8s/standalone-reference >/tmp/ai-routing-reference-rendered.yaml
 	@grep -q '^kind: Deployment$$' /tmp/ai-routing-reference-rendered.yaml
 	@test "$$(grep -c '^kind: Deployment$$' /tmp/ai-routing-reference-rendered.yaml)" -eq 5
 	@test "$$(grep -c '^kind: Service$$' /tmp/ai-routing-reference-rendered.yaml)" -eq 5
@@ -160,5 +166,5 @@ reference-k8s-build: ## Build the standalone reference container image
 	docker build -t $${REFERENCE_IMAGE:-ghcr.io/replace-me/ai-routing-reference:0.1.0} docs/sovereign_ai/microservices_reference
 
 reference-k8s-deploy: ## Apply the standalone reference package after creating runtime secrets
-	kubectl apply -k k8s/standalone-reference
+	kubectl apply -k infrastructure/k8s/standalone-reference
 	kubectl -n ai-routing-reference rollout status deployment/gateway

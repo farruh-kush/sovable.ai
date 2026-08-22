@@ -377,7 +377,7 @@ brew install terraform        # macOS
 # snap install terraform      # Linux
 
 # Deploy all Alibaba Cloud resources for dev
-bash scripts/deploy.sh dev
+bash testing/scripts/deploy.sh dev
 ```
 
 **What this provisions:**
@@ -401,7 +401,7 @@ bash scripts/deploy.sh dev
 
 ```bash
 # Build Docker image and push to ACR
-bash scripts/build-and-push.sh dev latest
+bash testing/scripts/build-and-push.sh dev latest
 
 # Verify the API is live
 curl https://$(terraform -chdir=infrastructure/terraform output -raw api_endpoint)/health
@@ -417,7 +417,7 @@ curl https://$(terraform -chdir=infrastructure/terraform output -raw api_endpoin
 ### Task 2.5 — Deploy Production Infrastructure
 
 ```bash
-bash scripts/deploy.sh prod
+bash testing/scripts/deploy.sh prod
 ```
 
 **Additional prod requirements before running:**
@@ -539,7 +539,7 @@ GET /v1/generations/{generation_id}
 
 ### Task 3.4 — Data Policy and ZDR Routing
 
-**Files to modify:** `config/routing.yaml`, `app/router/engine.py`, `app/models/schemas.py`
+**Files to modify:** `ai/config/routing.yaml`, `app/router/engine.py`, `app/models/schemas.py`
 
 **Part A — Tag providers in `routing.yaml`:**
 ```yaml
@@ -638,7 +638,7 @@ Replace the self-hosted Prometheus and Grafana containers in `docker-compose.yml
 
 ### Task 4.3 — A/B Testing Framework
 
-**Files to modify:** `app/router/engine.py`, `config/routing.yaml`
+**Files to modify:** `app/router/engine.py`, `ai/config/routing.yaml`
 
 Allow traffic to be split between two models or providers for quality comparison.
 

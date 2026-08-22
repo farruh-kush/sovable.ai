@@ -68,7 +68,7 @@ ai-routing-layer/
 │   ├── main.py                          # FastAPI app initialization
 │   ├── app_state.py                     # Global application state
 │   │
-│   ├── services/                        # ⭐ MICROSERVICE MODULES
+│   ├── microservices/                        # ⭐ MICROSERVICE MODULES
 │   │   ├── api_gateway/                # HTTP API & endpoints
 │   │   │   ├── __init__.py
 │   │   │   ├── routes.py               # FastAPI routers
@@ -93,7 +93,7 @@ ai-routing-layer/
 │   │       ├── service.py              # Auth logic
 │   │       └── rate_limit.py           # Rate limiting
 │   │
-│   ├── shared/                         # ⭐ SHARED LIBRARIES
+│   ├── backend/shared/                         # ⭐ SHARED LIBRARIES
 │   │   ├── models/                     # Domain models
 │   │   │   ├── __init__.py
 │   │   │   └── core.py                 # Data classes & Pydantic models
@@ -144,7 +144,7 @@ ai-routing-layer/
 │   ├── dashboard/                     # React/Next.js dashboard
 │   └── marketing/                     # Marketing website
 │
-├── infra/                             # Infrastructure-as-Code
+├── infrastructure/observability/                             # Infrastructure-as-Code
 │   ├── kubernetes/                    # Kubernetes manifests
 │   │   ├── base/
 │   │   ├── overlays/
@@ -166,8 +166,8 @@ ai-routing-layer/
 **Responsibility**: Handle all HTTP requests, validation, and authentication
 
 **Files**:
-- `services/api_gateway/routes.py` - Define FastAPI routes
-- `services/api_gateway/dependencies.py` - Dependency injection setup
+- `microservices/api_gateway/routes.py` - Define FastAPI routes
+- `microservices/api_gateway/dependencies.py` - Dependency injection setup
 
 **Key Endpoints**:
 ```
@@ -192,7 +192,7 @@ GET    /v1/keys                      List API keys (admin)
 **Responsibility**: Select optimal provider based on cost, latency, availability
 
 **Files**:
-- `services/routing/engine.py` - Core routing logic
+- `microservices/routing/engine.py` - Core routing logic
 
 **Core Logic**:
 ```python
@@ -215,9 +215,9 @@ def candidates_for_model(model: str) -> List[Provider]:
 **Responsibility**: Abstract provider-specific APIs with unified interface
 
 **Files**:
-- `services/providers/base.py` - Abstract provider interface
-- `services/providers/openai.py` - OpenAI implementation
-- `services/providers/anthropic.py` - Anthropic implementation
+- `microservices/providers/base.py` - Abstract provider interface
+- `microservices/providers/openai.py` - OpenAI implementation
+- `microservices/providers/anthropic.py` - Anthropic implementation
 
 **Interface**:
 ```python
@@ -241,7 +241,7 @@ class BaseProvider:
 **Responsibility**: Track usage and calculate costs
 
 **Files**:
-- `services/billing/service.py` - Billing logic
+- `microservices/billing/service.py` - Billing logic
 
 **Key Operations**:
 ```python
@@ -262,8 +262,8 @@ def record(usage_record: UsageRecord) -> None
 **Responsibility**: Authenticate requests and manage access control
 
 **Files**:
-- `services/auth/service.py` - Authentication logic
-- `services/auth/rate_limit.py` - Rate limiting implementation
+- `microservices/auth/service.py` - Authentication logic
+- `microservices/auth/rate_limit.py` - Rate limiting implementation
 
 **Key Operations**:
 ```python

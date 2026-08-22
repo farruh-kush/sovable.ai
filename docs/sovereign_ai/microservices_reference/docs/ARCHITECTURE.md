@@ -119,13 +119,13 @@ The reference supports two local execution modes.
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-PYTHONPATH=. python scripts/e2e_smoke.py
+PYTHONPATH=. python testing/scripts/e2e_smoke.py
 ```
 
 For a long-running local stack:
 
 ```bash
-PYTHONPATH=. python scripts/run_local.py --provider-mode fake
+PYTHONPATH=. python testing/scripts/run_local.py --provider-mode fake
 ```
 
 For Docker Compose:

@@ -8,8 +8,8 @@
 | --- | --- |
 | Python compilation: `python3 -m compileall -q shared services scripts tests` | Passed. |
 | Unit/contract suite: `PYTHONPATH=. pytest -q` | **5 passed**, one non-failing Starlette/httpx deprecation warning. |
-| Multi-process E2E: `PYTHONPATH=. python3 scripts/e2e_smoke.py` | **Passed on ports 8200–8204.** |
-| Compose structure parser: `python3 scripts/validate_deployment.py` | **Compose structure valid.** |
+| Multi-process E2E: `PYTHONPATH=. python3 testing/scripts/e2e_smoke.py` | **Passed on ports 8200–8204.** |
+| Compose structure parser: `python3 testing/scripts/validate_deployment.py` | **Compose structure valid.** |
 | Docker image build and container runtime | Not executed because Docker is not installed in the sandbox. |
 
 ## E2E coverage

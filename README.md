@@ -130,24 +130,24 @@ curl -X POST http://localhost:8000/v1/chat/completions \
 
 ## ⚙️ Configuration
 
-Routing logic, pricing, and provider capabilities are controlled entirely via `config/routing.yaml`. You can update this file and restart the Router service without modifying code.
+Routing logic, pricing, and provider capabilities are controlled entirely via `ai/config/routing.yaml`. You can update this file and restart the Router service without modifying code.
 
 ---
 
 ## 🚢 Kubernetes Deployment
 
-Production manifests are provided in the `k8s/` directory.
+Production manifests are provided in the `infrastructure/k8s/` directory.
 
 1. Generate secrets from the template:
    ```bash
-   cp k8s/base/secrets.yaml.template k8s/base/secrets.yaml
+   cp infrastructure/k8s/base/secrets.yaml.template infrastructure/k8s/base/secrets.yaml
    # Fill in the actual base64 encoded secrets
    ```
 
 2. Apply the manifests:
    ```bash
-   kubectl apply -f k8s/base/namespace.yaml
-   kubectl apply -f k8s/base/secrets.yaml
-   kubectl apply -f k8s/base/hpa.yaml
-   kubectl apply -f k8s/services/
+   kubectl apply -f infrastructure/k8s/base/namespace.yaml
+   kubectl apply -f infrastructure/k8s/base/secrets.yaml
+   kubectl apply -f infrastructure/k8s/base/hpa.yaml
+   kubectl apply -f infrastructure/k8s/services/
    ```
