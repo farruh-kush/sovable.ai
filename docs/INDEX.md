@@ -167,14 +167,14 @@ ai-routing-layer/
 │
 ├── 🎯 SOURCE CODE (NEW STRUCTURE)
 │   └── src/ai_routing_layer/
-│       ├── services/
+│       ├── microservices/
 │       │   ├── api_gateway/             ← HTTP API
 │       │   ├── routing/                 ← Route selection
 │       │   ├── providers/               ← LLM adapters
 │       │   ├── billing/                 ← Usage tracking
 │       │   └── auth/                    ← Authentication
 │       │
-│       ├── shared/
+│       ├── backend/shared/
 │       │   ├── models/                  ← Data models
 │       │   ├── exceptions/              ← Custom errors
 │       │   ├── middleware/              ← HTTP middleware
@@ -194,7 +194,7 @@ ai-routing-layer/
 │
 ├── 🐳 DEPLOYMENT
 │   ├── docker/                          ← Docker configs
-│   ├── infra/                           ← IaC (K8s, Terraform)
+│   ├── infrastructure/observability/                           ← IaC (K8s, Terraform)
 │   └── docker-compose.yml               ← Local dev
 │
 └── 🌐 FRONTEND
@@ -213,7 +213,7 @@ ai-routing-layer/
 ### I'm deploying to production
 1. Read: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 2. View: `docs/images/deployment-architecture.svg`
-3. Setup: Kubernetes manifests in `infra/kubernetes/`
+3. Setup: Kubernetes manifests in `infrastructure/observability/kubernetes/`
 
 ### I'm updating code imports
 1. Follow: [docs/IMPORT_MIGRATION.md](docs/IMPORT_MIGRATION.md)
@@ -223,11 +223,11 @@ ai-routing-layer/
 ### I want to understand request flow
 1. View: `docs/images/request-flow.svg`
 2. Read: "Data Flow" section in [docs/SERVICE_ARCHITECTURE.md](docs/SERVICE_ARCHITECTURE.md)
-3. Trace: Follow code in `services/api_gateway/routes.py`
+3. Trace: Follow code in `microservices/api_gateway/routes.py`
 
 ### I'm adding a new feature
 1. Identify service: Which service owns this feature?
-2. Review: Service file in `src/ai_routing_layer/services/*/`
+2. Review: Service file in `src/ai_routing_layer/microservices/*/`
 3. Implement: Follow clean architecture patterns
 4. Test: Add unit tests in `tests/unit/`
 5. Document: Update relevant architecture doc
@@ -235,7 +235,7 @@ ai-routing-layer/
 ### I'm scaling for high traffic
 1. Read: "Scaling Considerations" in [docs/SERVICE_ARCHITECTURE.md](docs/SERVICE_ARCHITECTURE.md)
 2. View: `docs/images/deployment-architecture.svg`
-3. Implement: Follow HPA settings in `infra/kubernetes/hpa/`
+3. Implement: Follow HPA settings in `infrastructure/observability/kubernetes/hpa/`
 
 ### I'm debugging a problem
 1. Check request flow: `docs/images/request-flow.svg`

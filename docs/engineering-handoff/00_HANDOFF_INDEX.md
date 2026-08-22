@@ -52,7 +52,7 @@ The package deliberately separates the **current implementation baseline** from 
 
 ## Engineering rules inherited from the repository
 
-The five existing microservices remain isolated and communicate through HTTP REST. Shared models, exceptions, and common middleware belong in the shared library. Auth and billing own separate PostgreSQL databases; cross-database joins are prohibited. Redis is ephemeral state only and must not become a system of record. I/O remains asynchronous. Structured logs use `structlog`, domain errors come from the shared exception package, and routing/model/pricing configuration remains externalized in `config/routing.yaml`.
+The five existing microservices remain isolated and communicate through HTTP REST. Shared models, exceptions, and common middleware belong in the shared library. Auth and billing own separate PostgreSQL databases; cross-database joins are prohibited. Redis is ephemeral state only and must not become a system of record. I/O remains asynchronous. Structured logs use `structlog`, domain errors come from the shared exception package, and routing/model/pricing configuration remains externalized in `ai/config/routing.yaml`.
 
 Any change to auth or billing persistence requires an Alembic migration. Any new provider requires an adapter, registry registration, routing catalog entry, contract tests, and pricing/capability metadata. Any new app-store package requires a signed manifest, permission declaration, security review, and rollback path.
 

@@ -102,13 +102,13 @@ cp .env.example .env.local
 make up
 
 # Run service tests
-./scripts/run_tests.sh
+./testing/testing/scripts/run_tests.sh
 
 # Render the selected Kubernetes overlay
-kubectl kustomize k8s/overlays/alibaba > /tmp/solvable-alibaba.yaml
+kubectl kustomize infrastructure/k8s/overlays/alibaba > /tmp/solvable-alibaba.yaml
 
 # Run the dashboard checks
-cd web/dashboard && npm run typecheck && npm run build
+cd frontend/dashboard && npm run typecheck && npm run build
 ```
 
 The exact commands must remain synchronized with the repository Makefile and service READMEs. Developers must not use production endpoints or keys in local `.env` files.

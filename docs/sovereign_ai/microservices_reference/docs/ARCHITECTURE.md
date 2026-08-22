@@ -90,7 +90,7 @@ Every internal call requires `X-Internal-Secret`. Every internal service returns
 
 ## Routing policy
 
-The reference policy is in `config/routing.json`, not hard-coded into the router logic. `local` routes to the local fake provider and is permitted without external approval. `gpt-4o-mini` represents an approved external route but is rejected unless the caller sets `metadata.allow_external=true` and has a non-free tier. The router also returns a fallback chain, although the reference gateway does not yet execute provider failover; the production router should treat fallback as a state machine with health checks, circuit breakers, and residency re-evaluation at every hop.
+The reference policy is in `ai/config/routing.json`, not hard-coded into the router logic. `local` routes to the local fake provider and is permitted without external approval. `gpt-4o-mini` represents an approved external route but is rejected unless the caller sets `metadata.allow_external=true` and has a non-free tier. The router also returns a fallback chain, although the reference gateway does not yet execute provider failover; the production router should treat fallback as a state machine with health checks, circuit breakers, and residency re-evaluation at every hop.
 
 ## Privacy behavior
 

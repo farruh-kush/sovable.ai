@@ -41,13 +41,13 @@ Professional microservice directory layout:
 
 ```
 src/ai_routing_layer/
-├── services/
+├── microservices/
 │   ├── api_gateway/          # HTTP API & endpoints
 │   ├── routing/              # Routing engine & logic
 │   ├── providers/            # LLM provider adapters
 │   ├── billing/              # Billing & usage
 │   └── auth/                 # Authentication
-├── shared/
+├── backend/shared/
 │   ├── models/               # Domain models
 │   ├── exceptions/           # Custom exceptions
 │   ├── middleware/           # HTTP middleware

@@ -4,7 +4,7 @@
 
 ## Scope
 
-The repository now contains two complementary layers. The existing production-oriented source services remain under `services/` and their existing deployment manifests remain under `k8s/`. The tested, self-contained reference implementation is synchronized under `docs/sovereign_ai/microservices_reference/`. Its independent Kubernetes package is under `k8s/standalone-reference/`.
+The repository now contains two complementary layers. The existing production-oriented source services remain under `microservices/` and their existing deployment manifests remain under `infrastructure/k8s/`. The tested, self-contained reference implementation is synchronized under `docs/sovereign_ai/microservices_reference/`. Its independent Kubernetes package is under `infrastructure/k8s/standalone-reference/`.
 
 The standalone package deploys five REST services: `gateway`, `auth`, `router`, `provider`, and `billing`. Only `gateway` is exposed through the Ingress. The other services are ClusterIP-only and communicate within the namespace.
 
@@ -18,12 +18,12 @@ docker build -t ghcr.io/YOUR_ORG/ai-routing-reference:0.1.0 \
 docker push ghcr.io/YOUR_ORG/ai-routing-reference:0.1.0
 ```
 
-Before deployment, replace the placeholder image in `k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deploymet genBefore deployment, replace the placeholder image in `k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `k8s/standalone-reference/deployments.yaml`, or use a  use External Secrets, Vault, a cloud KMS-backed secret manager, or an equivalent institutionally approved mechanism. Do not cBefore deployment, replace the placeholder image in `k8s/stredential.
+Before deployment, replace the placeholder image in `infrastructure/k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `infrastructure/k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `infrastructure/k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `infrastructure/k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deploymet genBefore deployment, replace the placeholder image in `infrastructure/k8s/standalone-reference/deployments.yaml`, or use a Kustomize imageBefore deployment, replace the placeholder image in `infrastructure/k8s/standalone-reference/deployments.yaml`, or use a  use External Secrets, Vault, a cloud KMS-backed secret manager, or an equivalent institutionally approved mechanism. Do not cBefore deployment, replace the placeholder image in `infrastructure/k8s/stredential.
 
 ## Render and validate
 
 ```bash
-kubectl kustomize k8s/standalone-reference > /tmp/ai-routing-reference.yaml
+kubectl kustomize infrastructure/k8s/standalone-reference > /tmp/ai-routing-reference.yaml
 make reference-k8s-validate
 ```
 
@@ -32,7 +32,7 @@ The rendered package contains five Deployments, five ClusterIP Services, one rou
 ## Deploy
 
 ```bash
-kubectl apply -k k8s/standalone-reference
+kubectl apply -k infrastructure/k8s/standalone-reference
 kubectl -n ai-routing-reference rollout status deployment/auth
 kubectl -n ai-routing-reference rollout status deployment/router
 kubectl -n ai-routing-reference rollout status deployment/provider

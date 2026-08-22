@@ -1,142 +1,42 @@
-# AI Routing Layer — Project Structure
-
-This document describes the microservice architecture directory layout.
+# Solvable AI Project Structure
 
 **Author:** Farruh
 
-```
-ai-routing-platform/
-│
-├── shared/                          # Shared Python library (ai_routing_shared)
-│   ├── pyproject.toml               # Shared library package definition
-│   └── src/ai_routing_shared/
-│       ├── models/                  # Canonical domain models (Pydantic v2)
-│       │   ├── requests.py          # ChatCompletionRequest, EmbeddingRequest
-│       │   ├── responses.py         # ChatCompletionResponse, EmbeddingResponse
-│       │   ├── usage.py             # UsageRecord, GenerationRecord, UsageInfo
-│       │   └── keys.py              # ApiKey, ApiKeyTier
-│       ├── exceptions/              # Unified exception hierarchy
-│       ├── middleware/              # RequestIdMiddleware, error_handler
-│       └── utils/                   # Structured logging, hashing utilities
-│
-├── services/                        # Independently deployable microservices
-│   │
-│   ├── gateway/                     # API Gateway Service (port 8000)
-│   │   ├── Dockerfile
-│   │   ├── pyproject.toml
-│   │   └── src/gateway/
-│   │       ├── main.py              # FastAPI app factory
-│   │       ├── core/
-│   │       │   ├── config.py        # GatewaySettings
-│   │       │   ├── auth.py          # Auth + rate limit + budget dependencies
-│   │       │   └── redis_client.py  # Sliding window rate limiter (Phase 1.1)
-│   │       └── api/v1/
-│   │           ├── chat.py          # POST /v1/chat/completions
-│   │           ├── embeddings.py    # POST /v1/embeddings
-│   │           ├── models.py        # GET /v1/models
-│   │           ├── keys.py          # POST/GET /v1/keys (admin)
-│   │           ├── generations.py   # GET /v1/generations/{id}
-│   │           └── health.py        # GET /health
-│   │
-│   ├── auth/                        # Auth & Identity Service (port 8001)
-│   │   ├── Dockerfile               # Runs Alembic migrations on startup
-│   │   ├── pyproject.toml
-│   │   └── src/auth/
-│   │       ├── main.py
-│   │       ├── core/config.py
-│   │       ├── db/
-│   │       │   ├── database.py      # Async SQLAlchemy engine (no create_all)
-│   │       │   └── models.py        # ApiKeyRecord ORM model
-│   │       └── api/
-│   │           ├── validate.py      # POST /internal/validate-key
-│   │           └── keys.py          # POST/GET /internal/keys
-│   │
-│   ├── router/                      # Router Engine Service (port 8002)
-│   │   ├── Dockerfile
-│   │   ├── pyproject.toml
-│   │   └── src/router/
-│   │       ├── main.py
-│   │       ├── core/
-│   │       │   ├── config.py
-│   │       │   └── redis_client.py  # P50 latency tracking (Phase 4.1)
-│   │       ├── engine/
-│   │       │   └── routing_engine.py  # All routing strategies
-│   │       └── api/__init__.py      # POST /route/chat/completions, etc.
-│   │
-│   ├── provider/                    # Provider Adapter Service (port 8003)
-│   │   ├── Dockerfile
-│   │   ├── pyproject.toml
-│   │   └── src/provider/
-│   │       ├── main.py
-│   │       ├── core/
-│   │       │   ├── config.py
-│   │       │   └── registry.py      # ProviderRegistry
-│   │       ├── adapters/
-│   │       │   ├── base.py          # BaseProviderAdapter + circuit breaker
-│   │       │   ├── openai_adapter.py
-│   │       │   └── anthropic_adapter.py
-│   │       └── api/__init__.py      # POST /adapt/chat/completions, etc.
-│   │
-│   └── billing/                     # Billing & Usage Service (port 8004)
-│       ├── Dockerfile               # Runs Alembic migrations on startup
-│       ├── pyproject.toml
-│       └── src/billing/
-│           ├── main.py
-│           ├── core/config.py
-│           ├── db/
-│           │   ├── database.py
-│           │   └── models.py        # UsageRecordORM
-│           ├── pricing/
-│           │   └── catalog.py       # PricingCatalog with markup
-│           └── api/
-│               ├── usage.py         # POST /internal/usage
-│               └── generations.py   # GET /internal/generations/{id}
-│
-├── config/
-│   └── routing.yaml                 # Routing rules, pricing, tier policies
-│
-├── infra/
-│   ├── postgres/
-│   │   └── init-multiple-databases.sh
-│   ├── prometheus/
-│   │   ├── prometheus.yml
-│   │   └── rules/alerts.yml
-│   ├── grafana/
-│   │   └── provisioning/
-│   │       ├── datasources/
-│   │       └── dashboards/
-│   ├── loki/
-│   │   └── loki-config.yaml
-│   └── promtail/
-│       └── promtail-config.yaml
-│
-├── k8s/
-│   ├── base/
-│   │   ├── namespace.yaml
-│   │   ├── hpa.yaml                 # Horizontal Pod Autoscalers
-│   │   └── secrets.yaml.template
-│   └── services/
-│       ├── gateway.yaml             # Deployment + Service + Ingress
-│       └── microservices.yaml       # auth, router, provider, billing
-│
-├── docker-compose.yml               # Full local development stack
-├── .env.example                     # Environment variable template
-├── README.md                        # Getting started guide
-├── API_DOCS.md                      # API endpoint documentation
-├── AGENTS.md                        # AI agent coding guidelines
-└── PROJECT_STRUCTURE.md             # This file
+This repository is organized around independently deployable services and clear ownership boundaries.
+
+```text
+AI-Routing-Layer/
+├── microservices/
+│   ├── auth/
+│   ├── billing/
+│   ├── gateway/
+│   ├── provider/
+│   └── router/
+├── backend/
+│   ├── shared/                 # stable shared Python library and types
+│   └── legacy-reference/       # retained earlier backend, not production runtime
+├── frontend/
+│   ├── dashboard/              # Next.js static-export console and public site
+│   ├── docs-site/              # MkDocs documentation source and site
+│   ├── legacy-client/           # retained earlier client template
+│   └── legacy-site/             # retained earlier generated site
+├── ai/
+│   └── config/routing.yaml      # versioned routing/model policy catalog
+├── testing/
+│   └── scripts/run_tests.sh     # consolidated service test runner
+├── infrastructure/
+│   ├── k8s/                    # Kubernetes base and cloud overlays
+│   └── observability/          # Prometheus, Grafana, Loki, and Promtail
+├── tools/
+│   ├── build/                  # reproducible build helpers
+│   └── patches/                # non-runtime patch files
+├── docs/                       # engineering handoff and product documentation
+├── scripts/                    # repository setup utilities
+└── docker-compose.yml          # local development stack
 ```
 
-## Service Communication Map
+## Ownership rules
 
-| Caller | Called | Protocol | Purpose |
-|--------|--------|----------|---------|
-| Gateway | Auth | HTTP POST | Validate API key on every request |
-| Gateway | Router | HTTP POST | Forward validated requests |
-| Gateway | Redis | TCP | Rate limiting, prompt cache, spend check |
-| Router | Provider | HTTP POST | Execute LLM calls |
-| Router | Billing | HTTP POST (async) | Emit usage events |
-| Router | Redis | TCP | Record and read P50 latency |
-| Billing | Redis | TCP | Update monthly spend counter |
-| Auth | PostgreSQL (auth_db) | TCP | Read/write API key records |
-| Billing | PostgreSQL (billing_db) | TCP | Read/write usage records |
+The five directories under `microservices/` own their domain contracts and service-local tests. The `backend/shared/` package contains only stable shared types, errors, middleware, serialization, and logging helpers. The `frontend/` directory contains browser-facing applications. AI policy assets belong under `ai/`; provider adapter implementation remains in `microservices/provider`. Cross-service validation belongs under `testing/`, while Kubernetes and observability assets belong under `infrastructure/`.
+
+Generated exports and local caches remain inside their owning application directory and are not treated as source-of-truth code. Secrets, kubeconfig files, local environments, and runtime logs remain ignored and outside committed source.

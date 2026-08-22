@@ -116,8 +116,8 @@
   - python/, js/
 - web/
   - marketing/ (static), dashboard/ (React/Next.js)
-- infra/
-  - docker-compose.yml, k8s/, terraform/
+- infrastructure/observability/
+  - docker-compose.yml, infrastructure/k8s/, terraform/
 - docs/
   - openapi.yaml, architecture.md (this file)
 
@@ -142,7 +142,7 @@ Key frontend design principles
 
 Suggested folder layout for frontend (Next.js)
 
-web/dashboard/
+frontend/dashboard/
   - package.json
   - next.config.js
   - pages/ (or app/)
@@ -179,7 +179,7 @@ Developer notes
 - Build the dashboard incrementally; start with a minimal Next.js app that calls `/v1/health` and `/v1/chat/completions` using `dev-default-key` then add auth and key management.
 - For design assets, maintain a simple Figma/Canva board with core screens: Landing, Signup, Dashboard Keys, Usage, Routing Editor, Playground.
 
-If you'd like, I can scaffold a minimal Next.js project under `web/dashboard` with starter pages, components, and a README — ready to run with `npm install` and `npm run dev`.
+If you'd like, I can scaffold a minimal Next.js project under `frontend/dashboard` with starter pages, components, and a README — ready to run with `npm install` and `npm run dev`.
 
 ## Core data models (conceptual)
 - User { id, email, oauth_provider, role, created_at }

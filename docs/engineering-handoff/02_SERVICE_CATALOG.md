@@ -12,19 +12,19 @@ Every service owns one domain and exposes a versioned contract. Service code mus
 
 | Service/module | Repository location | Responsibility | State owner | Current status |
 |---|---|---|---|---|
-| Gateway | `services/gateway` | Public API, authentication dependency, request lifecycle, streaming, normalized errors, request IDs, cache/policy coordination. | Redis for ephemeral cache/limits; no domain database. | Current core service. |
-| Auth / Identity | `services/auth` | Users, organizations, workspaces, projects, members, roles, sessions, API keys, service identities, invitations, MFA metadata. | `auth_db`. | Current service; organization expansion required. |
-| Router / Aggregator | `services/router` | Candidate discovery, policy filtering, route scoring, fallback, retries, circuit breakers, route explanations, health state. | Versioned policy catalog; Redis health cache; durable route-decision events. | Current core service; target policy engine expansion required. |
-| Provider | `services/provider` | Provider adapter registry, upstream calls, response normalization, usage extraction, provider errors, capability checks. | Provider/model catalog and secret references. | Current core service. |
-| Billing / Usage | `services/billing` | Usage ledger, pricing, provider cost, markup, credits, budgets, invoices, adjustments, reconciliation. | `billing_db`. | Current service; append-only ledger expansion required. |
+| Gateway | `microservices/gateway` | Public API, authentication dependency, request lifecycle, streaming, normalized errors, request IDs, cache/policy coordination. | Redis for ephemeral cache/limits; no domain database. | Current core service. |
+| Auth / Identity | `microservices/auth` | Users, organizations, workspaces, projects, members, roles, sessions, API keys, service identities, invitations, MFA metadata. | `auth_db`. | Current service; organization expansion required. |
+| Router / Aggregator | `microservices/router` | Candidate discovery, policy filtering, route scoring, fallback, retries, circuit breakers, route explanations, health state. | Versioned policy catalog; Redis health cache; durable route-decision events. | Current core service; target policy engine expansion required. |
+| Provider | `microservices/provider` | Provider adapter registry, upstream calls, response normalization, usage extraction, provider errors, capability checks. | Provider/model catalog and secret references. | Current core service. |
+| Billing / Usage | `microservices/billing` | Usage ledger, pricing, provider cost, markup, credits, budgets, invoices, adjustments, reconciliation. | `billing_db`. | Current service; append-only ledger expansion required. |
 | Privacy / Data Protection | Target module or service | Sensitive-data detection, masking, tokenization, blocking, restoration, retention evidence, provider eligibility. | Policy catalog plus request-scoped protected mapping. | Target increment; start as bounded module before extraction. |
 | Catalog / Policy | Target control-plane module | Providers, models, capabilities, price versions, route policies, masking policies, retention policies. | Control-plane database or a dedicated catalog schema. | Target increment; avoid duplicating routing YAML indefinitely. |
 | Data Platform | Target event and pipeline layer | Event ingestion, schema registry, sanitized analytics, warehouse exports, lineage, quality checks. | Event bus, object storage, warehouse. | Target increment. |
 | Marketplace | Target service | Agent/app catalog, publisher verification, manifests, versions, approvals, installations, reviews, takedowns. | Marketplace database and signed artifact storage. | Target increment. |
 | Agent Runtime | Target isolated runtime | Execute approved agents, workflows, tools, and connectors with declared permissions and resource limits. | Ephemeral run state plus event/audit records. | Target increment. |
-| Web Console | `web/dashboard` and static site | Public website, authenticated User Panel, Admin Panel, Playground, docs, usage, billing, marketplace. | Browser state plus API services. | Current UI baseline; authenticated expansion required. |
-| Shared library | `shared/src/ai_routing_shared` | Shared types, exceptions, serialization, middleware, logging helpers, configuration primitives. | None. | Current shared package. |
-| Operations | `infra/` plus platform stack | OpenTelemetry, Prometheus, Grafana, Loki, alert rules, dashboards, synthetic checks, incident metadata. | Metrics/logs/traces backends. | Current assets; production hardening required. |
+| Web Console | `frontend/dashboard` and static site | Public website, authenticated User Panel, Admin Panel, Playground, docs, usage, billing, marketplace. | Browser state plus API services. | Current UI baseline; authenticated expansion required. |
+| Shared library | `backend/shared/src/ai_routing_shared` | Shared types, exceptions, serialization, middleware, logging helpers, configuration primitives. | None. | Current shared package. |
+| Operations | `infrastructure/observability/` plus platform stack | OpenTelemetry, Prometheus, Grafana, Loki, alert rules, dashboards, synthetic checks, incident metadata. | Metrics/logs/traces backends. | Current assets; production hardening required. |
 
 ## 3. Service contracts and dependencies
 

@@ -5,7 +5,7 @@ author: "GitHub Copilot (custom agent)"
 description: "Agent specialized for designing, implementing, and reviewing an OpenRouter-like product (website, inference engine, SDKs, gateway, provider adapters) built with a microservices architecture. Use this agent when working on AWS-ready architecture, Python backend services, Docker Compose local-first workflows, GitHub Actions CI, API contracts, SDK generation, deployment manifests, and cross-service integrations."
 applyTo:
   - "src/**"
-  - "config/**"
+  - "ai/config/**"
   - "docs/**"
   - "tests/**"
 # Restrict always-on application to the routing/product areas rather than global editor context

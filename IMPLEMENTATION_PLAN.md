@@ -539,7 +539,7 @@ GET /v1/generations/{generation_id}
 
 ### Task 3.4 — Data Policy and ZDR Routing
 
-**Files to modify:** `config/routing.yaml`, `app/router/engine.py`, `app/models/schemas.py`
+**Files to modify:** `ai/config/routing.yaml`, `app/router/engine.py`, `app/models/schemas.py`
 
 **Part A — Tag providers in `routing.yaml`:**
 ```yaml
@@ -638,7 +638,7 @@ Replace the self-hosted Prometheus and Grafana containers in `docker-compose.yml
 
 ### Task 4.3 — A/B Testing Framework
 
-**Files to modify:** `app/router/engine.py`, `config/routing.yaml`
+**Files to modify:** `app/router/engine.py`, `ai/config/routing.yaml`
 
 Allow traffic to be split between two models or providers for quality comparison.
 

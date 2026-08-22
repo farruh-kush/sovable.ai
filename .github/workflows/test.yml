@@ -22,16 +22,16 @@ jobs:
             'sqlalchemy[asyncio]' structlog prometheus-client \
             pydantic pydantic-settings PyJWT pyyaml \
             pytest pytest-asyncio respx uvicorn
-          python -m pip install -e shared
+          python -m pip install -e backend/shared
       - name: Run service and shared tests
         env:
-          PYTHONPATH: shared/src:services/auth/src:services/billing/src:services/gateway/src:services/provider/src:services/router/src
+          PYTHONPATH: backend/shared/src:microservices/auth/src:microservices/billing/src:microservices/gateway/src:microservices/provider/src:microservices/router/src
         run: |
           python -m pytest \
-            shared/tests \
-            services/auth/tests \
-            services/billing/tests \
-            services/gateway/tests \
-            services/provider/tests \
-            services/router/tests \
+            backend/shared/tests \
+            microservices/auth/tests \
+            microservices/billing/tests \
+            microservices/gateway/tests \
+            microservices/provider/tests \
+            microservices/router/tests \
             -v

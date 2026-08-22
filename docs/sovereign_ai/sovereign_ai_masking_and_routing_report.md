@@ -164,7 +164,7 @@ The stack should favor open interfaces and domestic deployability. Managed cloud
 | Edge and API ingress | Envoy or Kong, WAF, DDoS protection, mTLS | Keep public exposure at the edge; route only to authenticated Gateway instances. |
 | Service runtime | Python 3.11+, FastAPI, `httpx`, async PostgreSQL access, `redis.asyncio` | Matches the project guidance for asynchronous I/O. Use `structlog` with generation, tenant, key, provider, and policy metadata. |
 | Gateway | FastAPI Gateway service with canonical request/response types, SSE streaming, privacy pipeline, and response normalizer | The privacy pipeline must be mandatory and fail closed for restricted data. |
-| Provider adapters | Provider service with isolated adapter classes and registry | Follow the project pattern: adapter, registry registration, configuration in `config/routing.yaml`, normalized errors, timeout and retry policy. |
+| Provider adapters | Provider service with isolated adapter classes and registry | Follow the project pattern: adapter, registry registration, configuration in `ai/config/routing.yaml`, normalized errors, timeout and retry policy. |
 | Routing substrate | Project Router service, optionally informed by LiteLLM or Portkey design patterns | LiteLLM documents weighted, latency, rate-limit-aware, least-busy, cost-based, retry, cooldown, and fallback routing [11]. Reuse ideas or components only after security and licensing review. |
 | Identity | OIDC/OAuth2, Keycloak or an enterprise IdP, short-lived service tokens, mTLS | Use tenant-scoped claims and separate administrative roles. Do not use provider API keys as end-user identity. |
 | Secrets and keys | HashiCorp Vault or equivalent secrets manager; domestic HSM/KMS; envelope encryption | Separate provider secrets, mapping-vault keys, audit keys, and tenant keys. Consider client-held or dual-control keys for banks. |
@@ -200,7 +200,7 @@ No guardrail or model classifier should be sold as a complete defense. AWS docum
 
 ## 9. Routing and masking policy examples
 
-The policy language should be configuration-driven, versioned, signed, and tested. It must not be hardcoded in application logic. The project’s `config/routing.yaml` can store model capabilities, provider metadata, prices, rate limits, regions, data-classification support, and fallback eligibility, while tenant-specific policy belongs in the policy registry.
+The policy language should be configuration-driven, versioned, signed, and tested. It must not be hardcoded in application logic. The project’s `ai/config/routing.yaml` can store model capabilities, provider metadata, prices, rate limits, regions, data-classification support, and fallback eligibility, while tenant-specific policy belongs in the policy registry.
 
 ```yaml
 policies:

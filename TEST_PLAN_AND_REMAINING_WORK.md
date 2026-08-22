@@ -16,7 +16,7 @@ This document outlines the comprehensive testing strategy for the new microservi
 
 ## 2. Comprehensive Test Plan
 
-The current test files (`services/*/tests/test_*.py`) are placeholders (`assert True`). They must be populated according to the following strategy.
+The current test files (`microservices/*/tests/test_*.py`) are placeholders (`assert True`). They must be populated according to the following strategy.
 
 ### 2.1. Shared Library (`ai-routing-shared`)
 **Focus:** Pure unit tests with no external dependencies.
@@ -64,9 +64,9 @@ The following items are not deployment blockers, but are required to achieve ful
 
 | Task | Component | Description | Priority |
 | :--- | :--- | :--- | :--- |
-| **Google Gemini Adapter** | Provider | Implement `GoogleAdapter` in `services/provider/src/provider/adapters/google_adapter.py` using the Gemini API. | High |
-| **Mistral Adapter** | Provider | Implement `MistralAdapter` in `services/provider/src/provider/adapters/mistral_adapter.py`. | High |
+| **Google Gemini Adapter** | Provider | Implement `GoogleAdapter` in `microservices/provider/src/provider/adapters/google_adapter.py` using the Gemini API. | High |
+| **Mistral Adapter** | Provider | Implement `MistralAdapter` in `microservices/provider/src/provider/adapters/mistral_adapter.py`. | High |
 | **Implement Tests** | All Services | Replace the `assert True` placeholders with the tests outlined in Section 2. | High |
 | **Observability Stack** | Infrastructure | Deploy Prometheus and Grafana (or Alibaba Cloud ARMS) to scrape the `/metrics` endpoints of all microservices. | Medium |
 | **A/B Testing Engine** | Router | Implement Phase 4 (Task 4.3) to randomly split traffic between models/providers based on an `experiment_name` header. | Low |
-| **Admin Web Dashboard** | Web | Complete the Next.js dashboard in `web/dashboard/` to allow UI-based API key generation and usage visualization. | Low |
+| **Admin Web Dashboard** | Web | Complete the Next.js dashboard in `frontend/dashboard/` to allow UI-based API key generation and usage visualization. | Low |

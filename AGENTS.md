@@ -7,7 +7,7 @@ This file contains instructions for AI agents working on the AI Routing Layer pr
 ## Architecture Principles
 
 1. **Microservice Isolation:** The system is divided into 5 independent microservices (`gateway`, `auth`, `router`, `provider`, `billing`). Do not introduce tight coupling between them. They communicate exclusively via HTTP REST.
-2. **Shared Library:** Domain models, exceptions, and common middleware reside in `shared/src/ai_routing_shared`. If a model is used by more than one service, it belongs in the shared library.
+2. **Shared Library:** Domain models, exceptions, and common middleware reside in `backend/shared/src/ai_routing_shared`. If a model is used by more than one service, it belongs in the shared library.
 3. **Database Segregation:** `auth` and `billing` have their own isolated PostgreSQL databases (`auth_db` and `billing_db`). Do not attempt to join tables across these databases.
 4. **State Management:** Redis is used for ephemeral state (rate limiting, prompt caching, latency tracking, monthly spend cache). Do not use Redis as a persistent system of record.
 
@@ -21,14 +21,14 @@ This file contains instructions for AI agents working on the AI Routing Layer pr
 ## Development Workflow
 
 1. **Schema Changes:** If you modify SQLAlchemy models in `auth` or `billing`, you MUST generate an Alembic migration using `alembic revision --autogenerate`.
-2. **Configuration:** Do not hardcode routing rules, model limits, or pricing. Read them from `config/routing.yaml`.
+2. **Configuration:** Do not hardcode routing rules, model limits, or pricing. Read them from `ai/config/routing.yaml`.
 3. **Adding Providers:** To add a new LLM provider:
-   - Create a new adapter in `services/provider/src/provider/adapters/`.
+   - Create a new adapter in `microservices/provider/src/provider/adapters/`.
    - Inherit from `BaseProviderAdapter`.
    - Register it in `ProviderRegistry`.
-   - Add it to `config/routing.yaml`.
+   - Add it to `ai/config/routing.yaml`.
 
 ## Testing
 
 When writing tests, use `pytest-asyncio`. Mock external HTTP calls using `respx` or by patching the `httpx.AsyncClient`.
-Tests are now strictly segregated by microservice. Place tests in `services/<service_name>/tests/` and run them from the respective service directory.
+Tests are now strictly segregated by microservice. Place tests in `microservices/<service_name>/tests/` and run them from the respective service directory.
