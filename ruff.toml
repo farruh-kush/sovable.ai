@@ -1,0 +1,12 @@
+line-length = 100
+target-version = "py311"
+
+[lint]
+select = ["E", "F", "W", "I", "UP", "B", "BLE", "RUF", "SIM"]
+
+[lint.per-file-ignores]
+"microservices/**/src/**/api/**/*.py" = ["B008"]
+"microservices/**/src/**/core/auth.py" = ["B008"]
+"microservices/provider/src/provider/adapters/*.py" = ["SIM117"]
+"microservices/router/src/router/engine/routing_engine.py" = ["SIM117"]
+"microservices/**/alembic/env.py" = ["E402"]

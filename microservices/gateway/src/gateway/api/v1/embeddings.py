@@ -6,9 +6,8 @@ Author: Farruh
 from __future__ import annotations
 
 import httpx
-from fastapi import APIRouter, Depends, Request
-
 from ai_routing_shared.models import ApiKey, EmbeddingRequest, EmbeddingResponse
+from fastapi import APIRouter, Depends, Request
 
 from ...core.auth import enforce_budget, enforce_model_whitelist
 from ...core.config import GatewaySettings, get_settings
@@ -30,9 +29,7 @@ async def embeddings(
     payload["_api_key_id"] = api_key.id
     payload["_user_id"] = api_key.user_id
 
-    async with httpx.AsyncClient(
-        base_url=settings.router_service_url, timeout=60.0
-    ) as client:
+    async with httpx.AsyncClient(base_url=settings.router_service_url, timeout=60.0) as client:
         response = await client.post("/route/embeddings", json=payload)
         response.raise_for_status()
 

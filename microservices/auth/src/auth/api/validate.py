@@ -7,14 +7,13 @@ Author: Farruh
 
 from __future__ import annotations
 
+from ai_routing_shared.exceptions import AuthenticationError
+from ai_routing_shared.models import ApiKey, ApiKeyTier
+from ai_routing_shared.utils import hash_api_key
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from ai_routing_shared.exceptions import AuthenticationError
-from ai_routing_shared.models import ApiKey, ApiKeyTier
-from ai_routing_shared.utils import hash_api_key
 
 from ..db.database import get_session
 from ..db.models import ApiKeyRecord

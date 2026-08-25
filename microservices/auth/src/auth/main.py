@@ -1,13 +1,16 @@
 """Auth and Identity Service application entry point.
 Author: Farruh
 """
+
 from __future__ import annotations
+
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
-from fastapi import FastAPI
+
 from ai_routing_shared.middleware import RequestIdMiddleware, error_handler_middleware
 from ai_routing_shared.utils import configure_logging
-from .api import internal_router, public_router
+from fastapi import FastAPI
+
 from .api.identity import router as identity_router
 from .api.keys import router as keys_router
 from .api.validate import router as validate_router

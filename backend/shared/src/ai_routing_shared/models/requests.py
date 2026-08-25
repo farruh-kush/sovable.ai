@@ -9,7 +9,7 @@ Author: Farruh
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -18,7 +18,7 @@ class ChatMessage(BaseModel):
     """A single message in a chat conversation."""
 
     role: Literal["system", "user", "assistant", "tool"]
-    content: Union[str, List[Dict[str, Any]]]
+    content: str | list[dict[str, Any]]
 
 
 class ProviderPreferences(BaseModel):
@@ -36,10 +36,10 @@ class ProviderPreferences(BaseModel):
             on user data or do not offer Zero Data Retention (ZDR).
     """
 
-    sort: Optional[Literal["price", "throughput", "latency"]] = None
-    order: Optional[List[str]] = None
+    sort: Literal["price", "throughput", "latency"] | None = None
+    order: list[str] | None = None
     allow_fallbacks: bool = True
-    data_collection: Optional[Literal["allow", "deny"]] = None
+    data_collection: Literal["allow", "deny"] | None = None
 
 
 class ChatCompletionRequest(BaseModel):
@@ -49,23 +49,23 @@ class ChatCompletionRequest(BaseModel):
     """
 
     model: str
-    messages: List[ChatMessage]
-    temperature: Optional[float] = Field(default=1.0, ge=0.0, le=2.0)
-    max_tokens: Optional[int] = Field(default=None, gt=0)
+    messages: list[ChatMessage]
+    temperature: float | None = Field(default=1.0, ge=0.0, le=2.0)
+    max_tokens: int | None = Field(default=None, gt=0)
     stream: bool = False
-    user: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    user: str | None = None
+    metadata: dict[str, Any] | None = None
 
     # Phase 3 — Task 3.1: Client-side routing controls
-    provider: Optional[ProviderPreferences] = None
+    provider: ProviderPreferences | None = None
 
     # Phase 3 — Task 3.4: Data policy routing
-    response_format: Optional[Dict[str, Any]] = None
+    response_format: dict[str, Any] | None = None
 
 
 class EmbeddingRequest(BaseModel):
     """OpenAI-compatible embedding request."""
 
     model: str
-    input: Union[str, List[str]]
-    user: Optional[str] = None
+    input: str | list[str]
+    user: str | None = None

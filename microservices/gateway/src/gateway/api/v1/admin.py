@@ -4,10 +4,11 @@ The gateway is the only public entry point. This endpoint aggregates safe,
 non-secret operational signals from internal services for the Admin Console.
 Author: Farruh
 """
+
 from __future__ import annotations
 
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -39,7 +40,9 @@ async def _safe_get(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
 
 
 @router.get("/admin/overview", dependencies=[Depends(require_admin_key)])
-async def admin_overview(settings: GatewaySettings = Depends(get_settings)) -> dict[str, Any]:
+async def admin_overview(
+    settings: GatewaySettings = Depends(get_settings),
+) -> dict[str, Any]:
     """Return a safe operational snapshot for the Admin Console."""
     async with httpx.AsyncClient(timeout=8.0) as client:
         router_health = await _safe_get(client, f"{settings.router_service_url}/health")
@@ -64,7 +67,7 @@ async def admin_overview(settings: GatewaySettings = Depends(get_settings)) -> d
     circuit_count = sum(1 for item in provider_items if item["circuit_open"])
 
     return {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "gateway": {"status": "healthy", "service": "gateway"},
         "router": router_health,
         "provider": {

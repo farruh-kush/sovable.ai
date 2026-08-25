@@ -11,8 +11,9 @@ from __future__ import annotations
 
 import asyncio
 from abc import ABC, abstractmethod
+from collections.abc import AsyncIterator
 from time import monotonic
-from typing import Any, AsyncIterator, Optional
+from typing import Any
 
 from ai_routing_shared.exceptions import ProviderCircuitOpenError, ProviderError
 from ai_routing_shared.models import (
@@ -61,7 +62,7 @@ class BaseProviderAdapter(ABC):
 
     name: str = "base"
 
-    def __init__(self, api_key: Optional[str], timeout_seconds: float = 30.0) -> None:
+    def __init__(self, api_key: str | None, timeout_seconds: float = 30.0) -> None:
         self.api_key = api_key
         self.timeout_seconds = timeout_seconds
         self.health = ProviderHealth()
@@ -72,9 +73,7 @@ class BaseProviderAdapter(ABC):
         """Execute a chat completion with retry and circuit breaker logic."""
         return await self._with_retries(self._chat_impl, request)
 
-    async def chat_stream(
-        self, request: ChatCompletionRequest
-    ) -> AsyncIterator[Any]:
+    async def chat_stream(self, request: ChatCompletionRequest) -> AsyncIterator[Any]:
         """Execute a streaming chat completion."""
         async for chunk in self._chat_stream_impl(request):
             yield chunk
@@ -91,9 +90,7 @@ class BaseProviderAdapter(ABC):
         ...
 
     @abstractmethod
-    async def _chat_stream_impl(
-        self, request: ChatCompletionRequest
-    ) -> AsyncIterator[Any]:
+    async def _chat_stream_impl(self, request: ChatCompletionRequest) -> AsyncIterator[Any]:
         """Provider-specific streaming chat implementation."""
         ...
 
@@ -113,7 +110,7 @@ class BaseProviderAdapter(ABC):
                 retriable=True,
             )
 
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         for attempt in range(_MAX_RETRIES + 1):
             try:
                 start = monotonic()
@@ -126,7 +123,9 @@ class BaseProviderAdapter(ABC):
                 if not exc.retriable or attempt == _MAX_RETRIES:
                     raise
                 await asyncio.sleep(0.1 * (attempt + 1))
-            except Exception as exc:
+            # Provider SDKs can expose arbitrary exception classes. Normalize them
+            # here so retries and circuit-breaker accounting remain consistent.
+            except Exception as exc:  # noqa: BLE001
                 last_error = exc
                 self.health.record_failure()
                 if attempt == _MAX_RETRIES:

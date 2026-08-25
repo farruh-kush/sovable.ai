@@ -8,12 +8,11 @@ Author: Farruh
 
 from __future__ import annotations
 
+from ai_routing_shared.models import GenerationCost, GenerationRecord, UsageInfo
+from ai_routing_shared.utils import get_logger
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from ai_routing_shared.models import GenerationCost, GenerationRecord, UsageInfo
-from ai_routing_shared.utils import get_logger
 
 from ..db.database import get_session
 from ..db.models import UsageRecordORM
@@ -33,9 +32,7 @@ async def get_generation(
     The ``user_id`` parameter is provided by the Gateway after authenticating
     the request, ensuring users can only access their own records.
     """
-    result = await session.execute(
-        select(UsageRecordORM).where(UsageRecordORM.id == generation_id)
-    )
+    result = await session.execute(select(UsageRecordORM).where(UsageRecordORM.id == generation_id))
     record = result.scalar_one_or_none()
 
     if record is None:
@@ -84,7 +81,8 @@ async def get_monthly_spend(
 ) -> dict:
     """Return the current month's total spend for an API key."""
     from datetime import datetime
-    from sqlalchemy import func, extract
+
+    from sqlalchemy import extract, func
 
     now = datetime.utcnow()
     result = await session.execute(

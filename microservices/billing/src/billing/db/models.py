@@ -6,7 +6,6 @@ Author: Farruh
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, Float, Integer, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -39,11 +38,11 @@ class UsageRecordORM(Base):
     cache_discount_usd: Mapped[float] = mapped_column(Float, default=0.0)
 
     # Phase 4 — Task 4.3: A/B testing
-    experiment_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
-    experiment_variant: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    experiment_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    experiment_variant: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     # Phase 4 — Task 4.4: Structured output validation
-    schema_validation_passed: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    schema_validation_passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     validation_retry_count: Mapped[int] = mapped_column(Integer, default=0)
 
     created_at: Mapped[datetime] = mapped_column(

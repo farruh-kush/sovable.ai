@@ -6,14 +6,12 @@ Author: Farruh
 from __future__ import annotations
 
 import uuid
-from typing import List, Optional
-
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from ai_routing_shared.models import ApiKeyTier
 from ai_routing_shared.utils import generate_api_key, hash_api_key
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.database import get_session
 from ..db.models import ApiKeyRecord
@@ -25,8 +23,8 @@ class CreateKeyRequest(BaseModel):
     name: str
     user_id: str = "system"
     tier: ApiKeyTier = ApiKeyTier.FREE
-    monthly_budget_usd: Optional[float] = None
-    allowed_models: Optional[List[str]] = None
+    monthly_budget_usd: float | None = None
+    allowed_models: list[str] | None = None
 
 
 class CreateKeyResponse(BaseModel):
@@ -71,6 +69,7 @@ async def list_keys(
 ) -> dict:
     """List all API keys (without raw key values)."""
     from sqlalchemy import select
+
     result = await session.execute(select(ApiKeyRecord))
     records = result.scalars().all()
     return {

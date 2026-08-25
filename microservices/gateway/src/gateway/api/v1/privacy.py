@@ -1,13 +1,18 @@
 """Authenticated privacy preview proxy. Author: Farruh"""
+
 from __future__ import annotations
+
 from typing import Any
+
 import httpx
-from fastapi import APIRouter, Depends, Request
 from ai_routing_shared.models import ApiKey
+from fastapi import APIRouter, Depends, Request
+
 from ...core.auth import enforce_rate_limit
 from ...core.config import GatewaySettings, get_settings
 
 router = APIRouter()
+
 
 @router.post("/privacy/preview")
 async def privacy_preview(

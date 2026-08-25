@@ -17,12 +17,11 @@ from __future__ import annotations
 import asyncio
 import time
 import uuid
+from collections.abc import AsyncIterator
 from pathlib import Path
-from typing import AsyncIterator, List, Optional
 
 import httpx
 import yaml
-
 from ai_routing_shared.exceptions import (
     DataPolicyViolationError,
     NoProvidersAvailableError,
@@ -61,6 +60,7 @@ class RoutingEngine:
         self._provider_url = provider_service_url
         self._billing_url = billing_service_url
         self._redis = redis
+        self._background_tasks: set[asyncio.Task[None]] = set()
 
     @staticmethod
     def _load_config(path: Path) -> dict:
@@ -82,7 +82,7 @@ class RoutingEngine:
         candidates = await self._resolve_candidates(request)
         generation_id = f"gen_{uuid.uuid4().hex}"
 
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         for provider_name in candidates:
             try:
                 start_ms = time.monotonic() * 1000
@@ -93,7 +93,7 @@ class RoutingEngine:
                 await self._redis.record_latency(provider_name, request.model, latency_ms)
 
                 # Emit usage event asynchronously (non-blocking)
-                asyncio.create_task(
+                usage_task = asyncio.create_task(
                     self._emit_usage_event(
                         generation_id=generation_id,
                         api_key_id=api_key_id,
@@ -105,6 +105,8 @@ class RoutingEngine:
                         fallback_used=(provider_name != candidates[0]),
                     )
                 )
+                self._background_tasks.add(usage_task)
+                usage_task.add_done_callback(self._background_tasks.discard)
 
                 response.generation_id = generation_id
                 return response
@@ -133,14 +135,12 @@ class RoutingEngine:
     ) -> AsyncIterator[str]:
         """Proxy normalized provider SSE chunks with fallback support."""
         candidates = await self._resolve_candidates(request)
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         for provider_name in candidates:
             payload = request.model_dump()
             payload["_provider"] = provider_name
             try:
-                async with httpx.AsyncClient(
-                    base_url=self._provider_url, timeout=120.0
-                ) as client:
+                async with httpx.AsyncClient(base_url=self._provider_url, timeout=120.0) as client:
                     async with client.stream(
                         "POST", "/adapt/chat/completions", json=payload
                     ) as response:
@@ -190,9 +190,9 @@ class RoutingEngine:
                     "id": model_id,
                     "object": "model",
                     "provider": info.get("provider"),
-                    "data_policy": providers_config.get(
-                        info.get("provider", ""), {}
-                    ).get("data_policy", {}),
+                    "data_policy": providers_config.get(info.get("provider", ""), {}).get(
+                        "data_policy", {}
+                    ),
                 }
                 for model_id, info in models_config.items()
             ],
@@ -200,9 +200,7 @@ class RoutingEngine:
 
     # ── Candidate Resolution ─────────────────────────────────────────────────
 
-    async def _resolve_candidates(
-        self, request: ChatCompletionRequest
-    ) -> List[str]:
+    async def _resolve_candidates(self, request: ChatCompletionRequest) -> list[str]:
         """Resolve the ordered list of provider candidates for a request.
 
         Applies (in order):
@@ -235,7 +233,7 @@ class RoutingEngine:
 
         return candidates
 
-    def _get_static_candidates(self, model: str) -> List[str]:
+    def _get_static_candidates(self, model: str) -> list[str]:
         """Return the static provider chain from routing.yaml."""
         routing = self._config.get("routing", {}).get(model, {})
         if routing:
@@ -246,20 +244,21 @@ class RoutingEngine:
         # Default: return all configured providers
         return list(self._config.get("providers", {}).keys())
 
-    def _filter_by_data_policy(self, candidates: List[str]) -> List[str]:
+    def _filter_by_data_policy(self, candidates: list[str]) -> list[str]:
         """Phase 3 — Task 3.4: Remove providers that train on user data."""
         providers_config = self._config.get("providers", {})
         return [
-            p for p in candidates
+            p
+            for p in candidates
             if not providers_config.get(p, {}).get("data_policy", {}).get("trains_on_data", False)
         ]
 
     async def _sort_candidates(
         self,
-        candidates: List[str],
+        candidates: list[str],
         model: str,
-        sort_by: Optional[str],
-    ) -> List[str]:
+        sort_by: str | None,
+    ) -> list[str]:
         """Sort candidates by the requested optimisation axis."""
         if sort_by == "latency":
             return await self._sort_by_latency(candidates, model)
@@ -268,7 +267,7 @@ class RoutingEngine:
         # Default: preserve static order (or throughput — same as static for now)
         return candidates
 
-    async def _sort_by_latency(self, candidates: List[str], model: str) -> List[str]:
+    async def _sort_by_latency(self, candidates: list[str], model: str) -> list[str]:
         """Phase 4 — Task 4.1: Sort by rolling P50 latency from Redis."""
         latencies = {}
         for provider in candidates:
@@ -277,12 +276,14 @@ class RoutingEngine:
 
         return sorted(candidates, key=lambda p: latencies[p])
 
-    def _sort_by_price(self, candidates: List[str], model: str) -> List[str]:
+    def _sort_by_price(self, candidates: list[str], model: str) -> list[str]:
         """Sort candidates by configured cost per token."""
         pricing = self._config.get("pricing", {})
+
         def cost_score(provider: str) -> float:
             p = pricing.get(provider, {}).get(model, {})
             return p.get("input_per_token", 999.0) + p.get("output_per_token", 999.0)
+
         return sorted(candidates, key=cost_score)
 
     def _resolve_static_provider(self, model: str) -> str:
@@ -301,9 +302,7 @@ class RoutingEngine:
         payload = request.model_dump()
         payload["_provider"] = provider
 
-        async with httpx.AsyncClient(
-            base_url=self._provider_url, timeout=120.0
-        ) as client:
+        async with httpx.AsyncClient(base_url=self._provider_url, timeout=120.0) as client:
             response = await client.post("/adapt/chat/completions", json=payload)
 
         if response.status_code >= 500:
@@ -328,9 +327,7 @@ class RoutingEngine:
         payload = request.model_dump()
         payload["_provider"] = provider
 
-        async with httpx.AsyncClient(
-            base_url=self._provider_url, timeout=60.0
-        ) as client:
+        async with httpx.AsyncClient(base_url=self._provider_url, timeout=60.0) as client:
             response = await client.post("/adapt/embeddings", json=payload)
             response.raise_for_status()
 
@@ -370,15 +367,13 @@ class RoutingEngine:
         )
 
         try:
-            async with httpx.AsyncClient(
-                base_url=self._billing_url, timeout=5.0
-            ) as client:
+            async with httpx.AsyncClient(base_url=self._billing_url, timeout=5.0) as client:
                 await client.post(
                     "/internal/usage",
                     json=record.model_dump(mode="json"),
                 )
-        except Exception as exc:
-            # Billing failures must never impact the client response
+        except (httpx.HTTPError, OSError, TimeoutError) as exc:
+            # Billing is best-effort; an outage must not fail the client response.
             logger.error("billing_emit_failed", error=str(exc), generation_id=generation_id)
 
     def get_routing_summary(self) -> dict:

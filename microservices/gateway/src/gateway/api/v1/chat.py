@@ -14,11 +14,14 @@ import hashlib
 import json
 
 import httpx
+from ai_routing_shared.models import (
+    ApiKey,
+    ChatCompletionRequest,
+    ChatCompletionResponse,
+)
+from ai_routing_shared.utils import get_logger
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
-
-from ai_routing_shared.models import ApiKey, ChatCompletionRequest, ChatCompletionResponse
-from ai_routing_shared.utils import get_logger
 
 from ...core.auth import enforce_budget, enforce_model_whitelist
 from ...core.config import GatewaySettings, get_settings
@@ -76,6 +79,7 @@ async def chat_completions(
             response = ChatCompletionResponse.model_validate(response_data)
             # Return with cache header
             from fastapi.responses import JSONResponse
+
             content = response.model_dump()
             json_response = JSONResponse(content=content)
             json_response.headers["X-Cache"] = "HIT"
@@ -89,9 +93,7 @@ async def chat_completions(
     if body.stream:
         return await _stream_from_router(router_payload, settings)
 
-    async with httpx.AsyncClient(
-        base_url=settings.router_service_url, timeout=120.0
-    ) as client:
+    async with httpx.AsyncClient(base_url=settings.router_service_url, timeout=120.0) as client:
         response = await client.post("/route/chat/completions", json=router_payload)
         response.raise_for_status()
         result = ChatCompletionResponse.model_validate(response.json())
@@ -101,6 +103,7 @@ async def chat_completions(
         await redis.set_cached_response(cache_key, result.model_dump_json())
 
     from fastapi.responses import JSONResponse
+
     json_response = JSONResponse(content=result.model_dump())
     json_response.headers["X-Cache"] = "MISS"
     if result.generation_id:
@@ -108,20 +111,16 @@ async def chat_completions(
     return json_response
 
 
-async def _stream_from_router(
-    payload: dict, settings: GatewaySettings
-) -> StreamingResponse:
+async def _stream_from_router(payload: dict, settings: GatewaySettings) -> StreamingResponse:
     """Proxy a streaming response from the Router Engine Service."""
 
     async def event_generator():
-        async with httpx.AsyncClient(
-            base_url=settings.router_service_url, timeout=120.0
-        ) as client:
-            async with client.stream(
-                "POST", "/route/chat/completions", json=payload
-            ) as response:
-                async for line in response.aiter_lines():
-                    if line:
-                        yield f"{line}\n\n"
+        async with (
+            httpx.AsyncClient(base_url=settings.router_service_url, timeout=120.0) as client,
+            client.stream("POST", "/route/chat/completions", json=payload) as response,
+        ):
+            async for line in response.aiter_lines():
+                if line:
+                    yield f"{line}\n\n"
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")

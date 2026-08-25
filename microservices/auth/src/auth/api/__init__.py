@@ -1,10 +1,12 @@
 """Auth Service API routes.
 Author: Farruh
 """
+
 from fastapi import APIRouter
+
+from .identity import router as identity_router
 from .keys import router as keys_router
 from .validate import router as validate_router
-from .identity import router as identity_router
 
 internal_router = APIRouter()
 internal_router.include_router(validate_router)

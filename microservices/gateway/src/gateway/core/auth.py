@@ -10,11 +10,7 @@ Author: Farruh
 
 from __future__ import annotations
 
-from typing import Optional
-
 import httpx
-from fastapi import Depends, Header, Request
-
 from ai_routing_shared.exceptions import (
     AuthenticationError,
     BudgetExceededError,
@@ -23,6 +19,7 @@ from ai_routing_shared.exceptions import (
 )
 from ai_routing_shared.models import ApiKey
 from ai_routing_shared.utils import get_logger
+from fastapi import Depends, Header, Request
 
 from .config import GatewaySettings, get_settings
 
@@ -31,8 +28,8 @@ logger = get_logger(__name__)
 
 async def get_api_key(
     request: Request,
-    authorization: Optional[str] = Header(default=None),
-    x_api_key: Optional[str] = Header(default=None),
+    authorization: str | None = Header(default=None),
+    x_api_key: str | None = Header(default=None),
     settings: GatewaySettings = Depends(get_settings),
 ) -> ApiKey:
     """Validate the API key by calling the Auth Service.
@@ -68,7 +65,7 @@ async def get_api_key(
             )
         except httpx.RequestError as exc:
             logger.error("auth_service_unreachable", error=str(exc))
-            raise AuthenticationError("Authentication service is temporarily unavailable.")
+            raise AuthenticationError("Authentication service is temporarily unavailable.") from exc
 
     if response.status_code == 401:
         raise AuthenticationError("Invalid or expired API key.")

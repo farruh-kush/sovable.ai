@@ -8,8 +8,6 @@ Author: Farruh
 
 from __future__ import annotations
 
-from typing import Optional
-
 
 class RoutingLayerError(Exception):
     """Base exception for all AI Routing Layer errors."""
@@ -17,13 +15,14 @@ class RoutingLayerError(Exception):
     http_status: int = 500
     error_code: str = "internal_error"
 
-    def __init__(self, message: str, details: Optional[dict] = None) -> None:
+    def __init__(self, message: str, details: dict | None = None) -> None:
         super().__init__(message)
         self.message = message
         self.details = details or {}
 
 
 # ── Authentication & Authorisation ──────────────────────────────────────────
+
 
 class AuthenticationError(RoutingLayerError):
     """Raised when an API key is missing or invalid."""
@@ -47,6 +46,7 @@ class ModelNotAllowedError(AuthorisationError):
 
 # ── Rate Limiting & Quotas ───────────────────────────────────────────────────
 
+
 class RateLimitError(RoutingLayerError):
     """Raised when a rate limit is exceeded."""
 
@@ -62,6 +62,7 @@ class BudgetExceededError(RoutingLayerError):
 
 
 # ── Routing ──────────────────────────────────────────────────────────────────
+
 
 class NoProvidersAvailableError(RoutingLayerError):
     """Raised when no provider can fulfil the request."""
@@ -79,6 +80,7 @@ class DataPolicyViolationError(RoutingLayerError):
 
 # ── Provider ─────────────────────────────────────────────────────────────────
 
+
 class ProviderError(RoutingLayerError):
     """Raised when an upstream LLM provider returns an error."""
 
@@ -90,7 +92,7 @@ class ProviderError(RoutingLayerError):
         message: str,
         provider: str,
         retriable: bool = False,
-        details: Optional[dict] = None,
+        details: dict | None = None,
     ) -> None:
         super().__init__(message, details)
         self.provider = provider
@@ -105,6 +107,7 @@ class ProviderCircuitOpenError(ProviderError):
 
 # ── Validation ───────────────────────────────────────────────────────────────
 
+
 class SchemaValidationError(RoutingLayerError):
     """Phase 4 — Task 4.4: Raised when structured output fails JSON Schema validation."""
 
@@ -113,15 +116,16 @@ class SchemaValidationError(RoutingLayerError):
 
 
 __all__ = [
-    "RoutingLayerError",
     "AuthenticationError",
     "AuthorisationError",
-    "ModelNotAllowedError",
-    "RateLimitError",
     "BudgetExceededError",
-    "NoProvidersAvailableError",
     "DataPolicyViolationError",
-    "ProviderError",
+    "EmailDeliveryError",
+    "ModelNotAllowedError",
+    "NoProvidersAvailableError",
     "ProviderCircuitOpenError",
+    "ProviderError",
+    "RateLimitError",
+    "RoutingLayerError",
     "SchemaValidationError",
 ]

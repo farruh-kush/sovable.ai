@@ -39,12 +39,15 @@ async def error_handler_middleware(request: Request, call_next: Any) -> Any:
                 }
             },
         )
+    # This is the last-resort HTTP boundary; no exception may escape unnormalized.
     except Exception as exc:
         logger.exception("unhandled_error", error=str(exc))
         return JSONResponse(
             status_code=500,
-            content={"error": {"code": "internal_error", "message": "An unexpected error occurred."}},
+            content={
+                "error": {"code": "internal_error", "message": "An unexpected error occurred."}
+            },
         )
 
 
-from typing import Any  # noqa: E402
+from typing import Any

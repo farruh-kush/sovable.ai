@@ -6,9 +6,8 @@ Author: Farruh
 from __future__ import annotations
 
 import httpx
-from fastapi import APIRouter, Depends
-
 from ai_routing_shared.models import ApiKey
+from fastapi import APIRouter, Depends
 
 from ...core.auth import get_api_key
 from ...core.config import GatewaySettings, get_settings
@@ -25,9 +24,7 @@ async def list_models(
 
     Phase 3 — Task 3.4: Includes data policy tags per provider.
     """
-    async with httpx.AsyncClient(
-        base_url=settings.router_service_url, timeout=10.0
-    ) as client:
+    async with httpx.AsyncClient(base_url=settings.router_service_url, timeout=10.0) as client:
         response = await client.get("/route/models")
         response.raise_for_status()
 

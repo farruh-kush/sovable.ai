@@ -13,17 +13,16 @@ Author: Farruh
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from ai_routing_shared.middleware import RequestIdMiddleware, error_handler_middleware
 from ai_routing_shared.utils import configure_logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from .api.v1 import admin, chat, embeddings, keys, models, generations, health, privacy
 from .api import auth as auth_proxy
+from .api.v1 import admin, chat, embeddings, generations, health, keys, models, privacy
 from .core.config import get_settings
 from .core.redis_client import RedisClient
 
@@ -47,10 +46,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 def create_app() -> FastAPI:
     """Application factory for the API Gateway Service."""
     from ai_routing_shared.utils import get_logger
+
     settings = get_settings()
     logger = get_logger(__name__)
     if settings.app_env == "production" and "*" in settings.cors_origins:
-        logger.warning("cors_wildcard_in_production", message="CORS_ORIGINS is set to '*' in production. This is a security risk.")
+        logger.warning(
+            "cors_wildcard_in_production",
+            message="CORS_ORIGINS is set to '*' in production. This is a security risk.",
+        )
 
     app = FastAPI(
         title="AI Routing Layer — API Gateway",

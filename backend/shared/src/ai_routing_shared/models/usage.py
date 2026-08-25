@@ -9,7 +9,6 @@ Author: Farruh
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -55,11 +54,11 @@ class UsageRecord(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     # Phase 4 — Task 4.3: A/B testing
-    experiment_name: Optional[str] = None
-    experiment_variant: Optional[str] = None
+    experiment_name: str | None = None
+    experiment_variant: str | None = None
 
     # Phase 4 — Task 4.4: Structured output validation
-    schema_validation_passed: Optional[bool] = None
+    schema_validation_passed: bool | None = None
     validation_retry_count: int = 0
 
 
@@ -74,7 +73,7 @@ class GenerationRecord(BaseModel):
     provider: str
     created_at: datetime
     usage: UsageInfo
-    cost: "GenerationCost"
+    cost: GenerationCost
     latency_ms: float
     fallback_used: bool
     cache_hit: bool

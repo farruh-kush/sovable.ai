@@ -8,23 +8,22 @@ Tests cover:
 
 Author: Farruh
 """
+
 from __future__ import annotations
 
 import json
 
 import pytest
 import respx
-from httpx import Response
-
 from ai_routing_shared.models import (
     ChatCompletionRequest,
     ChatMessage,
     EmbeddingRequest,
 )
+from httpx import Response
 from provider.adapters.google_adapter import GoogleAdapter
 from provider.core.config import ProviderSettings
 from provider.core.registry import ProviderRegistry
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -132,9 +131,7 @@ _FAKE_GENERATE_RESPONSE = {
     },
 }
 
-_FAKE_EMBEDDING_RESPONSE = {
-    "embedding": {"values": [0.01, 0.02, 0.03, 0.04, 0.05]}
-}
+_FAKE_EMBEDDING_RESPONSE = {"embedding": {"values": [0.01, 0.02, 0.03, 0.04, 0.05]}}
 
 
 class TestGoogleAdapterLiveMode:
@@ -145,9 +142,9 @@ class TestGoogleAdapterLiveMode:
     async def test_chat_success(
         self, adapter_with_key: GoogleAdapter, simple_request: ChatCompletionRequest
     ) -> None:
-        respx.post(
-            url__regex=r"generativelanguage\.googleapis\.com.*generateContent"
-        ).mock(return_value=Response(200, json=_FAKE_GENERATE_RESPONSE))
+        respx.post(url__regex=r"generativelanguage\.googleapis\.com.*generateContent").mock(
+            return_value=Response(200, json=_FAKE_GENERATE_RESPONSE)
+        )
 
         response = await adapter_with_key.chat(simple_request)
 
@@ -163,9 +160,9 @@ class TestGoogleAdapterLiveMode:
     async def test_chat_with_system_instruction(
         self, adapter_with_key: GoogleAdapter, system_request: ChatCompletionRequest
     ) -> None:
-        route = respx.post(
-            url__regex=r"generativelanguage\.googleapis\.com.*generateContent"
-        ).mock(return_value=Response(200, json=_FAKE_GENERATE_RESPONSE))
+        route = respx.post(url__regex=r"generativelanguage\.googleapis\.com.*generateContent").mock(
+            return_value=Response(200, json=_FAKE_GENERATE_RESPONSE)
+        )
 
         response = await adapter_with_key.chat(system_request)
 
@@ -173,8 +170,7 @@ class TestGoogleAdapterLiveMode:
         sent_payload = json.loads(route.calls[0].request.content)
         assert "systemInstruction" in sent_payload
         assert (
-            "You are a helpful assistant"
-            in sent_payload["systemInstruction"]["parts"][0]["text"]
+            "You are a helpful assistant" in sent_payload["systemInstruction"]["parts"][0]["text"]
         )
         assert response.choices[0].message.content == "4"
 
@@ -185,9 +181,9 @@ class TestGoogleAdapterLiveMode:
     ) -> None:
         from ai_routing_shared.exceptions import ProviderError
 
-        respx.post(
-            url__regex=r"generativelanguage\.googleapis\.com.*generateContent"
-        ).mock(return_value=Response(429, json={"error": {"message": "quota exceeded"}}))
+        respx.post(url__regex=r"generativelanguage\.googleapis\.com.*generateContent").mock(
+            return_value=Response(429, json={"error": {"message": "quota exceeded"}})
+        )
 
         with pytest.raises(ProviderError) as exc_info:
             await adapter_with_key._chat_impl(simple_request)
@@ -201,9 +197,9 @@ class TestGoogleAdapterLiveMode:
     ) -> None:
         from ai_routing_shared.exceptions import ProviderError
 
-        respx.post(
-            url__regex=r"generativelanguage\.googleapis\.com.*generateContent"
-        ).mock(return_value=Response(400, json={"error": {"message": "invalid request"}}))
+        respx.post(url__regex=r"generativelanguage\.googleapis\.com.*generateContent").mock(
+            return_value=Response(400, json={"error": {"message": "invalid request"}})
+        )
 
         with pytest.raises(ProviderError) as exc_info:
             await adapter_with_key._chat_impl(simple_request)
@@ -215,9 +211,9 @@ class TestGoogleAdapterLiveMode:
     async def test_embedding_success(
         self, adapter_with_key: GoogleAdapter, embedding_request: EmbeddingRequest
     ) -> None:
-        respx.post(
-            url__regex=r"generativelanguage\.googleapis\.com.*embedContent"
-        ).mock(return_value=Response(200, json=_FAKE_EMBEDDING_RESPONSE))
+        respx.post(url__regex=r"generativelanguage\.googleapis\.com.*embedContent").mock(
+            return_value=Response(200, json=_FAKE_EMBEDDING_RESPONSE)
+        )
 
         response = await adapter_with_key.embeddings(embedding_request)
 
@@ -300,6 +296,7 @@ class TestMistralAdapter:
     @pytest.mark.asyncio
     async def test_mistral_mock_chat(self) -> None:
         from provider.adapters.mistral_adapter import MistralAdapter
+
         adapter = MistralAdapter(api_key=None)
         request = ChatCompletionRequest(
             model="mistral-small-latest",

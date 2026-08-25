@@ -162,3 +162,17 @@ reference-k8s-build: ## Build the standalone reference container image
 reference-k8s-deploy: ## Apply the standalone reference package after creating runtime secrets
 	kubectl apply -k infrastructure/k8s/standalone-reference
 	kubectl -n ai-routing-reference rollout status deployment/gateway
+
+# ── Reproducible code-quality workflow ───────────────────────────────────────
+quality-python: ## Run Ruff lint and formatting checks for Python code
+	venv/bin/ruff check backend/shared/src microservices
+	venv/bin/ruff format --check backend/shared/src microservices
+
+quality-frontend: ## Run frontend lint, typecheck, and production build
+	cd frontend/dashboard && npm run lint
+	cd frontend/dashboard && npm run typecheck
+	cd frontend/dashboard && npm run build
+
+quality: quality-python ## Run the complete local quality gate
+	./testing/scripts/run_tests.sh
+	$(MAKE) quality-frontend

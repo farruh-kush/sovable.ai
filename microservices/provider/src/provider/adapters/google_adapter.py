@@ -18,14 +18,15 @@ a system message is present, which is the preferred approach.
 
 Author: Farruh
 """
+
 from __future__ import annotations
 
 import time
 import uuid
-from typing import Any, AsyncIterator, Dict, List, Optional
+from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
-
 from ai_routing_shared.exceptions import ProviderError
 from ai_routing_shared.models import (
     ChatChoice,
@@ -68,14 +69,12 @@ class GoogleAdapter(BaseProviderAdapter):
 
     name = "google"
 
-    def __init__(self, api_key: Optional[str], timeout_seconds: float = 30.0) -> None:
+    def __init__(self, api_key: str | None, timeout_seconds: float = 30.0) -> None:
         super().__init__(api_key, timeout_seconds)
 
     # ── Chat Completion ───────────────────────────────────────────────────────
 
-    async def _chat_impl(
-        self, request: ChatCompletionRequest
-    ) -> ChatCompletionResponse:
+    async def _chat_impl(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         if not self.api_key:
             return self._mock_chat(request)
 
@@ -107,8 +106,7 @@ class GoogleAdapter(BaseProviderAdapter):
         payload = self._build_generate_payload(request)
         model_id = self._resolve_model(request.model)
         url = (
-            f"{_GEMINI_BASE_URL}/models/{model_id}:streamGenerateContent"
-            f"?alt=sse&key={self.api_key}"
+            f"{_GEMINI_BASE_URL}/models/{model_id}:streamGenerateContent?alt=sse&key={self.api_key}"
         )
 
         async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
@@ -137,21 +135,17 @@ class GoogleAdapter(BaseProviderAdapter):
         if not self.api_key:
             return self._mock_embedding(request)
 
-        inputs = (
-            request.input if isinstance(request.input, list) else [request.input]
-        )
+        inputs = request.input if isinstance(request.input, list) else [request.input]
         model_id = self._resolve_model(
             request.model if request.model != "text-embedding-ada-002" else _DEFAULT_EMBEDDING_MODEL
         )
 
-        embeddings: List[EmbeddingVector] = []
+        embeddings: list[EmbeddingVector] = []
         total_tokens = 0
 
         async with httpx.AsyncClient(timeout=self.timeout_seconds) as client:
             for idx, text in enumerate(inputs):
-                url = (
-                    f"{_GEMINI_BASE_URL}/models/{model_id}:embedContent?key={self.api_key}"
-                )
+                url = f"{_GEMINI_BASE_URL}/models/{model_id}:embedContent?key={self.api_key}"
                 payload = {
                     "model": f"models/{model_id}",
                     "content": {"parts": [{"text": text}]},
@@ -179,10 +173,10 @@ class GoogleAdapter(BaseProviderAdapter):
 
     # ── Payload Builders ──────────────────────────────────────────────────────
 
-    def _build_generate_payload(self, request: ChatCompletionRequest) -> Dict[str, Any]:
+    def _build_generate_payload(self, request: ChatCompletionRequest) -> dict[str, Any]:
         """Build the ``generateContent`` request payload from the unified schema."""
-        system_text: Optional[str] = None
-        conversation: List[Dict[str, Any]] = []
+        system_text: str | None = None
+        conversation: list[dict[str, Any]] = []
 
         for msg in request.messages:
             if msg.role == "system":
@@ -197,7 +191,7 @@ class GoogleAdapter(BaseProviderAdapter):
                 system_text = (system_text + "\n" + text) if system_text else text
             else:
                 gemini_role = "user" if msg.role == "user" else "model"
-                content_parts: List[Dict[str, str]]
+                content_parts: list[dict[str, str]]
                 if isinstance(msg.content, str):
                     content_parts = [{"text": msg.content}]
                 else:
@@ -213,21 +207,16 @@ class GoogleAdapter(BaseProviderAdapter):
             conversation.append({"role": "user", "parts": [{"text": system_text}]})
             system_text = None
 
-        payload: Dict[str, Any] = {"contents": conversation}
+        payload: dict[str, Any] = {"contents": conversation}
 
         # Use systemInstruction for supported models
-        model_base = request.model.split("-preview")[0].split(":")[0]
         if system_text and any(m in request.model for m in _SYSTEM_INSTRUCTION_MODELS):
-            payload["systemInstruction"] = {
-                "parts": [{"text": system_text}]
-            }
+            payload["systemInstruction"] = {"parts": [{"text": system_text}]}
         elif system_text:
             # Prepend system text as first user turn for older models
-            conversation.insert(
-                0, {"role": "user", "parts": [{"text": system_text}]}
-            )
+            conversation.insert(0, {"role": "user", "parts": [{"text": system_text}]})
 
-        generation_config: Dict[str, Any] = {}
+        generation_config: dict[str, Any] = {}
         if request.temperature is not None:
             generation_config["temperature"] = request.temperature
         if request.max_tokens is not None:
@@ -237,12 +226,10 @@ class GoogleAdapter(BaseProviderAdapter):
 
         return payload
 
-    def _parse_generate_response(
-        self, data: Dict[str, Any], model: str
-    ) -> ChatCompletionResponse:
+    def _parse_generate_response(self, data: dict[str, Any], model: str) -> ChatCompletionResponse:
         """Parse a ``generateContent`` response into the unified schema."""
         candidates = data.get("candidates", [])
-        choices: List[ChatChoice] = []
+        choices: list[ChatChoice] = []
 
         for idx, candidate in enumerate(candidates):
             content = candidate.get("content", {})
@@ -274,9 +261,7 @@ class GoogleAdapter(BaseProviderAdapter):
             usage=usage,
         )
 
-    def _parse_stream_chunk(
-        self, data: Dict[str, Any], model: str
-    ) -> Optional[ChatCompletionChunk]:
+    def _parse_stream_chunk(self, data: dict[str, Any], model: str) -> ChatCompletionChunk | None:
         """Parse a single SSE data event from ``streamGenerateContent``."""
         candidates = data.get("candidates", [])
         if not candidates:
@@ -311,7 +296,7 @@ class GoogleAdapter(BaseProviderAdapter):
     @staticmethod
     def _resolve_model(model: str) -> str:
         """Map common model aliases to the Gemini API model ID."""
-        _aliases: Dict[str, str] = {
+        _aliases: dict[str, str] = {
             # Allow callers to use short names
             "gemini-pro": "gemini-1.0-pro",
             "gemini-flash": "gemini-1.5-flash",
@@ -322,7 +307,7 @@ class GoogleAdapter(BaseProviderAdapter):
     @staticmethod
     def _map_finish_reason(reason: str) -> str:
         """Map Gemini finish reasons to OpenAI-compatible values."""
-        _mapping: Dict[str, str] = {
+        _mapping: dict[str, str] = {
             "STOP": "stop",
             "MAX_TOKENS": "length",
             "SAFETY": "content_filter",
@@ -374,9 +359,7 @@ class GoogleAdapter(BaseProviderAdapter):
             )
 
     def _mock_embedding(self, request: EmbeddingRequest) -> EmbeddingResponse:
-        items = (
-            request.input if isinstance(request.input, list) else [request.input]
-        )
+        items = request.input if isinstance(request.input, list) else [request.input]
         usage = UsageInfo(
             prompt_tokens=len(items) * 5,
             total_tokens=len(items) * 5,

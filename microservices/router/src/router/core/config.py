@@ -19,12 +19,8 @@ class RouterSettings(BaseSettings):
     routing_config_path: str = Field(
         default="/app/config/routing.yaml", alias="ROUTING_CONFIG_PATH"
     )
-    provider_service_url: str = Field(
-        default="http://provider:8003", alias="PROVIDER_SERVICE_URL"
-    )
-    billing_service_url: str = Field(
-        default="http://billing:8004", alias="BILLING_SERVICE_URL"
-    )
+    provider_service_url: str = Field(default="http://provider:8003", alias="PROVIDER_SERVICE_URL")
+    billing_service_url: str = Field(default="http://billing:8004", alias="BILLING_SERVICE_URL")
 
     # Latency tracking TTL in seconds (Phase 4 — Task 4.1)
     latency_ttl_seconds: int = Field(default=300, alias="LATENCY_TTL_SECONDS")

@@ -6,44 +6,40 @@ request/response contract across service boundaries.
 Author: Farruh
 """
 
+from .keys import ApiKey, ApiKeyTier
 from .requests import (
     ChatCompletionRequest,
+    ChatMessage,
     EmbeddingRequest,
     ProviderPreferences,
-    ChatMessage,
 )
 from .responses import (
-    ChatCompletionResponse,
+    ChatChoice,
     ChatCompletionChunk,
     ChatCompletionChunkChoice,
     ChatCompletionChunkDelta,
-    ChatChoice,
+    ChatCompletionResponse,
     EmbeddingResponse,
     EmbeddingVector,
 )
-from .usage import UsageInfo, UsageRecord, GenerationRecord, GenerationCost
-from .keys import ApiKey, ApiKeyTier
+from .usage import GenerationCost, GenerationRecord, UsageInfo, UsageRecord
 
 __all__ = [
-    # Requests
-    "ChatCompletionRequest",
-    "EmbeddingRequest",
-    "ProviderPreferences",
-    "ChatMessage",
-    # Responses
-    "ChatCompletionResponse",
+    "ApiKey",
+    "ApiKeyTier",
+    "ChatChoice",
     "ChatCompletionChunk",
     "ChatCompletionChunkChoice",
     "ChatCompletionChunkDelta",
-    "ChatChoice",
+    "ChatCompletionRequest",
+    "ChatCompletionResponse",
+    "ChatMessage",
+    "EmbeddingRequest",
     "EmbeddingResponse",
     "EmbeddingVector",
-    # Usage
+    "GenerationCost",
+    "GenerationRecord",
+    "ProviderPreferences",
     "UsageInfo",
     "UsageRecord",
-    "GenerationRecord",
-    "GenerationCost",
-    # Keys
-    "ApiKey",
-    "ApiKeyTier",
 ]

@@ -17,7 +17,6 @@ from ..core.config import get_settings
 
 class Base(DeclarativeBase):
     """SQLAlchemy declarative base for all Auth Service models."""
-    pass
 
 
 _engine = None

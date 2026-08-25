@@ -6,7 +6,6 @@ Author: Farruh
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -33,9 +32,9 @@ class ApiKey(BaseModel):
     requests_per_day: int = 2000
 
     # Phase 1 — Task 1.2: Monthly budget enforcement
-    monthly_budget_usd: Optional[float] = None
+    monthly_budget_usd: float | None = None
 
     # Phase 1 — Task 1.3: Model whitelist enforcement
-    allowed_models: Optional[List[str]] = None
+    allowed_models: list[str] | None = None
 
     is_active: bool = True

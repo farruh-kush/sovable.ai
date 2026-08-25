@@ -3,8 +3,8 @@
 Author: Farruh
 """
 
-from .request_id import RequestIdMiddleware
 from .error_handler import error_handler_middleware
+from .request_id import RequestIdMiddleware
 
 __all__ = [
     "RequestIdMiddleware",

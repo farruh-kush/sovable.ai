@@ -9,8 +9,6 @@ Author: Farruh
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 from pydantic import BaseModel
 
 from .requests import ChatMessage  # single canonical definition
@@ -22,7 +20,7 @@ class ChatChoice(BaseModel):
 
     index: int
     message: ChatMessage
-    finish_reason: Optional[str] = None
+    finish_reason: str | None = None
 
 
 class ChatCompletionResponse(BaseModel):
@@ -33,21 +31,21 @@ class ChatCompletionResponse(BaseModel):
     created: int
     model: str
     provider: str
-    choices: List[ChatChoice]
+    choices: list[ChatChoice]
     usage: UsageInfo
 
     # Phase 3 — Task 3.2: Prompt caching metadata
     cache_hit: bool = False
 
     # Phase 3 — Task 3.3: Activity log reference
-    generation_id: Optional[str] = None
+    generation_id: str | None = None
 
 
 class ChatCompletionChunkDelta(BaseModel):
     """Delta content for a streaming chunk."""
 
-    role: Optional[str] = None
-    content: Optional[str] = None
+    role: str | None = None
+    content: str | None = None
 
 
 class ChatCompletionChunkChoice(BaseModel):
@@ -55,7 +53,7 @@ class ChatCompletionChunkChoice(BaseModel):
 
     index: int
     delta: ChatCompletionChunkDelta
-    finish_reason: Optional[str] = None
+    finish_reason: str | None = None
 
 
 class ChatCompletionChunk(BaseModel):
@@ -66,7 +64,7 @@ class ChatCompletionChunk(BaseModel):
     created: int
     model: str
     provider: str
-    choices: List[ChatCompletionChunkChoice]
+    choices: list[ChatCompletionChunkChoice]
 
 
 class EmbeddingVector(BaseModel):
@@ -74,14 +72,14 @@ class EmbeddingVector(BaseModel):
 
     object: str = "embedding"
     index: int
-    embedding: List[float]
+    embedding: list[float]
 
 
 class EmbeddingResponse(BaseModel):
     """Normalised embedding response."""
 
     object: str = "list"
-    data: List[EmbeddingVector]
+    data: list[EmbeddingVector]
     model: str
     provider: str
     usage: UsageInfo

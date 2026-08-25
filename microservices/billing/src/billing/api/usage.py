@@ -9,11 +9,11 @@ Author: Farruh
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from ai_routing_shared.models import UsageRecord
 from ai_routing_shared.utils import get_logger
+from fastapi import APIRouter, Depends
+from redis.exceptions import RedisError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..core.config import BillingSettings, get_settings
 from ..db.database import get_session
@@ -91,13 +91,12 @@ async def ingest_usage(
     return {"status": "accepted", "generation_id": record.id}
 
 
-async def _update_monthly_spend(
-    api_key_id: str, amount: float, redis_url: str
-) -> None:
+async def _update_monthly_spend(api_key_id: str, amount: float, redis_url: str) -> None:
     """Increment the monthly spend counter in Redis."""
     try:
-        import redis.asyncio as aioredis
         from datetime import datetime
+
+        import redis.asyncio as aioredis
 
         client = aioredis.from_url(redis_url, decode_responses=True)
         key = f"spend:{api_key_id}:monthly"
@@ -109,5 +108,5 @@ async def _update_monthly_spend(
         ttl = (days_in_month - now.day + 2) * 86400
         await client.expire(key, ttl)
         await client.aclose()
-    except Exception as exc:
+    except (RedisError, OSError, TimeoutError, ValueError) as exc:
         logger.error("redis_spend_update_failed", error=str(exc), api_key_id=api_key_id)

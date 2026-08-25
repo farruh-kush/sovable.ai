@@ -12,10 +12,10 @@ from __future__ import annotations
 
 import time
 import uuid
-from typing import Any, AsyncIterator, Dict, List, Optional, Union
+from collections.abc import AsyncIterator
+from typing import Any
 
 import httpx
-
 from ai_routing_shared.exceptions import ProviderError
 from ai_routing_shared.models import (
     ChatChoice,
@@ -45,17 +45,15 @@ class AnthropicAdapter(BaseProviderAdapter):
 
     name = "anthropic"
 
-    def __init__(self, api_key: Optional[str], timeout_seconds: float = 30.0) -> None:
+    def __init__(self, api_key: str | None, timeout_seconds: float = 30.0) -> None:
         super().__init__(api_key, timeout_seconds)
 
-    async def _chat_impl(
-        self, request: ChatCompletionRequest
-    ) -> ChatCompletionResponse:
+    async def _chat_impl(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         if not self.api_key:
             return self._mock_chat(request)
 
         # Separate system messages from conversation messages
-        system_parts: List[Union[str, Dict]] = []
+        system_parts: list[str | dict] = []
         user_messages = []
 
         for msg in request.messages:
@@ -73,7 +71,7 @@ class AnthropicAdapter(BaseProviderAdapter):
                 else:
                     user_messages.append({"role": role, "content": msg.content})
 
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "model": request.model,
             "messages": user_messages,
             "max_tokens": request.max_tokens or 1024,
@@ -104,9 +102,7 @@ class AnthropicAdapter(BaseProviderAdapter):
             )
 
         data = response.json()
-        text = "".join(
-            block["text"] for block in data["content"] if block.get("type") == "text"
-        )
+        text = "".join(block["text"] for block in data["content"] if block.get("type") == "text")
         raw_usage = data.get("usage", {})
 
         # Phase 3 — Task 3.2: Extract Anthropic cache hit metadata
@@ -172,6 +168,7 @@ class AnthropicAdapter(BaseProviderAdapter):
                 async for line in response.aiter_lines():
                     if line.startswith("data: "):
                         import json
+
                         try:
                             event = json.loads(line[6:])
                         except json.JSONDecodeError:
@@ -206,11 +203,19 @@ class AnthropicAdapter(BaseProviderAdapter):
             created=int(time.time()),
             model=request.model,
             provider=self.name,
-            choices=[ChatChoice(index=0, message=ChatMessage(role="assistant", content=content), finish_reason="end_turn")],
+            choices=[
+                ChatChoice(
+                    index=0,
+                    message=ChatMessage(role="assistant", content=content),
+                    finish_reason="end_turn",
+                )
+            ],
             usage=usage,
         )
 
-    async def _mock_stream(self, request: ChatCompletionRequest) -> AsyncIterator[ChatCompletionChunk]:
+    async def _mock_stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]:
         words = f"[Anthropic mock stream] {request.messages[-1].content}".split()
         for word in words:
             yield ChatCompletionChunk(
@@ -218,14 +223,23 @@ class AnthropicAdapter(BaseProviderAdapter):
                 created=int(time.time()),
                 model=request.model,
                 provider=self.name,
-                choices=[ChatCompletionChunkChoice(index=0, delta=ChatCompletionChunkDelta(content=f"{word} "), finish_reason=None)],
+                choices=[
+                    ChatCompletionChunkChoice(
+                        index=0,
+                        delta=ChatCompletionChunkDelta(content=f"{word} "),
+                        finish_reason=None,
+                    )
+                ],
             )
 
     def _mock_embedding(self, request: EmbeddingRequest) -> EmbeddingResponse:
         items = request.input if isinstance(request.input, list) else [request.input]
         usage = UsageInfo(prompt_tokens=len(items) * 5, total_tokens=len(items) * 5)
         return EmbeddingResponse(
-            data=[EmbeddingVector(index=i, embedding=[0.2, 0.4, 0.6, 0.8]) for i, _ in enumerate(items)],
+            data=[
+                EmbeddingVector(index=i, embedding=[0.2, 0.4, 0.6, 0.8])
+                for i, _ in enumerate(items)
+            ],
             model=request.model,
             provider=self.name,
             usage=usage,

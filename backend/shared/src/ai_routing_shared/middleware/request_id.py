@@ -10,10 +10,10 @@ from __future__ import annotations
 
 import uuid
 
+import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-import structlog
 
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
@@ -28,4 +28,4 @@ class RequestIdMiddleware(BaseHTTPMiddleware):
         return response
 
 
-from typing import Any  # noqa: E402 — placed after class to avoid circular import
+from typing import Any

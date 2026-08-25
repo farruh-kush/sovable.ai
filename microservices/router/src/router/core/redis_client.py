@@ -10,10 +10,8 @@ Author: Farruh
 from __future__ import annotations
 
 import time
-from typing import Optional
 
 import redis.asyncio as aioredis
-
 from ai_routing_shared.utils import get_logger
 
 logger = get_logger(__name__)
@@ -45,9 +43,7 @@ class RouterRedisClient:
 
     # ── Phase 4 — Task 4.1: Latency Tracking ────────────────────────────────
 
-    async def record_latency(
-        self, provider: str, model: str, latency_ms: float
-    ) -> None:
+    async def record_latency(self, provider: str, model: str, latency_ms: float) -> None:
         """Record an observed latency sample for a provider/model pair.
 
         Samples older than ``_LATENCY_WINDOW_SECONDS`` are automatically
@@ -64,7 +60,7 @@ class RouterRedisClient:
             pipe.expire(key, _LATENCY_WINDOW_SECONDS)
             await pipe.execute()
 
-    async def get_p50_latency(self, provider: str, model: str) -> Optional[float]:
+    async def get_p50_latency(self, provider: str, model: str) -> float | None:
         """Return the rolling P50 latency for a provider/model pair, or ``None``."""
         assert self.client is not None
         key = f"{_LATENCY_KEY_PREFIX}:{provider}:{model}"

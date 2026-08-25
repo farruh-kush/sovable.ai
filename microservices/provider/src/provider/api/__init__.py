@@ -5,9 +5,6 @@ Author: Farruh
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse
-
 from ai_routing_shared.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -15,6 +12,8 @@ from ai_routing_shared.models import (
     EmbeddingResponse,
 )
 from ai_routing_shared.utils import get_logger
+from fastapi import APIRouter, Request
+from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 logger = get_logger(__name__)
@@ -26,16 +25,19 @@ async def adapt_chat(body: dict, request: Request) -> ChatCompletionResponse | S
     provider_name = body.pop("_provider", None)
     if not provider_name:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=400, detail="Missing '_provider' field.")
 
     chat_request = ChatCompletionRequest.model_validate(body)
     adapter = request.app.state.registry.get(provider_name)
 
     if chat_request.stream:
+
         async def event_generator():
             async for chunk in adapter.chat_stream(chat_request):
                 yield f"data: {chunk.model_dump_json()}\n\n"
             yield "data: [DONE]\n\n"
+
         return StreamingResponse(event_generator(), media_type="text/event-stream")
 
     return await adapter.chat(chat_request)
@@ -47,6 +49,7 @@ async def adapt_embeddings(body: dict, request: Request) -> EmbeddingResponse:
     provider_name = body.pop("_provider", None)
     if not provider_name:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=400, detail="Missing '_provider' field.")
 
     embed_request = EmbeddingRequest.model_validate(body)

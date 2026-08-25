@@ -1,11 +1,15 @@
 """Public auth proxy from Gateway to the private Auth Service.
 Author: Farruh
 """
+
 from __future__ import annotations
+
 from typing import Any
+
 import httpx
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, RedirectResponse
+
 from ..core.config import GatewaySettings, get_settings
 
 router = APIRouter()
@@ -18,10 +22,17 @@ def _forward_headers(request: Request) -> dict[str, str]:
     return headers
 
 
-async def _json_proxy(request: Request, path: str, body: dict[str, Any] | None = None) -> JSONResponse:
+async def _json_proxy(
+    request: Request, path: str, body: dict[str, Any] | None = None
+) -> JSONResponse:
     settings: GatewaySettings = get_settings()
     async with httpx.AsyncClient(timeout=15.0) as client:
-        response = await client.request(request.method, f"{settings.auth_service_url}{path}", json=body, headers=_forward_headers(request))
+        response = await client.request(
+            request.method,
+            f"{settings.auth_service_url}{path}",
+            json=body,
+            headers=_forward_headers(request),
+        )
     try:
         payload = response.json()
     except ValueError:
@@ -43,9 +54,11 @@ async def register_verify(channel: str, request: Request) -> JSONResponse:
 async def activation_start(request: Request) -> JSONResponse:
     return await _json_proxy(request, "/auth/email/activation/start", await request.json())
 
+
 @router.post("/auth/email/activation/complete")
 async def activation_complete(request: Request) -> JSONResponse:
     return await _json_proxy(request, "/auth/email/activation/complete", await request.json())
+
 
 @router.post("/auth/refresh")
 async def refresh(request: Request) -> JSONResponse:
@@ -81,7 +94,9 @@ async def oauth_callback(provider: str, request: Request) -> Any:
     settings: GatewaySettings = get_settings()
     query = str(request.url.query)
     async with httpx.AsyncClient(timeout=15.0, follow_redirects=False) as client:
-        response = await client.get(f"{settings.auth_service_url}/auth/oauth/{provider}/callback?{query}")
+        response = await client.get(
+            f"{settings.auth_service_url}/auth/oauth/{provider}/callback?{query}"
+        )
     if response.is_redirect and response.headers.get("location"):
         return RedirectResponse(response.headers["location"], status_code=response.status_code)
     try:

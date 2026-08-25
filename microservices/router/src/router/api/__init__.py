@@ -1,10 +1,12 @@
 """Router Engine Service API routes.
 Author: Farruh
 """
+
 from __future__ import annotations
-from typing import Any, AsyncIterator
-from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse
+
+from collections.abc import AsyncIterator
+from typing import Any
+
 from ai_routing_shared.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -13,6 +15,8 @@ from ai_routing_shared.models import (
     EmbeddingResponse,
 )
 from ai_routing_shared.privacy import mask_chat_messages
+from fastapi import APIRouter, Request
+from fastapi.responses import StreamingResponse
 
 router = APIRouter()
 
@@ -35,7 +39,9 @@ async def _restore_stream(chunks: AsyncIterator[str], session: Any) -> AsyncIter
 
 
 @router.post("/chat/completions", response_model=ChatCompletionResponse)
-async def route_chat(body: dict[str, Any], request: Request) -> ChatCompletionResponse | StreamingResponse:
+async def route_chat(
+    body: dict[str, Any], request: Request
+) -> ChatCompletionResponse | StreamingResponse:
     """Route chat through request-local masking before the provider boundary."""
     api_key_id = body.pop("_api_key_id", "unknown")
     user_id = body.pop("_user_id", "unknown")
@@ -82,7 +88,9 @@ async def privacy_preview(body: dict[str, Any], request: Request) -> dict[str, A
         "detected_count": len(session.mapping),
         "token_labels": [token.split("_")[1] for token in session.mapping],
         "restoration": "request-local; original values are not returned by this endpoint",
-        "provider_boundary": "masked content is sent upstream and restored only in normalized client output",
+        "provider_boundary": (
+            "masked content is sent upstream and restored only in normalized client output"
+        ),
     }
 
 

@@ -9,10 +9,9 @@ Author: Farruh
 from __future__ import annotations
 
 import httpx
-from fastapi import APIRouter, Depends
-
-from ai_routing_shared.models import ApiKey, GenerationRecord
 from ai_routing_shared.exceptions import AuthorisationError
+from ai_routing_shared.models import ApiKey, GenerationRecord
+from fastapi import APIRouter, Depends
 
 from ...core.auth import get_api_key
 from ...core.config import GatewaySettings, get_settings
@@ -32,9 +31,7 @@ async def get_generation(
     is returned in the ``X-Generation-Id`` response header of every
     chat completion request.
     """
-    async with httpx.AsyncClient(
-        base_url=settings.billing_service_url, timeout=10.0
-    ) as client:
+    async with httpx.AsyncClient(base_url=settings.billing_service_url, timeout=10.0) as client:
         response = await client.get(
             f"/internal/generations/{generation_id}",
             params={"user_id": api_key.user_id},

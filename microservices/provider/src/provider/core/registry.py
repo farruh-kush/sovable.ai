@@ -7,16 +7,14 @@ Author: Farruh
 
 from __future__ import annotations
 
-from typing import Dict
-
 from ai_routing_shared.exceptions import NoProvidersAvailableError
 from ai_routing_shared.utils import get_logger
 
 from ..adapters.anthropic_adapter import AnthropicAdapter
 from ..adapters.base import BaseProviderAdapter
 from ..adapters.google_adapter import GoogleAdapter
-from ..adapters.openai_adapter import OpenAIAdapter
 from ..adapters.mistral_adapter import MistralAdapter
+from ..adapters.openai_adapter import OpenAIAdapter
 from .config import ProviderSettings
 
 logger = get_logger(__name__)
@@ -26,7 +24,7 @@ class ProviderRegistry:
     """Registry of all available provider adapters."""
 
     def __init__(self, settings: ProviderSettings) -> None:
-        self._adapters: Dict[str, BaseProviderAdapter] = {}
+        self._adapters: dict[str, BaseProviderAdapter] = {}
         self._register_all(settings)
 
     def _register_all(self, settings: ProviderSettings) -> None:
@@ -64,6 +62,6 @@ class ProviderRegistry:
             )
         return adapter
 
-    def all(self) -> Dict[str, BaseProviderAdapter]:
+    def all(self) -> dict[str, BaseProviderAdapter]:
         """Return all registered adapters."""
         return dict(self._adapters)

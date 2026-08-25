@@ -11,10 +11,9 @@ from __future__ import annotations
 
 import time
 import uuid
-from typing import Any, AsyncIterator, Optional
+from collections.abc import AsyncIterator
 
 import httpx
-
 from ai_routing_shared.exceptions import ProviderError
 from ai_routing_shared.models import (
     ChatChoice,
@@ -43,13 +42,16 @@ class OpenAIAdapter(BaseProviderAdapter):
 
     name = "openai"
 
-    def __init__(self, api_key: Optional[str], timeout_seconds: float = 30.0, base_url: str = _OPENAI_BASE_URL) -> None:
+    def __init__(
+        self,
+        api_key: str | None,
+        timeout_seconds: float = 30.0,
+        base_url: str = _OPENAI_BASE_URL,
+    ) -> None:
         super().__init__(api_key, timeout_seconds)
         self._base_url = base_url.rstrip("/")
 
-    async def _chat_impl(
-        self, request: ChatCompletionRequest
-    ) -> ChatCompletionResponse:
+    async def _chat_impl(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         if not self.api_key:
             return self._mock_chat(request)
 
@@ -135,6 +137,7 @@ class OpenAIAdapter(BaseProviderAdapter):
                 async for line in response.aiter_lines():
                     if line.startswith("data: ") and line != "data: [DONE]":
                         import json
+
                         data = json.loads(line[6:])
                         choice = data["choices"][0]
                         yield ChatCompletionChunk(
@@ -193,11 +196,19 @@ class OpenAIAdapter(BaseProviderAdapter):
             created=int(time.time()),
             model=request.model,
             provider=self.name,
-            choices=[ChatChoice(index=0, message=ChatMessage(role="assistant", content=content), finish_reason="stop")],
+            choices=[
+                ChatChoice(
+                    index=0,
+                    message=ChatMessage(role="assistant", content=content),
+                    finish_reason="stop",
+                )
+            ],
             usage=usage,
         )
 
-    async def _mock_stream(self, request: ChatCompletionRequest) -> AsyncIterator[ChatCompletionChunk]:
+    async def _mock_stream(
+        self, request: ChatCompletionRequest
+    ) -> AsyncIterator[ChatCompletionChunk]:
         words = f"[OpenAI mock stream] {request.messages[-1].content}".split()
         for word in words:
             yield ChatCompletionChunk(
@@ -205,14 +216,23 @@ class OpenAIAdapter(BaseProviderAdapter):
                 created=int(time.time()),
                 model=request.model,
                 provider=self.name,
-                choices=[ChatCompletionChunkChoice(index=0, delta=ChatCompletionChunkDelta(content=f"{word} "), finish_reason=None)],
+                choices=[
+                    ChatCompletionChunkChoice(
+                        index=0,
+                        delta=ChatCompletionChunkDelta(content=f"{word} "),
+                        finish_reason=None,
+                    )
+                ],
             )
 
     def _mock_embedding(self, request: EmbeddingRequest) -> EmbeddingResponse:
         items = request.input if isinstance(request.input, list) else [request.input]
         usage = UsageInfo(prompt_tokens=len(items) * 5, total_tokens=len(items) * 5)
         return EmbeddingResponse(
-            data=[EmbeddingVector(index=i, embedding=[0.1, 0.2, 0.3, 0.4]) for i, _ in enumerate(items)],
+            data=[
+                EmbeddingVector(index=i, embedding=[0.1, 0.2, 0.3, 0.4])
+                for i, _ in enumerate(items)
+            ],
             model=request.model,
             provider=self.name,
             usage=usage,

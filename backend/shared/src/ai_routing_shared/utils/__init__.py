@@ -3,12 +3,12 @@
 Author: Farruh
 """
 
+from .hashing import generate_api_key, hash_api_key
 from .logging import configure_logging, get_logger
-from .hashing import hash_api_key, generate_api_key
 
 __all__ = [
     "configure_logging",
+    "generate_api_key",
     "get_logger",
     "hash_api_key",
-    "generate_api_key",
 ]

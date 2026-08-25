@@ -3,10 +3,9 @@
 Author: Farruh
 """
 
+from ai_routing_shared.utils import get_logger
 from fastapi import APIRouter, Request
 from redis.exceptions import RedisError
-
-from ai_routing_shared.utils import get_logger
 
 router = APIRouter()
 logger = get_logger(__name__)

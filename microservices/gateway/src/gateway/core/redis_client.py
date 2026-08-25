@@ -13,8 +13,6 @@ from __future__ import annotations
 import time
 
 import redis.asyncio as aioredis
-
-from ai_routing_shared.exceptions import RateLimitError
 from ai_routing_shared.utils import get_logger
 
 logger = get_logger(__name__)
