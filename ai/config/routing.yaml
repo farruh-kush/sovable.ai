@@ -1,275 +1,496 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# AI Routing Layer — Routing Configuration
-#
-# This file is the single source of truth for:
-#   - Provider registration and data policies
-#   - Model-to-provider static routing and fallback chains
-#   - Pricing catalog for cost-optimised routing
-#   - Tier-based routing policies
-#
-# Author: Farruh
-# ─────────────────────────────────────────────────────────────────────────────
+# Solvable AI Routing Layer — governed catalog and routing policy.
+# Versioned, reviewable configuration. Credentials are environment/secret-manager only.
+schema_version: "1.0"
+catalog_version: "2026.08.26"
+policy_version: "2026.08.26.1"
+status: active
 
-# ── Provider Registry ─────────────────────────────────────────────────────────
+reload:
+  mode: atomic_snapshot
+  poll_interval_seconds: 30
+  require_schema_validation: true
+  reject_unknown_fields: false
+  retain_previous_on_error: true
+  audit_event: routing_policy_reload
+
+policy:
+  precedence:
+    - deny_list
+    - tenant_compliance
+    - region
+    - modality_and_capability
+    - quota_and_cost_cap
+    - provider_health
+    - explicit_provider_order
+    - experiment_assignment
+    - strategy
+    - static_fallback
+  tie_breaking:
+    - provider_order_in_policy
+    - model_id_lexicographic
+  retry:
+    max_attempts: 3
+    retryable_http_statuses: [408, 425, 429, 500, 502, 503, 504]
+    base_backoff_ms: 100
+    max_backoff_ms: 2000
+    retry_stream_after_first_byte: false
+  circuit_breaker:
+    consecutive_failures_to_open: 3
+    open_seconds: 30
+    half_open_probe_count: 1
+  backpressure:
+    max_inflight_per_provider: 200
+    queue_timeout_ms: 250
+    reject_when_queue_full: true
+  audit:
+    include_correlation_id: true
+    include_reasons: true
+    include_candidates: true
+    include_masking_summary: true
+    redact_secrets: true
+    retain_raw_prompt: false
+  masking:
+    required_before_provider_call: true
+    classify: [email, phone, payment_card, uz_personal_id]
+    preserve_tenant_isolation: true
+    reversible_tokens_request_local: true
+    provider_cannot_disable: true
+
+pricing:
+  currency: USD
+  unit: per_million_tokens
+  model_catalog_field: pricing_usd_per_million_tokens
+  platform_markup_default: 0.055
+  source: governed_model_catalog
+
 providers:
   openai:
-    display_name: "OpenAI"
-    base_url: "https://api.openai.com/v1"
-    timeout_seconds: 30
-    max_retries: 2
+    display_name: OpenAI
+    adapter: openai_compatible
+    api_key_env: OPENAI_API_KEY
+    base_url_env: OPENAI_BASE_URL
+    regions: [us, eu]
+    compliance_tags: [gdpr, soc2, no_training_default, configurable_zdr]
     data_policy:
-      trains_on_data: false       # Opt-out available via API
-      zero_data_retention: true   # ZDR available for Enterprise
-      gdpr_compliant: true
-      data_residency: ["us", "eu"]
-
+      trains_on_data: false
+      zero_data_retention: true
+      retention_days: 0
+    capabilities: [chat, embeddings, streaming, vision, tools, json_mode]
+    availability: {enabled: true, status: healthy, reason: null}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
   anthropic:
-    display_name: "Anthropic"
-    base_url: "https://api.anthropic.com/v1"
-    timeout_seconds: 30
-    max_retries: 2
+    display_name: Anthropic Claude
+    adapter: anthropic
+    api_key_env: ANTHROPIC_API_KEY
+    regions: [us]
+    compliance_tags: [gdpr, no_training_default, configurable_zdr]
     data_policy:
       trains_on_data: false
       zero_data_retention: true
-      gdpr_compliant: true
-      data_residency: ["us"]
-
+      retention_days: 0
+    capabilities: [chat, streaming, vision, tools, prompt_caching]
+    availability: {enabled: true, status: healthy, reason: null}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
   google:
-    display_name: "Google DeepMind"
-    base_url: "https://generativelanguage.googleapis.com/v1beta"
-    timeout_seconds: 30
-    max_retries: 2
+    display_name: Google Gemini
+    adapter: google
+    api_key_env: GOOGLE_API_KEY
+    regions: [us, eu]
+    compliance_tags: [gdpr]
     data_policy:
-      trains_on_data: true        # Default; disable via API settings
+      trains_on_data: true
       zero_data_retention: false
-      gdpr_compliant: true
-      data_residency: ["us", "eu"]
-
-  mistral:
-    display_name: "Mistral AI"
-    base_url: "https://api.mistral.ai/v1"
-    timeout_seconds: 30
+      retention_days: 30
+    capabilities: [chat, streaming, vision, tools]
+    availability: {enabled: true, status: healthy, reason: null}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
     max_retries: 2
+  mistral:
+    display_name: Mistral AI
+    adapter: mistral
+    api_key_env: MISTRAL_API_KEY
+    regions: [eu]
+    compliance_tags: [gdpr, eu_residency, no_training_default, configurable_zdr]
     data_policy:
       trains_on_data: false
       zero_data_retention: true
-      gdpr_compliant: true
-      data_residency: ["eu"]
+      retention_days: 0
+    capabilities: [chat, streaming, tools, json_mode]
+    availability: {enabled: true, status: healthy, reason: null}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
+  alibaba:
+    display_name: Alibaba Cloud Model Studio / Qwen
+    adapter: openai_compatible
+    api_key_env: DASHSCOPE_API_KEY
+    base_url_env: DASHSCOPE_BASE_URL
+    regions: [cn, ap, us]
+    compliance_tags: [china_residency_optional, configurable_zdr]
+    data_policy:
+      trains_on_data: true
+      zero_data_retention: false
+      retention_days: 30
+    capabilities: [chat, embeddings, streaming, vision, tools, json_mode]
+    availability: {enabled: false, status: unconfigured, reason: missing_secret_or_endpoint}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
+  moonshot:
+    display_name: Moonshot / Kimi
+    adapter: openai_compatible
+    api_key_env: MOONSHOT_API_KEY
+    base_url_env: MOONSHOT_BASE_URL
+    regions: [cn, us]
+    compliance_tags: [china_residency_optional]
+    data_policy: {trains_on_data: true, zero_data_retention: false, retention_days: 30}
+    capabilities: [chat, streaming, tools]
+    availability: {enabled: false, status: unconfigured, reason: missing_secret_or_endpoint}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
+  zhipu:
+    display_name: Zhipu AI / GLM
+    adapter: openai_compatible
+    api_key_env: ZHIPU_API_KEY
+    base_url_env: ZHIPU_BASE_URL
+    regions: [cn]
+    compliance_tags: [china_residency]
+    data_policy: {trains_on_data: true, zero_data_retention: false, retention_days: 30}
+    capabilities: [chat, streaming, tools, json_mode]
+    availability: {enabled: false, status: unconfigured, reason: missing_secret_or_endpoint}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
+  deepseek:
+    display_name: DeepSeek
+    adapter: openai_compatible
+    api_key_env: DEEPSEEK_API_KEY
+    base_url_env: DEEPSEEK_BASE_URL
+    regions: [cn, us]
+    compliance_tags: [china_residency_optional]
+    data_policy: {trains_on_data: true, zero_data_retention: false, retention_days: 30}
+    capabilities: [chat, streaming, tools, json_mode]
+    availability: {enabled: false, status: unconfigured, reason: missing_secret_or_endpoint}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 30
+    max_retries: 2
+  open_source:
+    display_name: Self-hosted open-source families
+    adapter: openai_compatible
+    api_key_env: OPEN_SOURCE_API_KEY
+    base_url_env: OPEN_SOURCE_BASE_URL
+    regions: [self_hosted, eu, us, cn]
+    compliance_tags: [self_hosted, configurable_zdr, tenant_controlled_retention]
+    data_policy: {trains_on_data: false, zero_data_retention: true, retention_days: 0}
+    capabilities: [chat, embeddings, streaming, vision, tools, json_mode]
+    availability: {enabled: false, status: unconfigured, reason: missing_endpoint}
+    health: {circuit_open: false, error_rate_5m: 0.0, p95_latency_ms: 0}
+    default_timeout_seconds: 60
+    max_retries: 2
 
-# ── Model Registry ────────────────────────────────────────────────────────────
 models:
-  # OpenAI
-  "gpt-4o":
+  gpt-4o:
     provider: openai
+    model_name: gpt-4o
+    family: gpt-4o
+    kind: chat
     context_window: 128000
     max_output_tokens: 16384
-    supports_vision: true
-    supports_function_calling: true
-    supports_json_mode: true
-
-  "gpt-4o-mini":
+    modalities: [text, image_input]
+    capability_tags: [chat, streaming, vision, tools, json_mode]
+    regions: [us, eu]
+    compliance_tags: [gdpr, configurable_zdr]
+    quality_tier: frontier
+    availability: active
+    pricing_usd_per_million_tokens: {input: 5.0, output: 15.0}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  gpt-4o-mini:
     provider: openai
+    model_name: gpt-4o-mini
+    family: gpt-4o
+    kind: chat
     context_window: 128000
     max_output_tokens: 16384
-    supports_vision: true
-    supports_function_calling: true
-    supports_json_mode: true
-
-  "gpt-4-turbo":
-    provider: openai
-    context_window: 128000
-    max_output_tokens: 4096
-    supports_vision: true
-    supports_function_calling: true
-    supports_json_mode: true
-
-  "gpt-3.5-turbo":
-    provider: openai
-    context_window: 16385
-    max_output_tokens: 4096
-    supports_function_calling: true
-    supports_json_mode: true
-
-  "text-embedding-3-small":
-    provider: openai
-    type: embedding
-    dimensions: 1536
-
-  "text-embedding-3-large":
-    provider: openai
-    type: embedding
-    dimensions: 3072
-
-  # Anthropic
-  "claude-3-5-sonnet-20241022":
+    modalities: [text, image_input]
+    capability_tags: [chat, streaming, vision, tools, json_mode]
+    regions: [us, eu]
+    compliance_tags: [gdpr, configurable_zdr]
+    quality_tier: standard
+    availability: active
+    pricing_usd_per_million_tokens: {input: 0.15, output: 0.60}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  claude-3-5-sonnet-20241022:
     provider: anthropic
+    model_name: claude-3-5-sonnet-20241022
+    family: claude-3.5
+    kind: chat
     context_window: 200000
     max_output_tokens: 8192
-    supports_vision: true
-    supports_function_calling: true
-    supports_prompt_caching: true
-
-  "claude-3-5-haiku-20241022":
+    modalities: [text, image_input]
+    capability_tags: [chat, streaming, vision, tools, prompt_caching]
+    regions: [us]
+    compliance_tags: [gdpr, configurable_zdr]
+    quality_tier: frontier
+    availability: active
+    pricing_usd_per_million_tokens: {input: 3.0, output: 15.0}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  claude-3-5-haiku-20241022:
     provider: anthropic
+    model_name: claude-3-5-haiku-20241022
+    family: claude-3.5
+    kind: chat
     context_window: 200000
     max_output_tokens: 8192
-    supports_vision: true
-    supports_function_calling: true
-    supports_prompt_caching: true
-
-  "claude-3-opus-20240229":
-    provider: anthropic
-    context_window: 200000
-    max_output_tokens: 4096
-    supports_vision: true
-    supports_function_calling: true
-    supports_prompt_caching: true
-
-  # Google
-  "gemini-1.5-pro":
+    modalities: [text, image_input]
+    capability_tags: [chat, streaming, vision, tools, prompt_caching]
+    regions: [us]
+    compliance_tags: [gdpr, configurable_zdr]
+    quality_tier: standard
+    availability: active
+    pricing_usd_per_million_tokens: {input: 0.8, output: 4.0}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  gemini-1.5-pro:
     provider: google
+    model_name: gemini-1.5-pro
+    family: gemini-1.5
+    kind: chat
     context_window: 1000000
     max_output_tokens: 8192
-    supports_vision: true
-    supports_function_calling: true
-
-  "gemini-1.5-flash":
+    modalities: [text, image_input]
+    capability_tags: [chat, streaming, vision, tools]
+    regions: [us, eu]
+    compliance_tags: [gdpr]
+    quality_tier: frontier
+    availability: active
+    pricing_usd_per_million_tokens: {input: 3.5, output: 10.5}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  gemini-1.5-flash:
     provider: google
+    model_name: gemini-1.5-flash
+    family: gemini-1.5
+    kind: chat
     context_window: 1000000
     max_output_tokens: 8192
-    supports_vision: true
-    supports_function_calling: true
-
-  # Mistral
-  "mistral-large-latest":
+    modalities: [text, image_input]
+    capability_tags: [chat, streaming, vision, tools]
+    regions: [us, eu]
+    compliance_tags: [gdpr]
+    quality_tier: standard
+    availability: active
+    pricing_usd_per_million_tokens: {input: 0.35, output: 1.05}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  mistral-large-latest:
     provider: mistral
+    model_name: mistral-large-latest
+    family: mistral-large
+    kind: chat
     context_window: 128000
     max_output_tokens: 4096
-    supports_function_calling: true
-    supports_json_mode: true
-
-  "mistral-small-latest":
+    modalities: [text]
+    capability_tags: [chat, streaming, tools, json_mode]
+    regions: [eu]
+    compliance_tags: [gdpr, eu_residency, configurable_zdr]
+    quality_tier: frontier
+    availability: active
+    pricing_usd_per_million_tokens: {input: 2.0, output: 6.0}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  mistral-small-latest:
     provider: mistral
+    model_name: mistral-small-latest
+    family: mistral-small
+    kind: chat
     context_window: 128000
     max_output_tokens: 4096
-    supports_function_calling: true
-
-  # Alibaba Model Studio via the OpenAI-compatible endpoint
-  "qwen-plus":
-    provider: openai
+    modalities: [text]
+    capability_tags: [chat, streaming, tools]
+    regions: [eu]
+    compliance_tags: [gdpr, eu_residency, configurable_zdr]
+    quality_tier: standard
+    availability: active
+    pricing_usd_per_million_tokens: {input: 0.2, output: 0.6}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  qwen-plus:
+    provider: alibaba
+    model_name: qwen-plus
+    family: qwen
+    kind: chat
     context_window: 131072
     max_output_tokens: 4096
-    supports_function_calling: true
-    supports_json_mode: true
+    modalities: [text]
+    capability_tags: [chat, streaming, tools, json_mode]
+    regions: [cn, ap, us]
+    compliance_tags: [china_residency_optional]
+    quality_tier: frontier
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 0.40, output: 1.20}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  text-embedding-v4:
+    provider: alibaba
+    model_name: text-embedding-v4
+    family: qwen-embedding
+    kind: embedding
+    context_window: 8192
+    max_output_tokens: 0
+    dimensions: 1536
+    modalities: [text]
+    capability_tags: [embeddings]
+    regions: [cn, ap, us]
+    compliance_tags: [china_residency_optional]
+    quality_tier: standard
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 0.07, output: 0.0}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  kimi-k2:
+    provider: moonshot
+    model_name: kimi-k2
+    family: kimi
+    kind: chat
+    context_window: 131072
+    max_output_tokens: 8192
+    modalities: [text]
+    capability_tags: [chat, streaming, tools]
+    regions: [cn, us]
+    compliance_tags: [china_residency_optional]
+    quality_tier: frontier
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 0.60, output: 2.50}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  glm-4-plus:
+    provider: zhipu
+    model_name: glm-4-plus
+    family: glm-4
+    kind: chat
+    context_window: 128000
+    max_output_tokens: 8192
+    modalities: [text]
+    capability_tags: [chat, streaming, tools, json_mode]
+    regions: [cn]
+    compliance_tags: [china_residency]
+    quality_tier: frontier
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 1.00, output: 1.00}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  deepseek-chat:
+    provider: deepseek
+    model_name: deepseek-chat
+    family: deepseek-v3
+    kind: chat
+    context_window: 131072
+    max_output_tokens: 8192
+    modalities: [text]
+    capability_tags: [chat, streaming, tools, json_mode]
+    regions: [cn, us]
+    compliance_tags: [china_residency_optional]
+    quality_tier: standard
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 0.27, output: 1.10}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  llama-3.3-70b-instruct:
+    provider: open_source
+    model_name: meta-llama/Llama-3.3-70B-Instruct
+    family: llama-3.3
+    kind: chat
+    context_window: 131072
+    max_output_tokens: 8192
+    modalities: [text]
+    capability_tags: [chat, streaming, tools, json_mode]
+    regions: [self_hosted, eu, us, cn]
+    compliance_tags: [self_hosted, configurable_zdr, tenant_controlled_retention]
+    quality_tier: frontier
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 0.20, output: 0.30}
+    deprecation: {status: active, sunset_at: null, replacement: null}
+  qwen2.5-72b-instruct:
+    provider: open_source
+    model_name: Qwen/Qwen2.5-72B-Instruct
+    family: qwen2.5
+    kind: chat
+    context_window: 131072
+    max_output_tokens: 8192
+    modalities: [text]
+    capability_tags: [chat, streaming, tools, json_mode]
+    regions: [self_hosted, eu, us, cn]
+    compliance_tags: [self_hosted, configurable_zdr, tenant_controlled_retention]
+    quality_tier: frontier
+    availability: configurable
+    pricing_usd_per_million_tokens: {input: 0.20, output: 0.30}
+    deprecation: {status: active, sunset_at: null, replacement: null}
 
-# ── Static Routing Table ──────────────────────────────────────────────────────
-# Defines the primary provider and fallback chain per model alias.
-# The router tries providers in order until one succeeds.
+aliases:
+  cheapest: {kind: strategy, strategy: cost, candidates: [gpt-4o-mini, gemini-1.5-flash, mistral-small-latest, deepseek-chat]}
+  fastest: {kind: strategy, strategy: latency, candidates: [gpt-4o-mini, gemini-1.5-flash, mistral-small-latest, deepseek-chat]}
+  best_quality: {kind: strategy, strategy: quality, candidates: [gpt-4o, claude-3-5-sonnet-20241022, gemini-1.5-pro, mistral-large-latest]}
+
 routing:
-  "gpt-4o":
-    primary: openai
-    fallback: ["anthropic"]   # claude-3-5-sonnet as fallback
-    strategy: static
+  gpt-4o: {strategy: static, primary: openai, fallback: [anthropic, google]}
+  gpt-4o-mini: {strategy: static, primary: openai, fallback: [mistral]}
+  claude-3-5-sonnet-20241022: {strategy: static, primary: anthropic, fallback: [openai, google]}
+  claude-3-5-haiku-20241022: {strategy: static, primary: anthropic, fallback: [mistral]}
+  gemini-1.5-pro: {strategy: static, primary: google, fallback: [anthropic, openai]}
+  gemini-1.5-flash: {strategy: static, primary: google, fallback: [openai, mistral]}
+  mistral-large-latest: {strategy: static, primary: mistral, fallback: [openai, anthropic]}
+  mistral-small-latest: {strategy: static, primary: mistral, fallback: [openai, google]}
+  qwen-plus: {strategy: static, primary: alibaba, fallback: [open_source]}
+  text-embedding-v4: {strategy: static, primary: alibaba, fallback: [openai, open_source]}
+  kimi-k2: {strategy: static, primary: moonshot, fallback: [open_source]}
+  glm-4-plus: {strategy: static, primary: zhipu, fallback: [open_source]}
+  deepseek-chat: {strategy: static, primary: deepseek, fallback: [open_source]}
+  llama-3.3-70b-instruct: {strategy: static, primary: open_source, fallback: []}
+  qwen2.5-72b-instruct: {strategy: static, primary: open_source, fallback: []}
 
-  "gpt-4o-mini":
-    primary: openai
-    fallback: ["mistral"]
-    strategy: static
-
-  "claude-3-5-sonnet-20241022":
-    primary: anthropic
-    fallback: ["openai"]
-    strategy: static
-
-  "claude-3-5-haiku-20241022":
-    primary: anthropic
-    fallback: []
-    strategy: static
-
-  "gemini-1.5-pro":
-    primary: google
-    fallback: ["anthropic"]
-    strategy: static
-
-  "gemini-1.5-flash":
-    primary: google
-    fallback: ["openai"]
-    strategy: static
-
-  "mistral-large-latest":
-    primary: mistral
-    fallback: ["openai"]
-    strategy: static
-
-  # Alias: route "cheapest" to the lowest-cost provider dynamically
-  "cheapest":
-    strategy: cost
-    candidates: ["openai", "anthropic", "mistral", "google"]
-
-  # Alias: route "fastest" to the lowest-latency provider dynamically
-  "fastest":
-    strategy: latency
-    candidates: ["openai", "anthropic", "mistral", "google"]
-
-# ── Pricing Catalog (USD per token) ──────────────────────────────────────────
-pricing:
-  openai:
-    "gpt-4o":          { input_per_token: 0.000005,   output_per_token: 0.000015 }
-    "gpt-4o-mini":     { input_per_token: 0.00000015, output_per_token: 0.00000060 }
-    "gpt-4-turbo":     { input_per_token: 0.00001,    output_per_token: 0.00003 }
-    "gpt-3.5-turbo":   { input_per_token: 0.0000005,  output_per_token: 0.0000015 }
-    "qwen-plus":      { input_per_token: 0.0000004,  output_per_token: 0.0000012 }
-    "text-embedding-v4": { input_per_token: 0.00000007, output_per_token: 0.0 }
-
-  anthropic:
-    "claude-3-5-sonnet-20241022": { input_per_token: 0.000003,   output_per_token: 0.000015 }
-    "claude-3-5-haiku-20241022":  { input_per_token: 0.0000008,  output_per_token: 0.000004 }
-    "claude-3-opus-20240229":     { input_per_token: 0.000015,   output_per_token: 0.000075 }
-
-  google:
-    "gemini-1.5-pro":   { input_per_token: 0.0000035, output_per_token: 0.0000105 }
-    "gemini-1.5-flash": { input_per_token: 0.00000035, output_per_token: 0.00000105 }
-
-  mistral:
-    "mistral-large-latest": { input_per_token: 0.000002, output_per_token: 0.000006 }
-    "mistral-small-latest": { input_per_token: 0.0000002, output_per_token: 0.0000006 }
-
-# ── Tier-Based Routing Policies ───────────────────────────────────────────────
-# Phase 2 — Task 2.2: Different routing behaviour per API key tier
 tier_policies:
   free:
-    allowed_models:
-      - "gpt-4o-mini"
-      - "claude-3-5-haiku-20241022"
-      - "gemini-1.5-flash"
-      - "mistral-small-latest"
+    allowed_models: [gpt-4o-mini, claude-3-5-haiku-20241022, gemini-1.5-flash, mistral-small-latest]
     requests_per_minute: 10
     requests_per_day: 100
     monthly_budget_usd: 5.0
-    enable_caching: true
-    enable_streaming: false
-
+    allow_streaming: false
+    allow_fallbacks: false
   pro:
-    allowed_models: "*"   # All models
+    allowed_models: "*"
     requests_per_minute: 100
     requests_per_day: 5000
     monthly_budget_usd: 500.0
-    enable_caching: true
-    enable_streaming: true
-    enable_fallbacks: true
-
+    allow_streaming: true
+    allow_fallbacks: true
   enterprise:
     allowed_models: "*"
     requests_per_minute: 1000
     requests_per_day: 100000
-    monthly_budget_usd: null   # No cap
-    enable_caching: true
-    enable_streaming: true
-    enable_fallbacks: true
+    monthly_budget_usd: null
+    allow_streaming: true
+    allow_fallbacks: true
     enable_ab_testing: true
-    zero_data_retention: true
+    require_zero_data_retention: true
 
-  "qwen-plus":
-    primary: openai
-    fallback: ["mistral"]
-    strategy: static
+experiments:
+  - id: quality-v1
+    status: paused
+    salt: quality-v1-2026-08-26
+    traffic_percent: 0
+    variants: [gpt-4o, claude-3-5-sonnet-20241022]
+    eligible_tiers: [enterprise]
+
+observability:
+  drift:
+    rolling_window_requests: 1000
+    quality_drop_threshold: 0.05
+    latency_regression_percent: 25
+    cost_regression_percent: 20
+  promotion:
+    min_evaluation_requests: 200
+    min_availability: 0.995
+    max_masking_leakage: 0
+    max_fallback_rate: 0.20
+  rollback:
+    fallback_rate: 0.35
+    p95_latency_multiplier: 2.0
+    consecutive_health_failures: 3
+
+deny_list: []

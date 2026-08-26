@@ -39,6 +39,13 @@ spec:
                 secretKeyRef:
                   name: auth-secret
                   key: secret-key
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: url
+            - name: RATE_LIMIT_BACKEND
+              value: "redis"
             - name: PUBLIC_BASE_URL
               value: "https://api.sovable.ai"
             - name: FRONTEND_BASE_URL

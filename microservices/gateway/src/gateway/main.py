@@ -18,8 +18,10 @@ from contextlib import asynccontextmanager
 
 from ai_routing_shared.middleware import RequestIdMiddleware, error_handler_middleware
 from ai_routing_shared.utils import configure_logging
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from .api import auth as auth_proxy
 from .api.v1 import admin, chat, embeddings, generations, health, keys, models, privacy
@@ -63,6 +65,29 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
         lifespan=lifespan,
     )
+
+    @app.exception_handler(RequestValidationError)
+    async def request_validation_error_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
+        """Return field-level validation details without echoing request values."""
+        errors = [
+            {
+                "loc": [str(part) for part in error.get("loc", ())],
+                "message": error.get("msg", "Invalid value."),
+            }
+            for error in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": {
+                    "code": "invalid_request",
+                    "message": "Request validation failed.",
+                    "details": {"fields": errors},
+                }
+            },
+        )
 
     # Middleware stack (applied in reverse order — last added = outermost)
     app.middleware("http")(error_handler_middleware)

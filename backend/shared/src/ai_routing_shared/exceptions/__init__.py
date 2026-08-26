@@ -115,11 +115,49 @@ class SchemaValidationError(RoutingLayerError):
     error_code = "schema_validation_failed"
 
 
+class EmailDeliveryError(RoutingLayerError):
+    """Raised when an activation email cannot be delivered."""
+
+    http_status = 503
+    error_code = "email_delivery_failed"
+
+
+class UpstreamServiceError(RoutingLayerError):
+    """Raised when a peer service returns an unusable or failed response."""
+
+    http_status = 502
+    error_code = "upstream_service_error"
+
+    def __init__(
+        self,
+        message: str,
+        service: str,
+        details: dict | None = None,
+    ) -> None:
+        super().__init__(message, details)
+        self.service = service
+
+
+class UpstreamTimeoutError(UpstreamServiceError):
+    """Raised when a peer service exceeds the gateway timeout."""
+
+    http_status = 504
+    error_code = "upstream_timeout"
+
+
+class DependencyUnavailableError(RoutingLayerError):
+    """Raised when a required gateway dependency is unavailable."""
+
+    http_status = 503
+    error_code = "dependency_unavailable"
+
+
 __all__ = [
     "AuthenticationError",
     "AuthorisationError",
     "BudgetExceededError",
     "DataPolicyViolationError",
+    "DependencyUnavailableError",
     "EmailDeliveryError",
     "ModelNotAllowedError",
     "NoProvidersAvailableError",
@@ -128,4 +166,6 @@ __all__ = [
     "RateLimitError",
     "RoutingLayerError",
     "SchemaValidationError",
+    "UpstreamServiceError",
+    "UpstreamTimeoutError",
 ]

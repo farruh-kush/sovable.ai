@@ -1,14 +1,8 @@
-"""Authentication and policy enforcement dependencies for the Gateway.
-
-This module implements the three critical bug fixes from Phase 1:
-  - Task 1.1: Rate limiting (delegated to RedisClient)
-  - Task 1.2: Monthly budget cap enforcement
-  - Task 1.3: Model whitelist enforcement
-
-Author: Farruh
-"""
+"""Gateway authentication and request policy dependencies."""
 
 from __future__ import annotations
+
+import hmac
 
 import httpx
 from ai_routing_shared.exceptions import (
@@ -16,14 +10,37 @@ from ai_routing_shared.exceptions import (
     BudgetExceededError,
     ModelNotAllowedError,
     RateLimitError,
+    UpstreamServiceError,
+    UpstreamTimeoutError,
 )
 from ai_routing_shared.models import ApiKey
 from ai_routing_shared.utils import get_logger
 from fastapi import Depends, Header, Request
+from pydantic import ValidationError
 
 from .config import GatewaySettings, get_settings
 
 logger = get_logger(__name__)
+
+
+def _extract_raw_key(authorization: str | None, x_api_key: str | None) -> str:
+    """Extract one API key and reject ambiguous authentication headers."""
+    bearer_key: str | None = None
+    if authorization is not None:
+        scheme, separator, value = authorization.partition(" ")
+        if scheme.lower() == "bearer" and separator:
+            bearer_key = value.strip()
+        elif authorization.strip():
+            raise AuthenticationError("Invalid Authorization header. Use 'Bearer <key>'.")
+
+    header_key = x_api_key.strip() if x_api_key else None
+    if bearer_key and header_key and not hmac.compare_digest(bearer_key, header_key):
+        raise AuthenticationError("Conflicting API-key headers were provided.")
+
+    raw_key = bearer_key or header_key
+    if not raw_key:
+        raise AuthenticationError("Missing API key. Provide it via 'Authorization: Bearer <key>'.")
+    return raw_key
 
 
 async def get_api_key(
@@ -32,61 +49,65 @@ async def get_api_key(
     x_api_key: str | None = Header(default=None),
     settings: GatewaySettings = Depends(get_settings),
 ) -> ApiKey:
-    """Validate the API key by calling the Auth Service.
-
-    Extracts the raw key from either the ``Authorization: Bearer <key>``
-    header or the ``X-Api-Key`` header, then delegates validation to the
-    Auth Service, which returns the full ``ApiKey`` principal.
-
-    Args:
-        request: The incoming FastAPI request (used to access app state).
-        authorization: Value of the ``Authorization`` header.
-        x_api_key: Value of the ``X-Api-Key`` header.
-        settings: Injected gateway settings.
-
-    Returns:
-        A validated ``ApiKey`` principal.
-
-    Raises:
-        AuthenticationError: If the key is missing or invalid.
-    """
-    raw_key = x_api_key
-    if authorization and authorization.lower().startswith("bearer "):
-        raw_key = authorization[7:]
-
-    if not raw_key:
-        raise AuthenticationError("Missing API key. Provide it via 'Authorization: Bearer <key>'.")
+    """Validate a client API key through the private Auth Service."""
+    raw_key = _extract_raw_key(authorization, x_api_key)
+    headers: dict[str, str] = {}
+    request_id = request.headers.get("x-request-id")
+    if request_id:
+        headers["x-request-id"] = request_id
 
     async with httpx.AsyncClient(base_url=settings.auth_service_url, timeout=5.0) as client:
         try:
             response = await client.post(
                 "/internal/validate-key",
                 json={"raw_key": raw_key},
+                headers=headers,
             )
+        except httpx.TimeoutException as exc:
+            logger.warning("auth_service_timeout")
+            raise UpstreamTimeoutError(
+                "Authentication service timed out.",
+                service="auth",
+                details={"service": "auth"},
+            ) from exc
         except httpx.RequestError as exc:
-            logger.error("auth_service_unreachable", error=str(exc))
-            raise AuthenticationError("Authentication service is temporarily unavailable.") from exc
+            logger.warning("auth_service_unreachable")
+            raise UpstreamServiceError(
+                "Authentication service is temporarily unavailable.",
+                service="auth",
+                details={"service": "auth"},
+            ) from exc
 
-    if response.status_code == 401:
+    if response.status_code in {401, 403}:
         raise AuthenticationError("Invalid or expired API key.")
-
+    if response.status_code >= 500:
+        logger.error("auth_service_error", status=response.status_code)
+        raise UpstreamServiceError(
+            "Authentication service returned an error.",
+            service="auth",
+            details={"status": response.status_code, "service": "auth"},
+        )
     if response.status_code != 200:
-        logger.error("auth_service_error", status=response.status_code, body=response.text)
-        raise AuthenticationError("Authentication service returned an unexpected error.")
+        raise AuthenticationError("Authentication service rejected the API key.")
 
-    return ApiKey.model_validate(response.json())
+    try:
+        payload = response.json()
+        return ApiKey.model_validate(payload)
+    except (ValueError, ValidationError) as exc:
+        logger.error("auth_service_invalid_response", status=response.status_code)
+        raise UpstreamServiceError(
+            "Authentication service returned an invalid response.",
+            service="auth",
+            details={"service": "auth"},
+        ) from exc
 
 
 async def enforce_rate_limit(
     request: Request,
     api_key: ApiKey = Depends(get_api_key),
 ) -> ApiKey:
-    """Phase 1 — Task 1.1: Enforce per-minute and per-day rate limits.
-
-    Uses the Redis sliding window implementation in ``RedisClient``.
-    """
+    """Enforce per-minute and per-day sliding-window limits."""
     redis = request.app.state.redis
-
     minute_key = f"rl:{api_key.id}:minute"
     day_key = f"rl:{api_key.id}:day"
 
@@ -111,18 +132,11 @@ async def enforce_budget(
     request: Request,
     api_key: ApiKey = Depends(enforce_rate_limit),
 ) -> ApiKey:
-    """Phase 1 — Task 1.2: Enforce the monthly budget cap.
-
-    Checks the current month's spend from Redis (written by the Billing
-    Service) before routing the request. Blocks with HTTP 429 if the
-    budget has been reached.
-    """
+    """Enforce the configured monthly spend cap before routing."""
     if api_key.monthly_budget_usd is None:
-        return api_key  # No budget configured — allow all requests
+        return api_key
 
-    redis = request.app.state.redis
-    current_spend = await redis.get_monthly_spend(api_key.id)
-
+    current_spend = await request.app.state.redis.get_monthly_spend(api_key.id)
     if current_spend >= api_key.monthly_budget_usd:
         raise BudgetExceededError(
             f"Monthly budget of ${api_key.monthly_budget_usd:.2f} USD has been reached.",
@@ -131,20 +145,11 @@ async def enforce_budget(
                 "budget": api_key.monthly_budget_usd,
             },
         )
-
     return api_key
 
 
 def enforce_model_whitelist(model: str, api_key: ApiKey) -> None:
-    """Phase 1 — Task 1.3: Enforce the model whitelist.
-
-    Args:
-        model: The model requested by the client.
-        api_key: The validated API key principal.
-
-    Raises:
-        ModelNotAllowedError: If the model is not in the key's whitelist.
-    """
+    """Reject models not permitted by the validated API-key principal."""
     if api_key.allowed_models and model not in api_key.allowed_models:
         raise ModelNotAllowedError(
             f"Model '{model}' is not permitted for this API key.",

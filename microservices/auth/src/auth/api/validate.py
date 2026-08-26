@@ -7,6 +7,8 @@ Author: Farruh
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 from ai_routing_shared.exceptions import AuthenticationError
 from ai_routing_shared.models import ApiKey, ApiKeyTier
 from ai_routing_shared.utils import hash_api_key
@@ -47,6 +49,9 @@ async def validate_key(
 
     if record is None:
         raise AuthenticationError("Invalid or expired API key.")
+
+    record.last_used_at = datetime.now(UTC)
+    await session.commit()
 
     return ApiKey(
         id=record.id,

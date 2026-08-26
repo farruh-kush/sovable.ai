@@ -2,7 +2,7 @@ apiVersion: solvable.ai/v1
 kind: ProviderAdapterContract
 metadata:
   id: provider-adapter-contract
-  version: 1
+  version: 2
 spec:
   adapter:
     interface: ProviderAdapter
@@ -71,12 +71,31 @@ spec:
     - providerClass: malformed_response
       solvableType: upstream_invalid_response
       retryable: false
-  security:
-    secretSource: secret-manager-reference
-    logProviderBodies: false
-    allowArbitraryBaseUrl: false
-    egressAllowlistRequired: true
   health:
     maxDurationMs: 5000
     mustUseSyntheticInput: true
     mustRespectBudget: true
+  http:
+    canonicalPrefix: /v1/adapt
+    backwardCompatiblePrefix: /adapt
+    correlationHeader: X-Correlation-Id
+    requestSelector: _provider
+    routes:
+      chat: POST /v1/adapt/chat/completions
+      embeddings: POST /v1/adapt/embeddings
+      health: GET /v1/adapt/health
+      capabilities: GET /v1/adapt/capabilities
+    streaming:
+      mediaType: text/event-stream
+      eventFormat: 'data: <NormalizedChunk JSON>\\n\\n'
+      terminalEvent: 'data: [DONE]\\n\\n'
+  embeddings:
+    input: string|array[string]
+    output: list[EmbeddingVector]
+    usage: TokenUsage
+  security:
+    secretSource: kubernetes-secret-environment
+    logProviderBodies: false
+    retainPrompts: false
+    allowArbitraryBaseUrl: false
+    egressAllowlistRequired: true

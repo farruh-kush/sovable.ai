@@ -8,17 +8,25 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 from ai_routing_shared.models import (
+    CatalogEnvelope,
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatMessage,
     EmbeddingRequest,
     EmbeddingResponse,
+    HealthEnvelope,
+    RouteDecisionContract,
+    RoutingSummaryContract,
 )
 from ai_routing_shared.privacy import mask_chat_messages
 from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse
 
 router = APIRouter()
+
+
+def _correlation_id(request: Request) -> str | None:
+    return request.headers.get("X-Request-Id") or request.headers.get("X-Correlation-Id")
 
 
 def _restore_response(response: ChatCompletionResponse, session: Any) -> ChatCompletionResponse:
@@ -52,7 +60,7 @@ async def route_chat(
     if masked_request.stream:
         return StreamingResponse(
             _restore_stream(
-                engine.route_chat_stream(masked_request, api_key_id, user_id),
+                engine.route_chat_stream(masked_request, api_key_id, user_id, _correlation_id(request)),
                 masking_session,
             ),
             media_type="text/event-stream",
@@ -61,6 +69,7 @@ async def route_chat(
         request=masked_request,
         api_key_id=api_key_id,
         user_id=user_id,
+        correlation_id=_correlation_id(request),
     )
     return _restore_response(response, masking_session)
 
@@ -75,6 +84,7 @@ async def route_embeddings(body: dict[str, Any], request: Request) -> EmbeddingR
         request=embed_request,
         api_key_id=api_key_id,
         user_id=user_id,
+        correlation_id=_correlation_id(request),
     )
 
 
@@ -100,7 +110,29 @@ async def list_models(request: Request) -> dict:
     return request.app.state.routing_engine.get_models()
 
 
-@router.get("/routing/summary")
+@router.get("/catalog", response_model=CatalogEnvelope)
+async def catalog(request: Request) -> dict:
+    """Return the validated, secret-free catalog snapshot."""
+    return request.app.state.routing_engine.get_catalog()
+
+
+@router.get("/health", response_model=HealthEnvelope)
+async def routing_health(request: Request) -> dict:
+    """Return catalog and provider health signals without credentials."""
+    return request.app.state.routing_engine.get_health()
+
+
+@router.get("/routing/summary", response_model=RoutingSummaryContract)
 async def routing_summary(request: Request) -> dict:
     """Return a safe summary of routing policy configuration."""
     return request.app.state.routing_engine.get_routing_summary()
+
+
+@router.get("/routing/decisions/{correlation_id}", response_model=RouteDecisionContract)
+async def route_decision(correlation_id: str, request: Request) -> dict:
+    """Return an auditable route decision retained for this process."""
+    decision = request.app.state.routing_engine.get_last_decision(correlation_id)
+    if decision is None:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="route decision not found")
+    return decision

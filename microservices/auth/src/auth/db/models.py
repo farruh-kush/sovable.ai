@@ -1,12 +1,20 @@
-"""SQLAlchemy ORM models for the Auth Service.
-Author: Farruh
-"""
+"""SQLAlchemy models owned by the Auth Service database."""
 
 from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,12 +27,12 @@ class ApiKeyRecord(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     key_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    tier: Mapped[str] = mapped_column(String(32), default="free")
-    requests_per_minute: Mapped[int] = mapped_column(Integer, default=60)
-    requests_per_day: Mapped[int] = mapped_column(Integer, default=2000)
+    tier: Mapped[str] = mapped_column(String(32), default="free", nullable=False)
+    requests_per_minute: Mapped[int] = mapped_column(Integer, default=60, nullable=False)
+    requests_per_day: Mapped[int] = mapped_column(Integer, default=2000, nullable=False)
     monthly_budget_usd: Mapped[float | None] = mapped_column(Float, nullable=True)
     allowed_models: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -34,6 +42,7 @@ class UserAccount(Base):
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     email: Mapped[str | None] = mapped_column(String(320), unique=True, index=True, nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(512), nullable=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     phone_e164: Mapped[str | None] = mapped_column(
         String(32), unique=True, index=True, nullable=True
@@ -52,6 +61,7 @@ class EmailActivationToken(Base):
     token_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     email: Mapped[str] = mapped_column(String(320), index=True, nullable=False)
     display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(512), nullable=True)
     account_type: Mapped[str] = mapped_column(String(16), default="user", nullable=False)
     consumed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -59,15 +69,15 @@ class EmailActivationToken(Base):
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False,
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
 
 class UserIdentity(Base):
     __tablename__ = "user_identities"
+    __table_args__ = (
+        UniqueConstraint("provider", "provider_subject", name="uq_identity_provider_subject"),
+    )
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     user_id: Mapped[str] = mapped_column(
         ForeignKey("user_accounts.id", ondelete="CASCADE"), index=True, nullable=False

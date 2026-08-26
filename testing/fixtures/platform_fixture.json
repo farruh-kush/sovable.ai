@@ -1,0 +1,60 @@
+{
+  "schema_version": "2026-08-26",
+  "request_id": "test-request-0001",
+  "user": {
+    "email": "release-test@example.invalid",
+    "password": "Correct-Horse-Battery-9!",
+    "display_name": "Release Test User",
+    "locale": "en"
+  },
+  "locales": ["uz", "ru", "en"],
+  "api_key": {
+    "raw": "sk-test-release-key",
+    "id": "key_release_0001",
+    "user_id": "usr_release_0001",
+    "allowed_models": ["gpt-4o-mini", "qwen-plus"],
+    "requests_per_minute": 20,
+    "requests_per_day": 500,
+    "monthly_budget_usd": 5.0
+  },
+  "chat": {
+    "model": "gpt-4o-mini",
+    "messages": [
+      {"role": "system", "content": "You are a deterministic test assistant."},
+      {"role": "user", "content": "Reply with the word READY."}
+    ],
+    "temperature": 0,
+    "max_tokens": 16
+  },
+  "stream_chat": {
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Stream READY."}],
+    "temperature": 0,
+    "max_tokens": 16,
+    "stream": true
+  },
+  "embedding": {
+    "model": "text-embedding-3-small",
+    "input": ["release fixture one", "release fixture two"]
+  },
+  "routing": {
+    "sort": "latency",
+    "order": ["openai", "qwen", "mistral"],
+    "allow_fallbacks": true,
+    "data_collection": "deny"
+  },
+  "usage": {
+    "id": "gen_release_0001",
+    "api_key_id": "key_release_0001",
+    "user_id": "usr_release_0001",
+    "model": "gpt-4o-mini",
+    "provider": "openai",
+    "prompt_tokens": 8,
+    "completion_tokens": 3,
+    "total_tokens": 11,
+    "cost_usd": 0.00008,
+    "markup_usd": 0.0000044,
+    "billed_usd": 0.0000844,
+    "latency_ms": 42.0
+  }
+}

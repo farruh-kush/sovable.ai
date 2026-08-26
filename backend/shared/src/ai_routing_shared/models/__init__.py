@@ -23,6 +23,13 @@ from .responses import (
     EmbeddingVector,
 )
 from .usage import GenerationCost, GenerationRecord, UsageInfo, UsageRecord
+from .routing import (
+    CatalogEnvelope,
+    HealthEnvelope,
+    ProviderHealthContract,
+    RouteDecisionContract,
+    RoutingSummaryContract,
+)
 
 __all__ = [
     "ApiKey",
@@ -42,4 +49,9 @@ __all__ = [
     "ProviderPreferences",
     "UsageInfo",
     "UsageRecord",
+    "CatalogEnvelope",
+    "HealthEnvelope",
+    "ProviderHealthContract",
+    "RouteDecisionContract",
+    "RoutingSummaryContract",
 ]

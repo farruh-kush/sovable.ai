@@ -121,6 +121,16 @@ __pycache__/
 .eggs/
 dist/
 build/
+# Test/runtime evidence is generated locally or attached as masked CI artifacts.
+.pytest_cache/
+testing/.pytest_cache/
+testing/evidence/
+# Imported delivery archives and adjacent component worktrees are not source for this aggregate repository.
+*.zip
+*.tar.gz
+sovable-auth/
+sovable-gateway/
+sovable-provider-adapters/
 
 # Public repository safety
 backend/.env.production

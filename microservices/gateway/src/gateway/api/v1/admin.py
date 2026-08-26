@@ -1,9 +1,4 @@
-"""Protected administrative overview endpoints.
-
-The gateway is the only public entry point. This endpoint aggregates safe,
-non-secret operational signals from internal services for the Admin Console.
-Author: Farruh
-"""
+"""Redacted operational overview for the administrative console."""
 
 from __future__ import annotations
 
@@ -12,7 +7,8 @@ from datetime import UTC, datetime
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, Depends, Header, HTTPException
+from ai_routing_shared.exceptions import AuthorisationError
+from fastapi import APIRouter, Depends, Header, Request
 
 from ...core.config import GatewaySettings, get_settings
 
@@ -25,13 +21,17 @@ def require_admin_key(
 ) -> None:
     """Require the configured management key without exposing comparison details."""
     if not x_admin_key or not secrets.compare_digest(x_admin_key, settings.admin_api_key):
-        raise HTTPException(status_code=403, detail="Admin access required")
+        raise AuthorisationError("Admin access required.")
 
 
-async def _safe_get(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
-    """Read an internal JSON endpoint and return a sanitized unavailable result on failure."""
+async def _safe_get(
+    client: httpx.AsyncClient,
+    url: str,
+    headers: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """Read an internal JSON endpoint and return a sanitized unavailable result."""
     try:
-        response = await client.get(url)
+        response = await client.get(url, headers=headers or {})
         response.raise_for_status()
         payload = response.json()
         return payload if isinstance(payload, dict) else {"status": "invalid_response"}
@@ -41,14 +41,16 @@ async def _safe_get(client: httpx.AsyncClient, url: str) -> dict[str, Any]:
 
 @router.get("/admin/overview", dependencies=[Depends(require_admin_key)])
 async def admin_overview(
+    request: Request,
     settings: GatewaySettings = Depends(get_settings),
 ) -> dict[str, Any]:
     """Return a safe operational snapshot for the Admin Console."""
-    async with httpx.AsyncClient(timeout=8.0) as client:
-        router_health = await _safe_get(client, f"{settings.router_service_url}/health")
-        models = await _safe_get(client, f"{settings.router_service_url}/route/models")
-        routing = await _safe_get(client, f"{settings.router_service_url}/route/routing/summary")
-        provider_health = await _safe_get(client, f"{settings.provider_service_url}/health")
+    headers = {"x-request-id": request.headers["x-request-id"]} if request.headers.get("x-request-id") else {}
+    async with httpx.AsyncClient(timeout=httpx.Timeout(8.0, connect=3.0)) as client:
+        router_health = await _safe_get(client, f"{settings.router_service_url}/health", headers)
+        models = await _safe_get(client, f"{settings.router_service_url}/route/models", headers)
+        routing = await _safe_get(client, f"{settings.router_service_url}/route/routing/summary", headers)
+        provider_health = await _safe_get(client, f"{settings.provider_service_url}/health", headers)
 
     providers = provider_health.get("providers", {})
     provider_items = [

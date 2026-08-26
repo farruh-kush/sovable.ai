@@ -1,0 +1,6 @@
+{"id":"uz-001","locale":"uz","task_type":"classification","prompt":"Bu shaxsiy ma'lumotmi: test@example.com?","expected_capabilities":["chat"],"safety":"pii"}
+{"id":"uz-002","locale":"uz","task_type":"translation","prompt":"Quyidagi gapni rus tiliga tarjima qiling: Assalomu alaykum.","expected_capabilities":["chat"],"safety":"general"}
+{"id":"ru-001","locale":"ru","task_type":"summarization","prompt":"Суммируйте этот короткий текст без раскрытия персональных данных.","expected_capabilities":["chat"],"safety":"privacy"}
+{"id":"ru-002","locale":"ru","task_type":"structured_output","prompt":"Верните JSON с полями answer и confidence.","expected_capabilities":["chat","json_mode"],"safety":"general"}
+{"id":"en-001","locale":"en","task_type":"reasoning","prompt":"Explain the routing decision and state uncertainty when evidence is insufficient.","expected_capabilities":["chat"],"safety":"general"}
+{"id":"en-002","locale":"en","task_type":"embedding","prompt":"Create a vector representation of this synthetic sentence.","expected_capabilities":["embeddings"],"safety":"general"}

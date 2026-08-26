@@ -36,7 +36,9 @@ from ai_routing_shared.models import (
 )
 from ai_routing_shared.utils import get_logger
 
+from ..core.catalog import CatalogManager
 from ..core.redis_client import RouterRedisClient
+from .policy import NoRoute, PolicyEvaluator, RouteContext, RouteDecision
 
 logger = get_logger(__name__)
 
@@ -57,10 +59,12 @@ class RoutingEngine:
         redis: RouterRedisClient,
     ) -> None:
         self._config = self._load_config(config_path)
+        self._catalog_manager = CatalogManager(config_path)
         self._provider_url = provider_service_url
         self._billing_url = billing_service_url
         self._redis = redis
         self._background_tasks: set[asyncio.Task[None]] = set()
+        self._last_decisions: dict[str, object] = {}
 
     @staticmethod
     def _load_config(path: Path) -> dict:
@@ -77,16 +81,19 @@ class RoutingEngine:
         request: ChatCompletionRequest,
         api_key_id: str,
         user_id: str,
+        correlation_id: str | None = None,
     ) -> ChatCompletionResponse:
         """Route a chat completion request to the best available provider."""
-        candidates = await self._resolve_candidates(request)
+        correlation_id = correlation_id or getattr(request, "correlation_id", None) or f"req_{uuid.uuid4().hex}"
+        decision = await self._resolve_candidates(request, api_key_id, user_id, correlation_id, return_decision=True)
+        candidates = decision.candidates
         generation_id = f"gen_{uuid.uuid4().hex}"
 
         last_error: Exception | None = None
         for provider_name in candidates:
             try:
                 start_ms = time.monotonic() * 1000
-                response = await self._call_provider_chat(provider_name, request)
+                response = await self._call_provider_chat(provider_name, request, decision.selected_model)
                 latency_ms = time.monotonic() * 1000 - start_ms
 
                 # Record latency for future routing decisions (Phase 4 — Task 4.1)
@@ -131,10 +138,12 @@ class RoutingEngine:
         )
 
     async def route_chat_stream(
-        self, request: ChatCompletionRequest, api_key_id: str, user_id: str
+        self, request: ChatCompletionRequest, api_key_id: str, user_id: str, correlation_id: str | None = None
     ) -> AsyncIterator[str]:
         """Proxy normalized provider SSE chunks with fallback support."""
-        candidates = await self._resolve_candidates(request)
+        correlation_id = correlation_id or getattr(request, "correlation_id", None) or f"req_{uuid.uuid4().hex}"
+        decision = await self._resolve_candidates(request, api_key_id, user_id, correlation_id, return_decision=True)
+        candidates = decision.candidates
         last_error: Exception | None = None
         for provider_name in candidates:
             payload = request.model_dump()
@@ -174,10 +183,17 @@ class RoutingEngine:
         request: EmbeddingRequest,
         api_key_id: str,
         user_id: str,
+        correlation_id: str | None = None,
     ) -> EmbeddingResponse:
         """Route an embedding request to the best available provider."""
-        provider_name = self._resolve_static_provider(request.model)
-        return await self._call_provider_embedding(provider_name, request)
+        decision = await self._resolve_candidates(request, api_key_id, user_id, correlation_id or f"req_{uuid.uuid4().hex}", return_decision=True)
+        last_error: Exception | None = None
+        for provider_name in decision.candidates:
+            try:
+                return await self._call_provider_embedding(provider_name, request, decision.selected_model)
+            except (ProviderError, httpx.HTTPError) as exc:
+                last_error = exc
+        raise NoProvidersAvailableError("All embedding providers failed.", details={"last_error": type(last_error).__name__ if last_error else None})
 
     def get_models(self) -> dict:
         """Return the list of available models with provider metadata."""
@@ -198,40 +214,72 @@ class RoutingEngine:
             ],
         }
 
+    def get_catalog(self) -> dict:
+        """Return a secret-free validated catalog snapshot and checksum."""
+        return {
+            "catalog": self._catalog_manager.redacted_snapshot(),
+            "checksum": self._catalog_manager.checksum,
+        }
+
+    def get_health(self) -> dict:
+        """Return policy/provider health signals without credentials."""
+        catalog = self._catalog_manager.snapshot()
+        return {
+            "catalog_version": catalog.catalog_version,
+            "policy_version": catalog.policy_version,
+            "checksum": self._catalog_manager.checksum,
+            "providers": {
+                name: {
+                    "status": entry.availability.status,
+                    "enabled": entry.availability.enabled,
+                    "circuit_open": entry.health.circuit_open,
+                    "error_rate_5m": entry.health.error_rate_5m,
+                    "p95_latency_ms": entry.health.p95_latency_ms,
+                }
+                for name, entry in catalog.providers.items()
+            },
+        }
+
+    def get_last_decision(self, correlation_id: str) -> dict | None:
+        """Return an auditable decision by correlation ID, if retained locally."""
+        decision = self._last_decisions.get(correlation_id)
+        return decision.as_dict() if hasattr(decision, "as_dict") else None
+
     # ── Candidate Resolution ─────────────────────────────────────────────────
 
-    async def _resolve_candidates(self, request: ChatCompletionRequest) -> list[str]:
-        """Resolve the ordered list of provider candidates for a request.
-
-        Applies (in order):
-        1. Client-side ``provider.order`` override (Phase 3 — Task 3.1)
-        2. Data policy filtering (Phase 3 — Task 3.4)
-        3. Dynamic routing strategy (cost / latency / throughput)
-        4. Static routing fallback chain from routing.yaml
-        """
-        prefs = request.provider
-
-        # Step 1: Client-supplied explicit order
-        if prefs and prefs.order:
-            candidates = list(prefs.order)
-        else:
-            candidates = self._get_static_candidates(request.model)
-
-        # Step 2: Data policy filtering
+    async def _resolve_candidates(
+        self,
+        request: ChatCompletionRequest | EmbeddingRequest,
+        api_key_id: str = "unknown",
+        user_id: str = "unknown",
+        correlation_id: str | None = None,
+        return_decision: bool = False,
+    ) -> list[str] | RouteDecision:
+        """Evaluate the pinned catalog and return candidates or an auditable decision."""
+        catalog = self._catalog_manager.snapshot()
+        prefs = getattr(request, "provider", None)
+        compliance = frozenset()
         if prefs and prefs.data_collection == "deny":
-            candidates = self._filter_by_data_policy(candidates)
-            if not candidates:
-                raise DataPolicyViolationError(
-                    "No provider satisfying the requested data policy is available.",
-                    details={"data_collection": "deny"},
-                )
-
-        # Step 3: Dynamic sort (if no explicit order was given)
-        if not (prefs and prefs.order):
-            sort_by = prefs.sort if prefs else None
-            candidates = await self._sort_candidates(candidates, request.model, sort_by)
-
-        return candidates
+            compliance = frozenset({"zero_data_retention", "no_training"})
+        capabilities = frozenset({"embeddings"}) if isinstance(request, EmbeddingRequest) else frozenset({"chat"})
+        context = RouteContext(
+            correlation_id=correlation_id or f"req_{uuid.uuid4().hex}",
+            tenant_id=api_key_id,
+            user_id=user_id,
+            compliance=compliance,
+            capabilities=capabilities,
+            streaming=getattr(request, "stream", False),
+            explicit_provider_order=tuple(prefs.order) if prefs and prefs.order else (),
+        )
+        requested_model = request.model
+        try:
+            decision = PolicyEvaluator(catalog).decide(requested_model, context)
+        except NoRoute as exc:
+            if compliance:
+                raise DataPolicyViolationError(str(exc), details={"data_collection": "deny", "rejected": exc.rejected}) from exc
+            raise NoProvidersAvailableError(str(exc), details={"rejected": exc.rejected}) from exc
+        self._last_decisions[context.correlation_id] = decision
+        return decision if return_decision else list(decision.candidates)
 
     def _get_static_candidates(self, model: str) -> list[str]:
         """Return the static provider chain from routing.yaml."""
@@ -296,11 +344,13 @@ class RoutingEngine:
     # ── Provider Calls ───────────────────────────────────────────────────────
 
     async def _call_provider_chat(
-        self, provider: str, request: ChatCompletionRequest
+        self, provider: str, request: ChatCompletionRequest, model: str | None = None
     ) -> ChatCompletionResponse:
         """Delegate a chat completion call to the Provider Adapter Service."""
         payload = request.model_dump()
         payload["_provider"] = provider
+        if model:
+            payload["model"] = model
 
         async with httpx.AsyncClient(base_url=self._provider_url, timeout=120.0) as client:
             response = await client.post("/adapt/chat/completions", json=payload)
@@ -321,11 +371,13 @@ class RoutingEngine:
         return ChatCompletionResponse.model_validate(response.json())
 
     async def _call_provider_embedding(
-        self, provider: str, request: EmbeddingRequest
+        self, provider: str, request: EmbeddingRequest, model: str | None = None
     ) -> EmbeddingResponse:
         """Delegate an embedding call to the Provider Adapter Service."""
         payload = request.model_dump()
         payload["_provider"] = provider
+        if model:
+            payload["model"] = model
 
         async with httpx.AsyncClient(base_url=self._provider_url, timeout=60.0) as client:
             response = await client.post("/adapt/embeddings", json=payload)
@@ -380,6 +432,7 @@ class RoutingEngine:
         """Return a non-secret summary of configured routing policies and pricing."""
         routing = self._config.get("routing", {})
         pricing = self._config.get("pricing", {})
+        catalog = self._catalog_manager.snapshot()
         policies = []
         for alias, policy in routing.items():
             if not isinstance(policy, dict):
@@ -394,6 +447,10 @@ class RoutingEngine:
                 }
             )
         return {
+            "catalog_version": catalog.catalog_version,
+            "policy_version": catalog.policy_version,
+            "checksum": self._catalog_manager.checksum,
+            "precedence": catalog.policy.get("precedence", []),
             "policies": sorted(policies, key=lambda item: item["alias"]),
             "pricing": {
                 "providers": sorted(pricing.keys()),

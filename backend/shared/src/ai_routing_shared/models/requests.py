@@ -48,8 +48,8 @@ class ChatCompletionRequest(BaseModel):
     Extended with ``provider`` preferences for intelligent routing.
     """
 
-    model: str
-    messages: list[ChatMessage]
+    model: str = Field(min_length=1, max_length=256)
+    messages: list[ChatMessage] = Field(min_length=1)
     temperature: float | None = Field(default=1.0, ge=0.0, le=2.0)
     max_tokens: int | None = Field(default=None, gt=0)
     stream: bool = False
@@ -66,6 +66,6 @@ class ChatCompletionRequest(BaseModel):
 class EmbeddingRequest(BaseModel):
     """OpenAI-compatible embedding request."""
 
-    model: str
+    model: str = Field(min_length=1, max_length=256)
     input: str | list[str]
     user: str | None = None
