@@ -1,0 +1,130 @@
+{
+  "catalog_checksum": "8c540a46368b0c751c4b82cbd442ea2bd79aeb2be6e3607e80e73a399136206f",
+  "catalog_version": "2026.08.26",
+  "metrics": {
+    "availability": 0.8333333333333334,
+    "cost": 0.8333333333333334,
+    "fallback_correctness": 0.8333333333333334,
+    "latency": 0.8333333333333334,
+    "masking_leakage": 0,
+    "quality": 0.8333333333333334,
+    "safety": 0.8333333333333334,
+    "token_efficiency": 0.8333333333333334
+  },
+  "policy_version": "2026.08.26.1",
+  "report_version": "1.0",
+  "results": [
+    {
+      "availability": 1.0,
+      "cost_score": 1.0,
+      "fallback_correct": true,
+      "latency_score": 1.0,
+      "locale": "uz",
+      "masking_leakage": 0,
+      "quality_score": 1.0,
+      "rejected": {
+        "anthropic": [
+          "region_not_allowed"
+        ]
+      },
+      "safety_score": 1.0,
+      "selected_model": "gpt-4o",
+      "selected_provider": "openai",
+      "strategy": "quality",
+      "task_id": "uz-001",
+      "token_efficiency_score": 1.0
+    },
+    {
+      "availability": 1.0,
+      "cost_score": 1.0,
+      "fallback_correct": true,
+      "latency_score": 1.0,
+      "locale": "uz",
+      "masking_leakage": 0,
+      "quality_score": 1.0,
+      "rejected": {
+        "anthropic": [
+          "region_not_allowed"
+        ]
+      },
+      "safety_score": 1.0,
+      "selected_model": "gpt-4o",
+      "selected_provider": "openai",
+      "strategy": "quality",
+      "task_id": "uz-002",
+      "token_efficiency_score": 1.0
+    },
+    {
+      "availability": 1.0,
+      "cost_score": 1.0,
+      "fallback_correct": true,
+      "latency_score": 1.0,
+      "locale": "ru",
+      "masking_leakage": 0,
+      "quality_score": 1.0,
+      "rejected": {
+        "anthropic": [
+          "region_not_allowed"
+        ]
+      },
+      "safety_score": 1.0,
+      "selected_model": "gpt-4o",
+      "selected_provider": "openai",
+      "strategy": "quality",
+      "task_id": "ru-001",
+      "token_efficiency_score": 1.0
+    },
+    {
+      "availability": 1.0,
+      "cost_score": 1.0,
+      "fallback_correct": true,
+      "latency_score": 1.0,
+      "locale": "ru",
+      "masking_leakage": 0,
+      "quality_score": 1.0,
+      "rejected": {
+        "anthropic": [
+          "region_not_allowed",
+          "capability_unsupported"
+        ],
+        "google": [
+          "capability_unsupported"
+        ]
+      },
+      "safety_score": 1.0,
+      "selected_model": "gpt-4o",
+      "selected_provider": "openai",
+      "strategy": "quality",
+      "task_id": "ru-002",
+      "token_efficiency_score": 1.0
+    },
+    {
+      "availability": 1.0,
+      "cost_score": 1.0,
+      "fallback_correct": true,
+      "latency_score": 1.0,
+      "locale": "en",
+      "masking_leakage": 0,
+      "quality_score": 1.0,
+      "rejected": {
+        "anthropic": [
+          "region_not_allowed"
+        ]
+      },
+      "safety_score": 1.0,
+      "selected_model": "gpt-4o",
+      "selected_provider": "openai",
+      "strategy": "quality",
+      "task_id": "en-001",
+      "token_efficiency_score": 1.0
+    },
+    {
+      "availability": 0.0,
+      "error": "NoRoute",
+      "locale": "en",
+      "masking_leakage": 0,
+      "task_id": "en-002"
+    }
+  ],
+  "task_count": 6
+}

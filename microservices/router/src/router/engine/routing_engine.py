@@ -84,8 +84,14 @@ class RoutingEngine:
         correlation_id: str | None = None,
     ) -> ChatCompletionResponse:
         """Route a chat completion request to the best available provider."""
-        correlation_id = correlation_id or getattr(request, "correlation_id", None) or f"req_{uuid.uuid4().hex}"
-        decision = await self._resolve_candidates(request, api_key_id, user_id, correlation_id, return_decision=True)
+        correlation_id = (
+            correlation_id
+            or getattr(request, "correlation_id", None)
+            or f"req_{uuid.uuid4().hex}"
+        )
+        decision = await self._resolve_candidates(
+            request, api_key_id, user_id, correlation_id, return_decision=True
+        )
         candidates = decision.candidates
         generation_id = f"gen_{uuid.uuid4().hex}"
 
@@ -93,11 +99,15 @@ class RoutingEngine:
         for provider_name in candidates:
             try:
                 start_ms = time.monotonic() * 1000
-                response = await self._call_provider_chat(provider_name, request, decision.selected_model)
+                response = await self._call_provider_chat(
+                    provider_name, request, decision.selected_model
+                )
                 latency_ms = time.monotonic() * 1000 - start_ms
 
                 # Record latency for future routing decisions (Phase 4 — Task 4.1)
-                await self._redis.record_latency(provider_name, request.model, latency_ms)
+                await self._redis.record_latency(
+                    provider_name, request.model, latency_ms
+                )
 
                 # Emit usage event asynchronously (non-blocking)
                 usage_task = asyncio.create_task(
@@ -138,18 +148,30 @@ class RoutingEngine:
         )
 
     async def route_chat_stream(
-        self, request: ChatCompletionRequest, api_key_id: str, user_id: str, correlation_id: str | None = None
+        self,
+        request: ChatCompletionRequest,
+        api_key_id: str,
+        user_id: str,
+        correlation_id: str | None = None,
     ) -> AsyncIterator[str]:
         """Proxy normalized provider SSE chunks with fallback support."""
-        correlation_id = correlation_id or getattr(request, "correlation_id", None) or f"req_{uuid.uuid4().hex}"
-        decision = await self._resolve_candidates(request, api_key_id, user_id, correlation_id, return_decision=True)
+        correlation_id = (
+            correlation_id
+            or getattr(request, "correlation_id", None)
+            or f"req_{uuid.uuid4().hex}"
+        )
+        decision = await self._resolve_candidates(
+            request, api_key_id, user_id, correlation_id, return_decision=True
+        )
         candidates = decision.candidates
         last_error: Exception | None = None
         for provider_name in candidates:
             payload = request.model_dump()
             payload["_provider"] = provider_name
             try:
-                async with httpx.AsyncClient(base_url=self._provider_url, timeout=120.0) as client:
+                async with httpx.AsyncClient(
+                    base_url=self._provider_url, timeout=120.0
+                ) as client:
                     async with client.stream(
                         "POST", "/adapt/chat/completions", json=payload
                     ) as response:
@@ -186,14 +208,25 @@ class RoutingEngine:
         correlation_id: str | None = None,
     ) -> EmbeddingResponse:
         """Route an embedding request to the best available provider."""
-        decision = await self._resolve_candidates(request, api_key_id, user_id, correlation_id or f"req_{uuid.uuid4().hex}", return_decision=True)
+        decision = await self._resolve_candidates(
+            request,
+            api_key_id,
+            user_id,
+            correlation_id or f"req_{uuid.uuid4().hex}",
+            return_decision=True,
+        )
         last_error: Exception | None = None
         for provider_name in decision.candidates:
             try:
-                return await self._call_provider_embedding(provider_name, request, decision.selected_model)
+                return await self._call_provider_embedding(
+                    provider_name, request, decision.selected_model
+                )
             except (ProviderError, httpx.HTTPError) as exc:
                 last_error = exc
-        raise NoProvidersAvailableError("All embedding providers failed.", details={"last_error": type(last_error).__name__ if last_error else None})
+        raise NoProvidersAvailableError(
+            "All embedding providers failed.",
+            details={"last_error": type(last_error).__name__ if last_error else None},
+        )
 
     def get_models(self) -> dict:
         """Return the list of available models with provider metadata."""
@@ -206,9 +239,9 @@ class RoutingEngine:
                     "id": model_id,
                     "object": "model",
                     "provider": info.get("provider"),
-                    "data_policy": providers_config.get(info.get("provider", ""), {}).get(
-                        "data_policy", {}
-                    ),
+                    "data_policy": providers_config.get(
+                        info.get("provider", ""), {}
+                    ).get("data_policy", {}),
                 }
                 for model_id, info in models_config.items()
             ],
@@ -261,7 +294,11 @@ class RoutingEngine:
         compliance = frozenset()
         if prefs and prefs.data_collection == "deny":
             compliance = frozenset({"zero_data_retention", "no_training"})
-        capabilities = frozenset({"embeddings"}) if isinstance(request, EmbeddingRequest) else frozenset({"chat"})
+        capabilities = (
+            frozenset({"embeddings"})
+            if isinstance(request, EmbeddingRequest)
+            else frozenset({"chat"})
+        )
         context = RouteContext(
             correlation_id=correlation_id or f"req_{uuid.uuid4().hex}",
             tenant_id=api_key_id,
@@ -276,8 +313,13 @@ class RoutingEngine:
             decision = PolicyEvaluator(catalog).decide(requested_model, context)
         except NoRoute as exc:
             if compliance:
-                raise DataPolicyViolationError(str(exc), details={"data_collection": "deny", "rejected": exc.rejected}) from exc
-            raise NoProvidersAvailableError(str(exc), details={"rejected": exc.rejected}) from exc
+                raise DataPolicyViolationError(
+                    str(exc),
+                    details={"data_collection": "deny", "rejected": exc.rejected},
+                ) from exc
+            raise NoProvidersAvailableError(
+                str(exc), details={"rejected": exc.rejected}
+            ) from exc
         self._last_decisions[context.correlation_id] = decision
         return decision if return_decision else list(decision.candidates)
 
@@ -298,7 +340,9 @@ class RoutingEngine:
         return [
             p
             for p in candidates
-            if not providers_config.get(p, {}).get("data_policy", {}).get("trains_on_data", False)
+            if not providers_config.get(p, {})
+            .get("data_policy", {})
+            .get("trains_on_data", False)
         ]
 
     async def _sort_candidates(
@@ -338,7 +382,9 @@ class RoutingEngine:
         """Return the primary provider for a model from static config."""
         candidates = self._get_static_candidates(model)
         if not candidates:
-            raise NoProvidersAvailableError(f"No provider configured for model '{model}'.")
+            raise NoProvidersAvailableError(
+                f"No provider configured for model '{model}'."
+            )
         return candidates[0]
 
     # ── Provider Calls ───────────────────────────────────────────────────────
@@ -352,7 +398,9 @@ class RoutingEngine:
         if model:
             payload["model"] = model
 
-        async with httpx.AsyncClient(base_url=self._provider_url, timeout=120.0) as client:
+        async with httpx.AsyncClient(
+            base_url=self._provider_url, timeout=120.0
+        ) as client:
             response = await client.post("/adapt/chat/completions", json=payload)
 
         if response.status_code >= 500:
@@ -379,7 +427,9 @@ class RoutingEngine:
         if model:
             payload["model"] = model
 
-        async with httpx.AsyncClient(base_url=self._provider_url, timeout=60.0) as client:
+        async with httpx.AsyncClient(
+            base_url=self._provider_url, timeout=60.0
+        ) as client:
             response = await client.post("/adapt/embeddings", json=payload)
             response.raise_for_status()
 
@@ -419,14 +469,18 @@ class RoutingEngine:
         )
 
         try:
-            async with httpx.AsyncClient(base_url=self._billing_url, timeout=5.0) as client:
+            async with httpx.AsyncClient(
+                base_url=self._billing_url, timeout=5.0
+            ) as client:
                 await client.post(
                     "/internal/usage",
                     json=record.model_dump(mode="json"),
                 )
         except (httpx.HTTPError, OSError, TimeoutError) as exc:
             # Billing is best-effort; an outage must not fail the client response.
-            logger.error("billing_emit_failed", error=str(exc), generation_id=generation_id)
+            logger.error(
+                "billing_emit_failed", error=str(exc), generation_id=generation_id
+            )
 
     def get_routing_summary(self) -> dict:
         """Return a non-secret summary of configured routing policies and pricing."""

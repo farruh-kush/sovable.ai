@@ -26,10 +26,14 @@ router = APIRouter()
 
 
 def _correlation_id(request: Request) -> str | None:
-    return request.headers.get("X-Request-Id") or request.headers.get("X-Correlation-Id")
+    return request.headers.get("X-Request-Id") or request.headers.get(
+        "X-Correlation-Id"
+    )
 
 
-def _restore_response(response: ChatCompletionResponse, session: Any) -> ChatCompletionResponse:
+def _restore_response(
+    response: ChatCompletionResponse, session: Any
+) -> ChatCompletionResponse:
     """Restore request-local tokens only in the normalized client response."""
     payload = response.model_dump()
     for choice in payload.get("choices", []):
@@ -40,7 +44,9 @@ def _restore_response(response: ChatCompletionResponse, session: Any) -> ChatCom
     return ChatCompletionResponse.model_validate(payload)
 
 
-async def _restore_stream(chunks: AsyncIterator[str], session: Any) -> AsyncIterator[str]:
+async def _restore_stream(
+    chunks: AsyncIterator[str], session: Any
+) -> AsyncIterator[str]:
     """Restore tokens in normalized SSE chunks without exposing raw values upstream."""
     async for chunk in chunks:
         yield session.restore_text(chunk)
@@ -60,7 +66,9 @@ async def route_chat(
     if masked_request.stream:
         return StreamingResponse(
             _restore_stream(
-                engine.route_chat_stream(masked_request, api_key_id, user_id, _correlation_id(request)),
+                engine.route_chat_stream(
+                    masked_request, api_key_id, user_id, _correlation_id(request)
+                ),
                 masking_session,
             ),
             media_type="text/event-stream",
@@ -91,7 +99,9 @@ async def route_embeddings(body: dict[str, Any], request: Request) -> EmbeddingR
 @router.post("/privacy/preview")
 async def privacy_preview(body: dict[str, Any], request: Request) -> dict[str, Any]:
     """Preview masking without returning any original sensitive values."""
-    messages = [ChatMessage.model_validate(item) for item in (body.get("messages") or [])]
+    messages = [
+        ChatMessage.model_validate(item) for item in (body.get("messages") or [])
+    ]
     masked_messages, session = mask_chat_messages(messages)
     return {
         "masked_messages": [message.model_dump() for message in masked_messages],
@@ -134,5 +144,6 @@ async def route_decision(correlation_id: str, request: Request) -> dict:
     decision = request.app.state.routing_engine.get_last_decision(correlation_id)
     if decision is None:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="route decision not found")
     return decision
