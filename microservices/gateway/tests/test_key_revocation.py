@@ -14,6 +14,7 @@ def settings() -> GatewaySettings:
     return GatewaySettings(
         ADMIN_API_KEY="test-admin-key",
         AUTH_SERVICE_URL="http://auth:8001",
+        AUTH_INTERNAL_SERVICE_KEY="test-internal-service-key",
     )
 
 
@@ -32,6 +33,7 @@ async def test_revoke_key_forwards_to_auth_and_returns_safe_metadata() -> None:
 
     assert response == {"status": "revoked", "id": "key_temporary"}
     assert revoke.called
+    assert revoke.calls[0].request.headers["X-Internal-Service-Key"] == "test-internal-service-key"
 
 
 @pytest.mark.asyncio

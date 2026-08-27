@@ -29,6 +29,13 @@ def _require_admin_key(provided: str | None, expected: str) -> None:
         raise AuthorisationError("Invalid admin key.")
 
 
+def _auth_internal_headers(settings: GatewaySettings) -> dict[str, str]:
+    """Forward the dedicated non-user service credential only to Auth."""
+
+    credential = settings.auth_internal_service_key.get_secret_value()
+    return {"X-Internal-Service-Key": credential} if credential else {}
+
+
 @router.post("/keys", response_model=None)
 async def create_key(
     body: CreateKeyRequest,
@@ -47,6 +54,7 @@ async def create_key(
             "/internal/keys",
             service="auth",
             json=body.model_dump(),
+            headers=_auth_internal_headers(settings),
         )
     mapped = response_error_or_none(response, "auth")
     if mapped is not None:
@@ -72,6 +80,7 @@ async def revoke_key(
             "DELETE",
             f"/internal/keys/{key_id}",
             service="auth",
+            headers=_auth_internal_headers(settings),
         )
     mapped = response_error_or_none(response, "auth")
     if mapped is not None:
@@ -96,7 +105,13 @@ async def list_keys(
         base_url=settings.auth_service_url,
         timeout=httpx.Timeout(10.0, connect=3.0),
     ) as client:
-        response = await request_peer(client, "GET", "/internal/keys", service="auth")
+        response = await request_peer(
+            client,
+            "GET",
+            "/internal/keys",
+            service="auth",
+            headers=_auth_internal_headers(settings),
+        )
     mapped = response_error_or_none(response, "auth")
     if mapped is not None:
         return mapped

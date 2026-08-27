@@ -48,6 +48,11 @@ spec:
                 secretKeyRef:
                   name: gateway-secret
                   key: admin-api-key
+            - name: AUTH_INTERNAL_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: auth-internal-secret
+                  key: gateway-service-key
           livenessProbe:
             httpGet:
               path: /health

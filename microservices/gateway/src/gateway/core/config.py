@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -36,6 +36,9 @@ class GatewaySettings(BaseSettings):
 
     # Admin key for management endpoints
     admin_api_key: str = Field(default="change-me-in-production", alias="ADMIN_API_KEY")
+    auth_internal_service_key: SecretStr = Field(
+        default=SecretStr(""), alias="AUTH_INTERNAL_SERVICE_KEY"
+    )
 
 
 @lru_cache

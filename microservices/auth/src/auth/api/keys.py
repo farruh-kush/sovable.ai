@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.database import get_session
 from ..db.models import ApiKeyRecord
-from ..security.dependencies import require_roles
+from ..security.dependencies import InternalServicePrincipal, require_key_management_actor
 
 router = APIRouter()
 
@@ -39,7 +39,7 @@ class CreateKeyResponse(BaseModel):
 async def create_key(
     body: CreateKeyRequest,
     session: AsyncSession = Depends(get_session),
-    actor=Depends(require_roles("platform_controller", "org_admin")),
+    actor: UserAccount | InternalServicePrincipal = Depends(require_key_management_actor),
 ) -> CreateKeyResponse:
     """Create a key and return its raw value exactly once."""
     owner_id = actor.id if body.user_id == "system" else body.user_id
@@ -68,7 +68,7 @@ async def create_key(
 @router.get("")
 async def list_keys(
     session: AsyncSession = Depends(get_session),
-    actor=Depends(require_roles("platform_controller", "org_admin")),
+    actor: UserAccount | InternalServicePrincipal = Depends(require_key_management_actor),
 ) -> dict:
     """List metadata only; raw key values and hashes are never serialized."""
     query = select(ApiKeyRecord)
@@ -94,7 +94,7 @@ async def list_keys(
 async def revoke_key(
     key_id: str,
     session: AsyncSession = Depends(get_session),
-    actor=Depends(require_roles("platform_controller", "org_admin")),
+    actor: UserAccount | InternalServicePrincipal = Depends(require_key_management_actor),
 ) -> dict[str, str]:
     record = await session.get(ApiKeyRecord, key_id)
     if not record:

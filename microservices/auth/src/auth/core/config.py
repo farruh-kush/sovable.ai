@@ -24,6 +24,9 @@ class AuthSettings(BaseSettings):
     )
     redis_url: str = Field(default="redis://redis:6379/0", alias="REDIS_URL")
     secret_key: SecretStr = Field(default=SecretStr("change-me-in-production"), alias="SECRET_KEY")
+    internal_service_key: SecretStr = Field(
+        default=SecretStr(""), alias="AUTH_INTERNAL_SERVICE_KEY"
+    )
     public_base_url: str = Field(default="https://api.sovable.ai", alias="PUBLIC_BASE_URL")
     frontend_base_url: str = Field(default="https://sovable.ai", alias="FRONTEND_BASE_URL")
     access_token_ttl_seconds: int = Field(default=900, alias="ACCESS_TOKEN_TTL_SECONDS", ge=60)
