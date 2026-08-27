@@ -119,21 +119,6 @@ async def me(request: Request) -> JSONResponse:
     return await _json_proxy(request, "/auth/me")
 
 
-@router.post("/v1/keys")
-async def create_key(request: Request) -> JSONResponse:
-    return await _json_proxy(request, "/v1/keys", await _json_body(request))
-
-
-@router.get("/v1/keys")
-async def list_keys(request: Request) -> JSONResponse:
-    return await _json_proxy(request, "/v1/keys")
-
-
-@router.delete("/v1/keys/{key_id}")
-async def revoke_key(key_id: str, request: Request) -> JSONResponse:
-    return await _json_proxy(request, f"/v1/keys/{key_id}")
-
-
 async def _oauth_proxy(request: Request, path: str) -> Any:
     settings: GatewaySettings = get_settings()
     async with httpx.AsyncClient(
