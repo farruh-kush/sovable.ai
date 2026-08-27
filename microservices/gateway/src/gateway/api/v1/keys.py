@@ -55,6 +55,36 @@ async def create_key(
     return payload if isinstance(payload, dict) else {"data": payload}
 
 
+@router.delete("/keys/{key_id}", response_model=None)
+async def revoke_key(
+    key_id: str,
+    x_admin_key: str | None = Header(default=None),
+    settings: GatewaySettings = Depends(get_settings),
+) -> dict | JSONResponse:
+    """Revoke an API key through Auth without exposing raw credential material."""
+    _require_admin_key(x_admin_key, settings.admin_api_key)
+    async with httpx.AsyncClient(
+        base_url=settings.auth_service_url,
+        timeout=httpx.Timeout(10.0, connect=3.0),
+    ) as client:
+        response = await request_peer(
+            client,
+            "DELETE",
+            f"/internal/keys/{key_id}",
+            service="auth",
+        )
+    mapped = response_error_or_none(response, "auth")
+    if mapped is not None:
+        return mapped
+    payload = response_json(response, "auth")
+    if not isinstance(payload, dict):
+        return {"status": "revoked", "id": key_id}
+    return {
+        "status": str(payload.get("status", "revoked")),
+        "id": str(payload.get("id", key_id)),
+    }
+
+
 @router.get("/keys", response_model=None)
 async def list_keys(
     x_admin_key: str | None = Header(default=None),
